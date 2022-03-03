@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.bloomablelogistics">
+  package="nl.sajansen.bloomablelogistics">
 
     <uses-permission android:name="android.permission.INTERNET" />
 

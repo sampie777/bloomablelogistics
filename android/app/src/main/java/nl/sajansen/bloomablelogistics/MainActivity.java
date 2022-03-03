@@ -1,4 +1,4 @@
-package com.bloomablelogistics;
+package nl.sajansen.bloomablelogistics;
 
 import com.facebook.react.ReactActivity;
 

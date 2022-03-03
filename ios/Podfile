@@ -12,6 +12,10 @@ target 'bloomablelogistics' do
     :hermes_enabled => false
   )
 
+  pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
+
+  pod 'RNDeviceInfo', :path => '../node_modules/react-native-device-info'
+
   target 'bloomablelogisticsTests' do
     inherit! :complete
     # Pods for testing
