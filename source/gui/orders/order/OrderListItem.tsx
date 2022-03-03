@@ -1,6 +1,5 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { Order } from "../../../logic/orders";
 import { format } from "../../../logic/utils";
 import { lightColors } from "../../theme";
 import ClientInfo from "./ClientInfo";
@@ -9,6 +8,7 @@ import OrderStatus from "./OrderStatus";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import OrderCosts from "./OrderCosts";
 import RecipientInfo from "./RecipientInfo";
+import { Order } from "../../../logic/models";
 
 interface Props {
   order: Order;

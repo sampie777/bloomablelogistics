@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Recipient } from "../../../logic/orders";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../../theme";
 import UrlLink from "../../utils/UrlLink";
+import { Recipient } from "../../../logic/models";
 
 interface Props {
   recipient: Recipient;

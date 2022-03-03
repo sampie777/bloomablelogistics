@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FlatList, ListRenderItemInfo, RefreshControl, StyleSheet, Text, View } from "react-native";
-import { Order, Orders } from "../../logic/orders";
+import { Orders } from "../../logic/orders";
 import OrderListItem from "./order/OrderListItem";
 import ListEmptyComponent from "./ListEmptyComponent";
 import ListHeaderComponent from "./ListHeaderComponent";
+import { Order } from "../../logic/models";
 
 interface Props {
 

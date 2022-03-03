@@ -1,6 +1,6 @@
-import { Order, Recipient } from "../orders";
 import { rollbar } from "../rollbar";
 import { decode } from "html-entities";
+import { Order, Recipient } from "../models";
 
 export namespace ServerHtml {
   export const loginResponseToError = (html: string): string => {

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Order } from "../../../logic/orders";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import UrlLink from "../../utils/UrlLink";
 import { lightColors } from "../../theme";
+import { Order } from "../../../logic/models";
 
 interface Props {
   order: Order;

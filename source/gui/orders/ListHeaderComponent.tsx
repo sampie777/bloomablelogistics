@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { Order } from "../../logic/orders";
 import { lightColors } from "../theme";
+import { Order } from "../../logic/models";
 
 interface Props {
   orders: Order[];
