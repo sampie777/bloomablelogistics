@@ -15,8 +15,8 @@ const LoggedInView: React.FC<Props> = ({ onLoggedOut }) => {
   };
 
   return <View style={styles.container}>
-    <TouchableOpacity onPress={logout}>
-      <Text style={styles.logoutButton}>Log out</Text>
+    <TouchableOpacity onPress={logout} style={styles.logoutButton}>
+      <Text style={styles.logoutButtonText}>Log out</Text>
     </TouchableOpacity>
   </View>;
 };
@@ -29,13 +29,15 @@ const styles = StyleSheet.create({
   },
   header: {},
   logoutButton: {
+    alignSelf: "flex-end",
+    marginHorizontal: 10,
+  },
+  logoutButtonText: {
     backgroundColor: lightColors.primary,
     color: lightColors.onPrimary,
-    alignSelf: "flex-end",
     borderRadius: 10,
     paddingHorizontal: 15,
     paddingVertical: 8,
-    marginHorizontal: 10,
   },
 });
 

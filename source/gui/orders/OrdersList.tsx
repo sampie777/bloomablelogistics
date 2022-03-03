@@ -9,20 +9,43 @@ interface Props {
 }
 
 const OrdersList: React.FC<Props> = () => {
+  let isMounted = true;
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
     fetchOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    isMounted = true;
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const fetchOrders = () => {
     setIsProcessing(true);
+    setErrorMessage(undefined);
+
     Orders.fetchAll()
-      .then(setOrders)
-      .catch(setErrorMessage)
-      .finally(() => setIsProcessing(false));
+      .then(_orders => {
+        if (!isMounted) {
+          return;
+        }
+        setOrders(_orders);
+      })
+      .catch(error => {
+        if (!isMounted) {
+          return;
+        }
+        setErrorMessage(error.toString());
+      })
+      .finally(() => {
+        if (!isMounted) {
+          return;
+        }
+        setIsProcessing(false);
+      });
   };
 
   const renderOrderItem = ({ item }: ListRenderItemInfo<Order>) => {
@@ -38,7 +61,7 @@ const OrdersList: React.FC<Props> = () => {
               refreshControl={<RefreshControl onRefresh={fetchOrders}
                                               refreshing={isProcessing} />}
               renderItem={renderOrderItem}
-              keyExtractor={order => order.clientName}
+              keyExtractor={order => order.number + order.clientName}
               ListEmptyComponent={ListEmptyComponent}
     />
   </View>;
@@ -52,7 +75,7 @@ const styles = StyleSheet.create({
     color: "#800",
   },
   list: {
-    flex: 1,
+    // flex: 1,
   },
 });
 
