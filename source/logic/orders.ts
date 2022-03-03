@@ -29,6 +29,7 @@ export class Recipient {
   unit: string = "";
   address: string = "";
   message: string | undefined;
+  specialInstructions: string | undefined;
 }
 
 export namespace Orders {

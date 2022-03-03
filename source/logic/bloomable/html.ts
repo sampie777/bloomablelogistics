@@ -132,18 +132,33 @@ export namespace ServerHtml {
     let columns = rows.map(it => it.split("</td>"))
       .filter(it => it.length >= 3);
 
-    const name = columns[0][1].replace(new RegExp(".*\"> "), "").replace(new RegExp("<small.*"),"").trim();
-    const phones = [
-      columns[2][1].replace(new RegExp(".*\"> "),"").replace(new RegExp("<small.*"),"").trim(),
-      columns[2][1].replace(new RegExp(".*\"> "),"").replace(new RegExp("<small.*"),"").trim(),
-    ];
-    const company = columns[3][1].replace(new RegExp(".*\"> "),"").replace(new RegExp("<small.*"),"").trim();
-    const unit = columns[4][1].replace(new RegExp(".*\"> "),"").replace(new RegExp("<small.*"),"").trim();
-    const address = columns[5][1].replace(new RegExp(".*\">"),"").replace(new RegExp("<small.*"),"").trim();
+    const name = columns[0][1].replace(new RegExp(".*\"> "), "").replace(new RegExp("<small.*"), "").trim();
+    const phones = [];
+    let i = 0;
+    while (++i < 3) {
+      if (!columns[i][0].includes("Telephone")) {
+        break;
+      }
+      phones.push(columns[i][1].replace(new RegExp(".*\"> "), "").replace(new RegExp("<small.*"), "").trim());
+    }
+    const company = columns[i++][1].replace(new RegExp(".*\"> "), "").replace(new RegExp("<small.*"), "").trim();
+    const unit = columns[i++][1].replace(new RegExp(".*\"> "), "").replace(new RegExp("<small.*"), "").trim();
+    const address = columns[i++][1].replace(new RegExp(".*\">"), "").replace(new RegExp("<small.*"), "").trim();
+
+    let specialInstructions;
+    for (let j = i; j < rows.length - 1; j++) {
+      if (rows[j].includes("> Special Instructions </td>")) {
+        specialInstructions = rows[j + 2].match(new RegExp("\">(.*?)</td>"))?.[1].replace(new RegExp("<br ?/>", "gi"), "\n").trim();
+        break;
+      }
+    }
 
     let message;
-    if (rows[11].includes("Accompanying Message")) {
-      message = rows[13].match(new RegExp("\">(.*?)</td>"))?.[1].replace(new RegExp("<br ?/>", "gi"), "\n").trim();
+    for (let j = i; j < rows.length - 1; j++) {
+      if (rows[j].includes("> Accompanying Message </td>")) {
+        message = rows[j + 2].match(new RegExp("\">(.*?)</td>"))?.[1].replace(new RegExp("<br ?/>", "gi"), "\n").trim();
+        break;
+      }
     }
 
     const recipient = new Recipient();
@@ -153,6 +168,7 @@ export namespace ServerHtml {
     recipient.unit = unit;
     recipient.address = address;
     recipient.message = message;
+    recipient.specialInstructions = specialInstructions;
     return recipient;
   };
 }

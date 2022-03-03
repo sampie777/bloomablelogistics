@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Recipient } from "../../logic/orders";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../theme";
@@ -17,18 +17,24 @@ const RecipientInfo: React.FC<Props> = ({ recipient }) => {
       <View style={styles.row}>
         <FontAwesome5Icon name={"address-card"} solid style={styles.icon} />
         <Text style={styles.name}>{recipient.name}</Text>
+
+        {!recipient.specialInstructions ? undefined :
+          <FontAwesome5Icon name={"exclamation-triangle"} solid style={[styles.icon, { color: "#f38300" }]} />}
+
         <FontAwesome5Icon name={collapsed ? "chevron-down" : "chevron-up"} />
       </View>
     </TouchableOpacity>
 
     {collapsed ? undefined : <View style={styles.collapsedContainer}>
-      {recipient.phones.map((it, i) =>
-        <View key={i} style={styles.row}>
-          <FontAwesome5Icon name={"phone-alt"} style={styles.icon} />
-          <UrlLink url={"tel:" + it}>
-            <Text style={styles.phone}>{it}</Text>
-          </UrlLink>
-        </View>)
+      {recipient.phones
+        .filter(it => it)
+        .map((it, i) =>
+          <View key={i} style={styles.row}>
+            <FontAwesome5Icon name={"phone-alt"} style={styles.icon} />
+            <UrlLink url={"tel:" + it}>
+              <Text style={styles.phone}>{it}</Text>
+            </UrlLink>
+          </View>)
       }
 
       <View style={styles.row}>
@@ -49,13 +55,20 @@ const RecipientInfo: React.FC<Props> = ({ recipient }) => {
           {!recipient.address ? undefined :
             <View style={styles.row}>
               <Text style={styles.addressLabel}>Address:</Text>
-              <UrlLink url={"geo:0,0?q=" + recipient.address} style={{ flex: 1 }}>
+              <UrlLink url={Platform.select({ ios: 'maps:0,0?q=', android: 'geo:0,0?q=' }) + recipient.address} style={{ flex: 1 }}>
                 <Text style={[styles.addressValue, styles.url]}>{recipient.address}</Text>
               </UrlLink>
             </View>
           }
         </View>
       </View>
+
+      {!recipient.specialInstructions ? undefined :
+        <View style={styles.row}>
+          <FontAwesome5Icon name={"exclamation-triangle"} solid style={styles.icon} />
+          <Text style={styles.specialInstructions}>{recipient.specialInstructions}</Text>
+        </View>
+      }
 
       {!recipient.message ? undefined :
         <View style={styles.row}>
@@ -103,6 +116,18 @@ const styles = StyleSheet.create({
   },
   addressValue: {
     flex: 1,
+  },
+
+  specialInstructions: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#a00",
+    borderRadius: 10,
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    backgroundColor: lightColors.surface2,
+    marginTop: 10,
+    marginBottom: 10,
   },
 
   message: {
