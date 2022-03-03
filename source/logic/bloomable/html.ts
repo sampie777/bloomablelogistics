@@ -1,5 +1,6 @@
 import { Order, Recipient } from "../orders";
 import { rollbar } from "../rollbar";
+import { decode } from "html-entities";
 
 export namespace ServerHtml {
   export const loginResponseToError = (html: string): string => {
@@ -67,12 +68,12 @@ export namespace ServerHtml {
       order.id = id;
       order.number = number === undefined ? undefined : +number;
       order.createdAt = createdAt === undefined ? undefined : new Date(createdAt + ":00");
-      order.partner = partner;
-      order.clientName = clientName;
-      order.clientEmail = email;
-      order.clientPhones = phones;
-      order.paymentType = paymentType;
-      order.florist = florist;
+      order.partner = decode(partner, { level: "html5" });
+      order.clientName = decode(clientName, { level: "html5" });
+      order.clientEmail = !email ? email : decode(email, { level: "html5" });
+      order.clientPhones = phones.filter(it => it).map(it => decode(it, { level: "html5" }));
+      order.paymentType = !paymentType ? paymentType : decode(paymentType, { level: "html5" });
+      order.florist = !florist ? florist : decode(florist, { level: "html5" });
       order.deliverAtDate = deliverAtDate === undefined ? undefined : new Date(deliverAtDate);
       order.orderValue = orderValue === undefined ? 0 : +orderValue;
       order.orderCosts = orderCosts === undefined ? 0 : +orderCosts;
@@ -162,13 +163,13 @@ export namespace ServerHtml {
     }
 
     const recipient = new Recipient();
-    recipient.name = name;
-    recipient.phones = phones;
-    recipient.company = company;
-    recipient.unit = unit;
-    recipient.address = address;
-    recipient.message = message;
-    recipient.specialInstructions = specialInstructions;
+    recipient.name = decode(name, { level: "html5" });
+    recipient.phones = phones.filter(it => it).map(it => decode(it, { level: "html5" }));
+    recipient.company = decode(company, { level: "html5" });
+    recipient.unit = decode(unit, { level: "html5" });
+    recipient.address = decode(address, { level: "html5" });
+    recipient.message = !message ? message : decode(message, { level: "html5" });
+    recipient.specialInstructions = !specialInstructions ? specialInstructions : decode(specialInstructions, { level: "html5" });
     return recipient;
   };
 }

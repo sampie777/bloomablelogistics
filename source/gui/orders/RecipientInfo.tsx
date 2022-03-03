@@ -27,7 +27,6 @@ const RecipientInfo: React.FC<Props> = ({ recipient }) => {
 
     {collapsed ? undefined : <View style={styles.collapsedContainer}>
       {recipient.phones
-        .filter(it => it)
         .map((it, i) =>
           <View key={i} style={styles.row}>
             <FontAwesome5Icon name={"phone-alt"} style={styles.icon} />

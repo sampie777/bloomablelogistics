@@ -22,12 +22,14 @@ const ClientInfo: React.FC<Props> = ({ order }) => {
     </TouchableOpacity>
 
     {collapsed ? undefined : <View>
-      <View style={styles.row}>
-        <FontAwesome5Icon name={"envelope"} style={styles.icon} />
-        <UrlLink url={"mailto:" + order.clientEmail}>
-          <Text style={styles.email} selectable={true}>{order.clientEmail}</Text>
-        </UrlLink>
-      </View>
+      {!order.clientEmail ? undefined :
+        <View style={styles.row}>
+          <FontAwesome5Icon name={"envelope"} style={styles.icon} />
+          <UrlLink url={"mailto:" + order.clientEmail}>
+            <Text style={styles.email} selectable={true}>{order.clientEmail}</Text>
+          </UrlLink>
+        </View>
+      }
 
       {order.clientPhones.map((it, i) =>
         <View key={i} style={styles.row}>

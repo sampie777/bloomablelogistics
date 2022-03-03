@@ -19,17 +19,21 @@ const AdditionalInfo: React.FC<Props> = ({ order }) => {
       </View>
 
       {collapsed ? undefined : <View>
-        <View style={styles.row}>
-          <FontAwesome5Icon name={"credit-card"} style={styles.icon} />
-          <Text style={styles.paymentType}>{order.paymentType}</Text>
-        </View>
-        <View style={styles.row}>
-          <FontAwesome5Icon name={"user-tag"} style={styles.icon} />
-          <Text style={styles.florist}>{order.florist}</Text>
-        </View>
+        {!order.paymentType ? undefined :
+          <View style={styles.row}>
+            <FontAwesome5Icon name={"credit-card"} style={styles.icon} />
+            <Text style={styles.paymentType}>{order.paymentType}</Text>
+          </View>
+        }
+        {!order.florist ? undefined :
+          <View style={styles.row}>
+            <FontAwesome5Icon name={"user-tag"} style={styles.icon} />
+            <Text style={styles.florist}>{order.florist}</Text>
+          </View>
+        }
         <View style={styles.row}>
           <FontAwesome5Icon name={"calendar-plus"} style={styles.icon} />
-          <Text style={styles.createdAt}>Created on {format(order.createdAt, "%YYYY-%mm-%dd at %HH:%MM")}</Text>
+          <Text style={styles.createdAt}>Created on {format(order.createdAt, "%YYYY-%mm-%dd at %HH:%MM") || "unknown"}</Text>
         </View>
       </View>}
     </TouchableOpacity>
