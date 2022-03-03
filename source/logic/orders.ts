@@ -35,22 +35,30 @@ export class Recipient {
 export namespace Orders {
   let fetchedOrders: Order[] = [];
 
+  export const fetchPage = (page: number = 1): Promise<Order[]> => {
+    return server.getOrdersPage(page)
+      .then((html: string) => {
+        const orders = ServerHtml.ordersResponseToOrders(html);
+        return fetchDetailsForOrders(orders);
+      });
+  };
+
   export const fetchAll = (): Promise<Order[]> => {
     fetchedOrders = [];
     return sequentiallyFetchAll();
   };
 
   const sequentiallyFetchAll = (page: number = 1): Promise<Order[]> => {
-    return server.getOrdersPage(page)
-      .then((html: string) => {
-        fetchedOrders = fetchedOrders.concat(ServerHtml.ordersResponseToOrders(html));
+    return fetchPage(page)
+      .then((orders: Order[]) => {
+        fetchedOrders = fetchedOrders.concat(orders);
 
         const hasNext = page < config.maxOrderPagesToFetch;
         if (hasNext) {
           return sequentiallyFetchAll(page + 1);
         }
 
-        return fetchDetailsForOrders(fetchedOrders);
+        return fetchedOrders;
       });
   };
 

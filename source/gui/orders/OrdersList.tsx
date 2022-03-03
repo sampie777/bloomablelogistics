@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FlatList, ListRenderItemInfo, RefreshControl, StyleSheet, Text, View } from "react-native";
 import { Order, Orders } from "../../logic/orders";
-import OrderListItem from "./OrderListItem";
+import OrderListItem from "./order/OrderListItem";
 import ListEmptyComponent from "./ListEmptyComponent";
 import ListHeaderComponent from "./ListHeaderComponent";
 
@@ -11,6 +11,7 @@ interface Props {
 
 const OrdersList: React.FC<Props> = () => {
   let isMounted = true;
+  let fetchPage = useRef(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -25,28 +26,40 @@ const OrdersList: React.FC<Props> = () => {
   }, []);
 
   const fetchOrders = () => {
+    fetchPage.current = 0;
+    setOrders([]);
+    fetchNextOrderPage();
+  };
+
+  const fetchNextOrderPage = () => {
     setIsProcessing(true);
     setErrorMessage(undefined);
 
-    Orders.fetchAll()
+    fetchPage.current++;
+    Orders.fetchPage(fetchPage.current)
       .then(_orders => {
         if (!isMounted) {
           return;
         }
-        setOrders(_orders
-          .sort((a, b) => {
-            if (a.deliverAtDate && b.deliverAtDate) {
-              return a.deliverAtDate.getTime() - b.deliverAtDate.getTime();
-            } else if (a.deliverAtDate) {
-              return 1;
-            } else if (b.deliverAtDate) {
-              return -1;
-            } else {
-              return (a.number || 0) - (b.number || 0);
-            }
-          })
-          .reverse()
-        );
+
+        if (fetchPage.current > 1) {
+          _orders = orders.concat(_orders);
+        }
+
+        setOrders(
+          _orders
+            .sort((a, b) => {
+              if (a.deliverAtDate && b.deliverAtDate) {
+                return a.deliverAtDate.getTime() - b.deliverAtDate.getTime();
+              } else if (a.deliverAtDate) {
+                return 1;
+              } else if (b.deliverAtDate) {
+                return -1;
+              } else {
+                return (a.number || 0) - (b.number || 0);
+              }
+            })
+            .reverse());
       })
       .catch(error => {
         if (!isMounted) {
@@ -76,6 +89,8 @@ const OrdersList: React.FC<Props> = () => {
                                               refreshing={isProcessing} />}
               renderItem={renderOrderItem}
               keyExtractor={order => order.id + ""}
+              onEndReached={fetchNextOrderPage}
+              onEndReachedThreshold={2}
               ListEmptyComponent={ListEmptyComponent}
               ListHeaderComponent={<ListHeaderComponent orders={orders} />}
     />

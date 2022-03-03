@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { Order } from "../../logic/orders";
+import { Order } from "../../../logic/orders";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 
 interface Props {

@@ -1,8 +1,8 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { Order } from "../../logic/orders";
-import { format } from "../../logic/utils";
-import { lightColors } from "../theme";
+import { Order } from "../../../logic/orders";
+import { format } from "../../../logic/utils";
+import { lightColors } from "../../theme";
 import ClientInfo from "./ClientInfo";
 import AdditionalInfo from "./AdditionalInfo";
 import OrderStatus from "./OrderStatus";
