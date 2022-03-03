@@ -3,6 +3,7 @@ import { ServerHtml } from "./bloomable/html";
 import { config } from "./config";
 
 export class Order {
+  id: string | undefined;
   number: number | undefined;
   createdAt: Date | undefined;
   partner: string = "";

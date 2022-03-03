@@ -75,7 +75,7 @@ const OrdersList: React.FC<Props> = () => {
               refreshControl={<RefreshControl onRefresh={fetchOrders}
                                               refreshing={isProcessing} />}
               renderItem={renderOrderItem}
-              keyExtractor={order => order.number + order.clientName}
+              keyExtractor={order => order.id + ""}
               ListEmptyComponent={ListEmptyComponent}
               ListHeaderComponent={<ListHeaderComponent orders={orders} />}
     />

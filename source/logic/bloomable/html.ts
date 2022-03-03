@@ -48,6 +48,7 @@ export namespace ServerHtml {
       let columns = row.split("</td>").map(it => it.trim());
       columns.pop();
 
+      const id = columns[0].match(new RegExp("orderId=(.*?)'"))?.[1];
       const number = columns[0].match(new RegExp(">(\\d+)</a>$"))?.[1];
       const createdAt = columns[1].match(new RegExp(">(.*?)$"))?.[1].replace(" ", "T");
       const partner = columns[2].replace("<td>", "").trim();
@@ -63,6 +64,7 @@ export namespace ServerHtml {
       const delivered = columns[12].match(new RegExp(">(.{0,2})</span>$"))?.[1].toUpperCase() === "Y";
       const deleted = row.match(new RegExp("<tr class=\"deletedOrder\">")) != null;
 
+      order.id = id;
       order.number = number === undefined ? undefined : +number;
       order.createdAt = createdAt === undefined ? undefined : new Date(createdAt + ":00");
       order.partner = partner;
