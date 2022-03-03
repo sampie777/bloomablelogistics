@@ -1,23 +1,20 @@
-import { Buffer } from "buffer";
+import { Linking, Platform, ScaledSize } from "react-native";
+import { rollbar } from "./rollbar";
 
-export const stringToBytes = (text: string) => {
-  const buffer = new Buffer(text, "utf8");
-  return Array.from(buffer.values());
-};
-
-export const bytesToString = (bytes: Uint8Array) => {
-  const buffer = Buffer.from(bytes);
-  return buffer.toString();
-};
+export function dateFrom(date: Date | string): Date {
+  if (typeof date === "string") {
+    return new Date(date);
+  }
+  return date;
+}
 
 export function format(date: Date | string | undefined, _format: string) {
   if (date === undefined) {
     return "";
   }
 
-  if (typeof date === "string") {
-    date = new Date(date);
-  }
+  date = dateFrom(date);
+
   return _format
     .replace(/%dd/g, date.getDate().toString().padStart(2, "0"))
     .replace(/%d/g, date.getDate().toString())
@@ -36,3 +33,50 @@ export function format(date: Date | string | undefined, _format: string) {
 }
 
 export const emptyPromise = () => new Promise((resolve => resolve(null)));
+
+export function capitalize(word: string) {
+  if (word.length === 0) {
+    return word;
+  }
+
+  if (word.length === 1) {
+    return word.toUpperCase();
+  }
+
+  return word.charAt(0).toUpperCase() + word.substring(1);
+}
+
+export function isPortraitMode(window: ScaledSize) {
+  return window.height >= window.width;
+}
+
+export function openLink(url: string): Promise<any> {
+  return Linking.canOpenURL(url)
+    .then(isSupported => {
+      if (isSupported) {
+        return Linking.openURL(url);
+      } else {
+        throw new Error("Can't open URL '" + url + "': your device can't open these type of URLs.");
+      }
+    })
+    .catch(error => {
+      if (error !== undefined && error.message !== undefined && `${error.message}`.startsWith("Can't open Url '")) {
+        rollbar.info(error);
+      } else {
+        rollbar.warning(error);
+      }
+      throw error;
+    });
+}
+
+export const isAndroid = Platform.OS === "android";
+
+export class ValidationError extends Error {
+}
+
+export function validate(result: boolean, message?: string) {
+  if (result) {
+    return;
+  }
+  throw new ValidationError(message || "Value is not true");
+}

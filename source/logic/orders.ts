@@ -1,5 +1,6 @@
 import server from "./bloomable/server";
 import { ServerHtml } from "./bloomable/html";
+import { config } from "./config";
 
 export class Order {
   number: number | undefined;
@@ -8,13 +9,14 @@ export class Order {
   clientName: string = "";
   clientEmail: string | undefined;
   clientPhones: string[] = [];
-  deliverAt: Date | undefined;
+  deliverAtDate: Date | undefined;
   paymentType: string | undefined;
   florist: string | undefined;
   orderValue: number = 0;
   orderCosts: number = 0;
-  accepted: boolean | undefined;
-  delivered: boolean | undefined;
+  accepted: boolean = false;
+  delivered: boolean = false;
+  deleted: boolean = false;
 }
 
 export namespace Orders {
@@ -30,7 +32,7 @@ export namespace Orders {
       .then((html: string) => {
         fetchedOrders = fetchedOrders.concat(ServerHtml.ordersResponseToOrders(html));
 
-        const hasNext = false;
+        const hasNext = page < config.maxOrderPagesToFetch;
         if (hasNext) {
           return sequentiallyFetchAll(page + 1);
         }

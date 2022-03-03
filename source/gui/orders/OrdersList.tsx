@@ -3,6 +3,7 @@ import { FlatList, ListRenderItemInfo, RefreshControl, StyleSheet, Text, View } 
 import { Order, Orders } from "../../logic/orders";
 import OrderListItem from "./OrderListItem";
 import ListEmptyComponent from "./ListEmptyComponent";
+import ListHeaderComponent from "./ListHeaderComponent";
 
 interface Props {
 
@@ -32,7 +33,20 @@ const OrdersList: React.FC<Props> = () => {
         if (!isMounted) {
           return;
         }
-        setOrders(_orders);
+        setOrders(_orders
+          .sort((a, b) => {
+            if (a.deliverAtDate && b.deliverAtDate) {
+              return a.deliverAtDate.getTime() - b.deliverAtDate.getTime();
+            } else if (a.deliverAtDate) {
+              return 1;
+            } else if (b.deliverAtDate) {
+              return -1;
+            } else {
+              return (a.number || 0) - (b.number || 0);
+            }
+          })
+          .reverse()
+        );
       })
       .catch(error => {
         if (!isMounted) {
@@ -63,6 +77,7 @@ const OrdersList: React.FC<Props> = () => {
               renderItem={renderOrderItem}
               keyExtractor={order => order.number + order.clientName}
               ListEmptyComponent={ListEmptyComponent}
+              ListHeaderComponent={<ListHeaderComponent orders={orders} />}
     />
   </View>;
 };

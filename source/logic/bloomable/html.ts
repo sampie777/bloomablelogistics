@@ -54,13 +54,14 @@ export namespace ServerHtml {
       const clientName = columns[4].replace("<td>", "").trim();
       const email = columns[5].match(new RegExp("mailto:(.*?)\"", "i"))?.[1].trim();
       const phones = columns[5].replace(new RegExp(".*</a>"), "").trim().split(" ");
-      const deliverAt = columns[6].match(new RegExp(">(.*?)$"))?.[1]
+      const deliverAtDate = columns[6].match(new RegExp(">(.*?)$"))?.[1];
       const paymentType = columns[7].replace("<td>", "").trim();
       const florist = columns[8].replace("<td>", "").trim();
       const orderValue = columns[9].replace(new RegExp(".*> R"), "").trim().replace(",", "");
       const orderCosts = columns[10].replace(new RegExp(".*> R"), "").trim().replace(",", "");
       const accepted = columns[11].match(new RegExp(">(.{0,2})</span>$"))?.[1].toUpperCase() === "Y";
       const delivered = columns[12].match(new RegExp(">(.{0,2})</span>$"))?.[1].toUpperCase() === "Y";
+      const deleted = row.match(new RegExp("<tr class=\"deletedOrder\">")) != null;
 
       order.number = number === undefined ? undefined : +number;
       order.createdAt = createdAt === undefined ? undefined : new Date(createdAt + ":00");
@@ -70,11 +71,12 @@ export namespace ServerHtml {
       order.clientPhones = phones;
       order.paymentType = paymentType;
       order.florist = florist;
-      order.deliverAt = deliverAt === undefined ? undefined : new Date(deliverAt);
+      order.deliverAtDate = deliverAtDate === undefined ? undefined : new Date(deliverAtDate);
       order.orderValue = orderValue === undefined ? 0 : +orderValue;
       order.orderCosts = orderCosts === undefined ? 0 : +orderCosts;
       order.accepted = accepted;
       order.delivered = delivered;
+      order.deleted = deleted;
 
       return order;
     }

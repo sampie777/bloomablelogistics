@@ -20,6 +20,7 @@ const styles = StyleSheet.create({
   },
   message: {
     color: lightColors.textLighter,
+    marginVertical: 30,
   },
 });
 
