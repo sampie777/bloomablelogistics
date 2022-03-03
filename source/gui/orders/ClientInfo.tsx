@@ -16,7 +16,7 @@ const ClientInfo: React.FC<Props> = ({ order }) => {
     <TouchableOpacity onPress={() => setCollapsed(!collapsed)}>
       <View style={styles.row}>
         <FontAwesome5Icon name={"user"} solid style={styles.icon} />
-        <Text style={styles.name}>{order.clientName}</Text>
+        <Text style={styles.name} selectable={true}>{order.clientName}</Text>
         <FontAwesome5Icon name={collapsed ? "chevron-down" : "chevron-up"} />
       </View>
     </TouchableOpacity>
@@ -25,7 +25,7 @@ const ClientInfo: React.FC<Props> = ({ order }) => {
       <View style={styles.row}>
         <FontAwesome5Icon name={"envelope"} style={styles.icon} />
         <UrlLink url={"mailto:" + order.clientEmail}>
-          <Text style={styles.email}>{order.clientEmail}</Text>
+          <Text style={styles.email} selectable={true}>{order.clientEmail}</Text>
         </UrlLink>
       </View>
 
@@ -33,7 +33,7 @@ const ClientInfo: React.FC<Props> = ({ order }) => {
         <View key={i} style={styles.row}>
           <FontAwesome5Icon name={"phone-alt"} style={styles.icon} />
           <UrlLink url={"tel:" + it}>
-            <Text style={styles.phone}>{it}</Text>
+            <Text style={styles.phone} selectable={true}>{it}</Text>
           </UrlLink>
         </View>)
       }

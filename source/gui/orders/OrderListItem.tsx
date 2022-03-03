@@ -17,7 +17,7 @@ interface Props {
 const OrderListItem: React.FC<Props> = ({ order }) => {
   return <View style={[styles.container, (order.deleted ? styles.deleted : {})]}>
     <View style={styles.row}>
-      <Text style={styles.number}>{order.number}</Text>
+      <Text style={styles.number} selectable={true}>{order.number}</Text>
 
       <View style={styles.deliverAtDate}>
         <FontAwesome5Icon name={"truck"} style={styles.icon} />

@@ -16,7 +16,7 @@ const RecipientInfo: React.FC<Props> = ({ recipient }) => {
     <TouchableOpacity onPress={() => setCollapsed(!collapsed)}>
       <View style={styles.row}>
         <FontAwesome5Icon name={"address-card"} solid style={styles.icon} />
-        <Text style={styles.name}>{recipient.name}</Text>
+        <Text style={styles.name} selectable={true}>{recipient.name}</Text>
 
         {!recipient.specialInstructions ? undefined :
           <FontAwesome5Icon name={"exclamation-triangle"} solid style={[styles.icon, { color: "#f38300" }]} />}
@@ -32,7 +32,7 @@ const RecipientInfo: React.FC<Props> = ({ recipient }) => {
           <View key={i} style={styles.row}>
             <FontAwesome5Icon name={"phone-alt"} style={styles.icon} />
             <UrlLink url={"tel:" + it}>
-              <Text style={styles.phone}>{it}</Text>
+              <Text style={styles.phone} selectable={true}>{it}</Text>
             </UrlLink>
           </View>)
       }
@@ -43,20 +43,24 @@ const RecipientInfo: React.FC<Props> = ({ recipient }) => {
           {!recipient.company ? undefined :
             <View style={styles.row}>
               <Text style={styles.addressLabel}>Company:</Text>
-              <Text style={styles.addressValue}>{recipient.company}</Text>
+              <Text style={styles.addressValue} selectable={true}>{recipient.company}</Text>
             </View>
           }
           {!recipient.unit ? undefined :
             <View style={styles.row}>
               <Text style={styles.addressLabel}>Unit:</Text>
-              <Text style={styles.addressValue}>{recipient.unit}</Text>
+              <Text style={styles.addressValue} selectable={true}>{recipient.unit}</Text>
             </View>
           }
           {!recipient.address ? undefined :
             <View style={styles.row}>
               <Text style={styles.addressLabel}>Address:</Text>
-              <UrlLink url={Platform.select({ ios: 'maps:0,0?q=', android: 'geo:0,0?q=' }) + recipient.address} style={{ flex: 1 }}>
-                <Text style={[styles.addressValue, styles.url]}>{recipient.address}</Text>
+              <UrlLink url={Platform.select({ ios: "maps:0,0?q=", android: "geo:0,0?q=" }) + recipient.address}
+                       style={{ flex: 1 }}>
+                <Text style={[styles.addressValue, styles.url]}
+                      selectable={true}>
+                  {recipient.address}
+                </Text>
               </UrlLink>
             </View>
           }
@@ -66,14 +70,14 @@ const RecipientInfo: React.FC<Props> = ({ recipient }) => {
       {!recipient.specialInstructions ? undefined :
         <View style={styles.row}>
           <FontAwesome5Icon name={"exclamation-triangle"} solid style={styles.icon} />
-          <Text style={styles.specialInstructions}>{recipient.specialInstructions}</Text>
+          <Text style={styles.specialInstructions} selectable={true}>{recipient.specialInstructions}</Text>
         </View>
       }
 
       {!recipient.message ? undefined :
         <View style={styles.row}>
           <FontAwesome5Icon name={"comment"} solid style={styles.icon} />
-          <Text style={styles.message}>{recipient.message}</Text>
+          <Text style={styles.message} selectable={true}>{recipient.message}</Text>
         </View>
       }
     </View>}
