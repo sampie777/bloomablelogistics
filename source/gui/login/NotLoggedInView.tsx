@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import server, { LoginError } from "../../logic/bloomable/server";
 import LoadingOverlay from "../utils/LoadingOverlay";
@@ -10,17 +10,47 @@ interface Props {
 }
 
 const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
+  let isMounted = true;
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
+  let passwordInput: TextInput | null = null;
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    isMounted = true;
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const validate = (): boolean => {
+    if (!username) {
+      setErrorMessage("Username cannot be empty");
+      return false;
+    }
+    if (!password) {
+      setErrorMessage("Password cannot be empty");
+      return false;
+    }
+    return true;
+  };
 
   const login = () => {
+    if (!validate()) {
+      return;
+    }
+
     setErrorMessage(undefined);
     setIsProcessing(true);
 
     server.login(username, password)
       .then(() => {
+        if (!isMounted) {
+          return;
+        }
+
         if (!server.isLoggedIn()) {
           return setErrorMessage("Failed to log in. Are your credentials correct?");
         }
@@ -28,6 +58,10 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
         onLoggedIn?.();
       })
       .catch(error => {
+        if (!isMounted) {
+          return;
+        }
+
         if (error instanceof LoginError) {
           setErrorMessage(error.message);
         } else {
@@ -35,6 +69,10 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
         }
       })
       .finally(() => {
+        if (!isMounted) {
+          return;
+        }
+
         setIsProcessing(false);
       });
   };
@@ -55,16 +93,22 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
                  maxLength={255}
                  value={username}
                  onChangeText={setUserName}
-                 autoComplete={"username"} />
+                 autoComplete={"username"}
+                 returnKeyType={"next"}
+                 onSubmitEditing={() => passwordInput?.focus()}
+                 blurOnSubmit={false} />
 
       <TextInput placeholder={"Password"}
+                 ref={ref => passwordInput = ref}
                  style={styles.input}
                  maxLength={255}
                  value={password}
                  onChangeText={setPassword}
                  textContentType={"password"}
                  autoComplete={"password"}
-                 secureTextEntry={true} />
+                 secureTextEntry={true}
+                 returnKeyType={"send"}
+                 onSubmitEditing={login} />
 
       <TouchableOpacity onPress={login}>
         <Text style={styles.button}>Log in</Text>

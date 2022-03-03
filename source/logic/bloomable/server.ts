@@ -1,6 +1,7 @@
 import { rollbar } from "../rollbar";
 import { api, throwErrorsIfNotOk } from "../api";
 import { ServerHtml } from "./html";
+import EncryptedStorage from "react-native-encrypted-storage";
 
 export class LoginError extends Error {
   constructor(message: string) {
@@ -11,6 +12,10 @@ export class LoginError extends Error {
 
 class Server {
   private cookie: string | undefined = undefined;
+
+  setCookie(value: string) {
+    this.cookie = value;
+  }
 
   login(username: string, password: string) {
     this.logout();
@@ -32,6 +37,8 @@ class Server {
         if (cookies) {
           this.processCookie(cookies);
         }
+
+        this.storeCookie();
 
         return response.text();
       })
@@ -61,6 +68,7 @@ class Server {
 
   logout() {
     this.cookie = undefined;
+    this.storeCookie();
   }
 
   isLoggedIn() {
@@ -77,6 +85,32 @@ class Server {
         rollbar.error(`Error fetching orders data`, error);
         throw error;
       });
+  }
+
+  recallCookie() {
+    return EncryptedStorage.getItem("cookie")
+      .then(value => {
+        if (value) {
+          this.setCookie(value);
+        }
+      })
+      .catch(error => {
+        rollbar.critical(`Error getting EncryptedStorage item: ${error}`, error);
+      });
+  }
+
+  storeCookie() {
+    if (this.cookie !== undefined) {
+      EncryptedStorage.setItem("cookie", this.cookie)
+        .catch(error => {
+          rollbar.critical(`Error setting EncryptedStorage item: ${error}`, error);
+        });
+    } else {
+      EncryptedStorage.removeItem("cookie")
+        .catch(error => {
+          rollbar.error(`Error clearing EncryptedStorage item: ${error}`, error);
+        });
+    }
   }
 }
 
