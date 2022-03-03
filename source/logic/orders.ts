@@ -1,6 +1,7 @@
 import server from "./bloomable/server";
 import { ServerHtml } from "./bloomable/html";
 import { config } from "./config";
+import { emptyPromise, emptyPromiseWithValue } from "./utils";
 
 export class Order {
   id: string | undefined;
@@ -18,6 +19,16 @@ export class Order {
   accepted: boolean = false;
   delivered: boolean = false;
   deleted: boolean = false;
+  recipient: Recipient | null | undefined;  // null when recipient not available, undefined when recipient not yet fetched
+}
+
+export class Recipient {
+  name: string = "";
+  phones: string[] = [];
+  company: string = "";
+  unit: string = "";
+  address: string = "";
+  message: string | undefined;
 }
 
 export namespace Orders {
@@ -29,7 +40,7 @@ export namespace Orders {
   };
 
   const sequentiallyFetchAll = (page: number = 1): Promise<Order[]> => {
-    return server.getOrderPage(page)
+    return server.getOrdersPage(page)
       .then((html: string) => {
         fetchedOrders = fetchedOrders.concat(ServerHtml.ordersResponseToOrders(html));
 
@@ -38,8 +49,31 @@ export namespace Orders {
           return sequentiallyFetchAll(page + 1);
         }
 
-        return fetchedOrders;
+        return fetchDetailsForOrders(fetchedOrders);
       });
   };
 
+  export const fetchDetailsForOrders = (orders: Order[]): Promise<Order[]> => {
+    if (orders.length === 0) {
+      return emptyPromiseWithValue(orders);
+    }
+
+    const nextOrder = orders.find(it => it.recipient === undefined);
+    if (nextOrder === undefined) {
+      return emptyPromiseWithValue(orders);
+    }
+
+    return fetchDetailsForOrder(nextOrder)
+      .then(() => fetchDetailsForOrders(orders));
+  };
+
+  export const fetchDetailsForOrder = (order: Order) => {
+    if (!order.id) {
+      return emptyPromise();
+    }
+    return server.getOrderDetailsPage(order.id)
+      .then((html: string) => {
+        order.recipient = ServerHtml.orderDetailsResponseToRecipient(html);
+      });
+  };
 }

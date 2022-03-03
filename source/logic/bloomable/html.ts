@@ -1,4 +1,4 @@
-import { Order } from "../orders";
+import { Order, Recipient } from "../orders";
 import { rollbar } from "../rollbar";
 
 export namespace ServerHtml {
@@ -101,5 +101,58 @@ export namespace ServerHtml {
     rows.pop(); // Remove last empty element
 
     return rows.map(it => rowToOrder(it));
+  };
+
+  export const orderDetailsResponseToRecipient = (html: string): Recipient | undefined => {
+    function cleanUp(_html: string) {
+      return _html
+        .replace(new RegExp("[\n\r\t]*", "gi"), "")
+        .replace(new RegExp(" class=\"tv\"", "gi"), "")
+        .replace(new RegExp(" +", "gi"), " ")
+        .replace(new RegExp("\s?(<\/?(p|ol|li|h\d)>)\s?", "gi"), "$1")
+        .replace(new RegExp(" <sup>\s?", "gi"), "<sup>")
+        .replace(new RegExp(" </sup>", "gi"), "</sup>")
+        .replace(new RegExp(" +", "gi"), " ");
+    }
+
+    const extractTable = (_html: string) => _html
+      .match(new RegExp("<table style=\"width: 100%;\"> (<tr> <td colspan=\"4\".*?)</table>", "i"))?.[1];
+
+    html = cleanUp(html);
+
+    const table = extractTable(html);
+    if (!table) {
+      rollbar.error("Could not find table in html");
+      return undefined;
+    }
+
+    let rows = table.split("</tr>");
+    rows.pop(); // Remove last empty element
+
+    let columns = rows.map(it => it.split("</td>"))
+      .filter(it => it.length >= 3);
+
+    const name = columns[0][1].replace(new RegExp(".*\"> "), "").replace(new RegExp("<small.*"),"").trim();
+    const phones = [
+      columns[2][1].replace(new RegExp(".*\"> "),"").replace(new RegExp("<small.*"),"").trim(),
+      columns[2][1].replace(new RegExp(".*\"> "),"").replace(new RegExp("<small.*"),"").trim(),
+    ];
+    const company = columns[3][1].replace(new RegExp(".*\"> "),"").replace(new RegExp("<small.*"),"").trim();
+    const unit = columns[4][1].replace(new RegExp(".*\"> "),"").replace(new RegExp("<small.*"),"").trim();
+    const address = columns[5][1].replace(new RegExp(".*\">"),"").replace(new RegExp("<small.*"),"").trim();
+
+    let message;
+    if (rows[11].includes("Accompanying Message")) {
+      message = rows[13].match(new RegExp("\">(.*?)</td>"))?.[1].replace(new RegExp("<br ?/>", "gi"), "\n").trim();
+    }
+
+    const recipient = new Recipient();
+    recipient.name = name;
+    recipient.phones = phones;
+    recipient.company = company;
+    recipient.unit = unit;
+    recipient.address = address;
+    recipient.message = message;
+    return recipient;
   };
 }

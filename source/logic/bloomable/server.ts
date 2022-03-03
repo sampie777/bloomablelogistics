@@ -75,18 +75,6 @@ class Server {
     return this.cookie !== undefined;
   }
 
-  getOrderPage(page: number) {
-    return fetch(api.url.orders(page), {
-      "headers": {},
-    })
-      .then(throwErrorsIfNotOk)
-      .then(response => response.text())
-      .catch(error => {
-        rollbar.error(`Error fetching orders data`, error);
-        throw error;
-      });
-  }
-
   recallCookie() {
     return EncryptedStorage.getItem("cookie")
       .then(value => {
@@ -111,6 +99,26 @@ class Server {
           rollbar.error(`Error clearing EncryptedStorage item: ${error}`, error);
         });
     }
+  }
+
+  getOrdersPage(page: number) {
+    return fetch(api.url.orders(page))
+      .then(throwErrorsIfNotOk)
+      .then(response => response.text())
+      .catch(error => {
+        rollbar.error(`Error fetching orders data`, error);
+        throw error;
+      });
+  }
+
+  getOrderDetailsPage(id: string) {
+    return fetch(api.url.orderDetail(id))
+      .then(throwErrorsIfNotOk)
+      .then(response => response.text())
+      .catch(error => {
+        rollbar.error(`Error fetching order details data`, error);
+        throw error;
+      });
   }
 }
 

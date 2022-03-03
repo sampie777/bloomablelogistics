@@ -8,6 +8,7 @@ import AdditionalInfo from "./AdditionalInfo";
 import OrderStatus from "./OrderStatus";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import OrderCosts from "./OrderCosts";
+import RecipientInfo from "./RecipientInfo";
 
 interface Props {
   order: Order;
@@ -24,6 +25,8 @@ const OrderListItem: React.FC<Props> = ({ order }) => {
       </View>
     </View>
 
+    {order.recipient == null ? undefined :
+      <RecipientInfo recipient={order.recipient} />}
     <OrderCosts order={order} />
     <ClientInfo order={order} />
     <AdditionalInfo order={order} />
@@ -33,10 +36,14 @@ const OrderListItem: React.FC<Props> = ({ order }) => {
 
 const styles = StyleSheet.create({
   container: {
-    borderBottomWidth: 1,
-    borderBottomColor: lightColors.border,
+    borderRadius: 10,
+    borderColor: lightColors.border,
+    backgroundColor: lightColors.surface1,
+    marginBottom: 10,
+    marginHorizontal: 5,
     paddingVertical: 10,
     paddingHorizontal: 20,
+    elevation: 3,
   },
   deleted: {
     backgroundColor: "#aaa",
@@ -45,7 +52,6 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
-    paddingBottom: 8,
   },
 
   number: {
@@ -68,3 +74,4 @@ const styles = StyleSheet.create({
 });
 
 export default OrderListItem;
+

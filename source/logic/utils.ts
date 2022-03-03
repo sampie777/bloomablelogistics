@@ -33,6 +33,7 @@ export function format(date: Date | string | undefined, _format: string) {
 }
 
 export const emptyPromise = () => new Promise((resolve => resolve(null)));
+export const emptyPromiseWithValue = <T>(v: T): Promise<T> => new Promise((resolve => resolve(v)));
 
 export function capitalize(word: string) {
   if (word.length === 0) {
