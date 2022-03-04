@@ -17,10 +17,8 @@ const AdditionalInfo: React.FC<Props> = ({ order }) => {
         <Text style={styles.partner}>{order.partner}</Text>
         <FontAwesome5Icon name={collapsed ? "chevron-down" : "chevron-up"} />
       </View>
-    </TouchableOpacity>
 
-    {collapsed ? undefined : <View>
-      <TouchableOpacity onPress={() => setCollapsed(!collapsed)}>
+      {collapsed ? undefined : <View>
         {!order.paymentType ? undefined :
           <View style={styles.row}>
             <FontAwesome5Icon name={"credit-card"} style={styles.icon} />
@@ -38,8 +36,8 @@ const AdditionalInfo: React.FC<Props> = ({ order }) => {
           <Text style={styles.createdAt}>Created
             on {format(order.createdAt, "%YYYY-%mm-%dd at %HH:%MM") || "unknown"}</Text>
         </View>
-      </TouchableOpacity>
-    </View>}
+      </View>}
+    </TouchableOpacity>
   </View>;
 };
 
