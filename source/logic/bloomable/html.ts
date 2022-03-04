@@ -133,7 +133,12 @@ export namespace ServerHtml {
     return rows.map(it => rowToOrder(it));
   };
 
-  export const orderDetailsResponseToRecipient = (html: string): Recipient | undefined => {
+  interface OrderDetails {
+    recipient?: Recipient;
+    orderValue?: number;
+  }
+
+  export const orderDetailsResponseToRecipient = (html: string): OrderDetails => {
     function cleanUp(_html: string) {
       return _html
         .replace(new RegExp("[\n\r\t]*", "gi"), "")
@@ -146,14 +151,50 @@ export namespace ServerHtml {
     }
 
     const extractTable = (_html: string) => _html
-      .match(new RegExp("<table style=\"width: 100%;\"> (<tr> <td colspan=\"4\".*?)</table>", "i"))?.[1];
+      .match(new RegExp("<table style=\"width: 100%;\"> (<tr> <td colspan=\"4\".*?)</table> *</table>", "i"))?.[1];
+
+    const findRowIndexMatching = (search: string) => {
+      return rows.findIndex(it => it.includes(search));
+    };
+
+    const executeWithRowIndexMatching = <T>(search: string, callback: (index: number) => T, maxIndex?: number): T | undefined => {
+      const rowIndex = findRowIndexMatching(search);
+      if (rowIndex < 0 || (maxIndex !== undefined && rowIndex >= maxIndex)) {
+        return undefined;
+      }
+      return callback(rowIndex);
+    };
+
+    const getOrderValue = (_rows: string[]) => {
+      const retailValue = executeWithRowIndexMatching("Please produce a product to the retail value of (excluding delivery):",
+        (index) => _rows[index]
+          .match(new RegExp("\"> *R *([\\d.,]+) *</td>"))?.[1]
+          .replace(",", "")
+          .trim());
+
+      const deliveryCosts = executeWithRowIndexMatching("Please produce a product to the retail value of (excluding delivery):",
+        (index) => _rows[index]
+          .match(new RegExp("\"> *R *([\\d.,]+) *</td>"))?.[1]
+          .replace(",", "")
+          .trim());
+
+      let orderValue = 0;
+      if (retailValue === undefined && deliveryCosts === undefined) {
+        return undefined;
+      } else if (retailValue !== undefined) {
+        orderValue += +retailValue;
+      } else if (deliveryCosts !== undefined) {
+        orderValue += +deliveryCosts;
+      }
+      return orderValue;
+    };
 
     html = cleanUp(html);
 
     const table = extractTable(html);
     if (!table) {
       rollbar.error("Could not find table in html");
-      return undefined;
+      return {};
     }
 
     let rows = table.split("</tr>");
@@ -192,27 +233,19 @@ export namespace ServerHtml {
       .replace(new RegExp("<small.*"), "")
       .trim();
 
-    let specialInstructions;
-    for (let j = i; j < rows.length - 1; j++) {
-      if (rows[j].includes("> Special Instructions </td>")) {
-        specialInstructions = rows[j + 2]
-          .match(new RegExp("\">(.*?)</td>"))?.[1]
-          .replace(new RegExp("<br ?/>", "gi"), "\n")
-          .trim();
-        break;
-      }
-    }
+    const specialInstructions = executeWithRowIndexMatching("> Special Instructions </td>",
+      (index) => rows[index + 2]
+        .match(new RegExp("\">(.*?)</td>"))?.[1]
+        .replace(new RegExp("<br ?/>", "gi"), "\n")
+        .trim(), rows.length - 2);
 
-    let message;
-    for (let j = i; j < rows.length - 1; j++) {
-      if (rows[j].includes("> Accompanying Message </td>")) {
-        message = rows[j + 2]
-          .match(new RegExp("\">(.*?)</td>"))?.[1]
-          .replace(new RegExp("<br ?/>", "gi"), "\n")
-          .trim();
-        break;
-      }
-    }
+    const message = executeWithRowIndexMatching("> Accompanying Message </td>",
+      (index) => rows[index + 2]
+        .match(new RegExp("\">(.*?)</td>"))?.[1]
+        .replace(new RegExp("<br ?/>", "gi"), "\n")
+        .trim(), rows.length - 2);
+
+    let orderValue = getOrderValue(rows);
 
     const recipient = new Recipient();
     recipient.name = decode(name, { level: "html5" });
@@ -220,8 +253,12 @@ export namespace ServerHtml {
     recipient.company = decode(company, { level: "html5" });
     recipient.unit = decode(unit, { level: "html5" });
     recipient.address = decode(address, { level: "html5" });
-    recipient.message = !message ? message : decode(message, { level: "html5" });
     recipient.specialInstructions = !specialInstructions ? specialInstructions : decode(specialInstructions, { level: "html5" });
-    return recipient;
+    recipient.message = !message ? message : decode(message, { level: "html5" });
+
+    return {
+      recipient: recipient,
+      orderValue: orderValue,
+    };
   };
 }

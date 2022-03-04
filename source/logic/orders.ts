@@ -53,7 +53,11 @@ export namespace Orders {
     }
     return server.getOrderDetailsPage(order.id)
       .then((html: string) => {
-        order.recipient = ServerHtml.orderDetailsResponseToRecipient(html);
+        const { recipient, orderValue } = ServerHtml.orderDetailsResponseToRecipient(html);
+        order.recipient = recipient;
+        if (order.orderValue === undefined) {
+          order.orderValue = orderValue;
+        }
       });
   };
 }

@@ -50,7 +50,7 @@ describe("ServerHtml", () => {
   });
 
   it("Parses order details correctly", () => {
-    const recipient = ServerHtml.orderDetailsResponseToRecipient(orderDetails1Response);
+    const { recipient, orderValue } = ServerHtml.orderDetailsResponseToRecipient(orderDetails1Response);
 
     expect(recipient).not.toBeUndefined();
     expect(recipient!.name).toBe("ASdsf Ssdfs");
@@ -67,5 +67,6 @@ describe("ServerHtml", () => {
       "\n" +
       "Abv, cdd & Dilan");
     expect(recipient!.specialInstructions).toBeUndefined();
+    expect(orderValue).toBe(620);
   });
 });
