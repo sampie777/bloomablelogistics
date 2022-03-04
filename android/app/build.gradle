@@ -1,6 +1,20 @@
 apply plugin: "com.android.application"
 
 import com.android.build.OutputFile
+import groovy.json.JsonSlurper
+
+/* https://stackoverflow.com/a/39026727/2806723 */
+def getNpmVersion() {
+    def inputFile = new File("../package.json")
+    def packageJson = new JsonSlurper().parseText(inputFile.text)
+    return packageJson["version"]
+}
+
+/* calculated from git commits to give sequential integers */
+def getGitVersion() {
+    def process = "git rev-list HEAD --first-parent --count".execute()
+    return process.text.toInteger()
+}
 
 /**
  * The react.gradle file registers a task for each build variant (e.g. bundleDebugJsAndAssets
@@ -134,8 +148,10 @@ android {
         applicationId "nl.sajansen.bloomablelogistics"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode getGitVersion()
+        versionName getNpmVersion()
+
+        setProperty("archivesBaseName", applicationId.replaceAll(/.*\./, "") + "-v" + versionCode + "(" + versionName + ")")
     }
     splits {
         abi {
@@ -152,6 +168,14 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            if (project.hasProperty('HYMNBOOK_UPLOAD_STORE_FILE')) {
+                storeFile file(HYMNBOOK_UPLOAD_STORE_FILE)
+                storePassword HYMNBOOK_UPLOAD_STORE_PASSWORD
+                keyAlias HYMNBOOK_UPLOAD_KEY_ALIAS
+                keyPassword HYMNBOOK_UPLOAD_KEY_PASSWORD
+            }
+        }
     }
     buildTypes {
         debug {
@@ -165,7 +189,7 @@ android {
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
