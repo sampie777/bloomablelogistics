@@ -7,10 +7,10 @@ import ListHeaderComponent from "./ListHeaderComponent";
 import { Order } from "../../logic/models";
 
 interface Props {
-
+  setMapOrders?: (orders: Order[]) => void;
 }
 
-const OrdersList: React.FC<Props> = () => {
+const OrdersList: React.FC<Props> = ({ setMapOrders }) => {
   const isMounted = useRef(false);
   const fetchPage = useRef(0);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -77,6 +77,8 @@ const OrdersList: React.FC<Props> = () => {
         }
       })
       .reverse());
+
+    setMapOrders?.(orders);
   };
 
   const onOrderUpdated = () => {

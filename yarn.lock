@@ -1305,6 +1305,11 @@
   resolved "https://registry.yarnpkg.com/@types/eslint-visitor-keys/-/eslint-visitor-keys-1.0.0.tgz#1ee30d79544ca84d68d4b3cdb0af4f205663dd2d"
   integrity sha512-OCutwjDZ4aFS6PB1UZ988C4YgwlBHJd6wCeQqaLdmadZ/7e+w79+hbMUFC1QXDNCmdyoRfAFdm0RypzwR+Qpag==
 
+"@types/geojson@^7946.0.7":
+  version "7946.0.8"
+  resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.8.tgz#30744afdb385e2945e22f3b033f897f76b1f12ca"
+  integrity sha512-1rkryxURpr6aWP7R786/UQOkJ3PcpQiWkAXBmdWc7ryFWqN6a4xfK7BtjXvFBKO9LjQ+MWQSWxYeZX1OApnArA==
+
 "@types/graceful-fs@^4.1.2":
   version "4.1.5"
   resolved "https://registry.yarnpkg.com/@types/graceful-fs/-/graceful-fs-4.1.5.tgz#21ffba0d98da4350db64891f92a9e5db3cdb4e15"
@@ -5678,6 +5683,18 @@ react-native-encrypted-storage@^4.0.2:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/react-native-encrypted-storage/-/react-native-encrypted-storage-4.0.2.tgz#c7d59b1d3ff2f80d572be3e85aaab3fdee16744a"
   integrity sha512-vneDkHGDuTvLQjUBztqb2YI8QoH1zxdJonPGTS+g57lfJZff9fAjoLSSb6NgMBebpXFcK3I3sEresGyL+3AArw==
+
+react-native-geocoding@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/react-native-geocoding/-/react-native-geocoding-0.5.0.tgz#69748f896047a63d1c3c1d55255f9d67c8e275c2"
+  integrity sha512-peTXRpRxPLiZpbTW43AOvoXXAEoS+eLnSo4KRY0hcL9F2hulWE5r7o5KiaLx8AWj35c6EJP3fdGHe754q2Gd2Q==
+
+react-native-maps@^0.30.1:
+  version "0.30.1"
+  resolved "https://registry.yarnpkg.com/react-native-maps/-/react-native-maps-0.30.1.tgz#b227f3cbf68947bbd22fcf2b7470a7ab3a4f3fbb"
+  integrity sha512-VDgGygFcXwKLFNmdGb5DVy3DJhjP3qCe3txzDfeO6kQyNELj875ZbZMTYW84XsLUBFNpAWXKffWvMKHMQKv2Gg==
+  dependencies:
+    "@types/geojson" "^7946.0.7"
 
 react-native-safe-area-context@^3.3.2:
   version "3.4.1"
