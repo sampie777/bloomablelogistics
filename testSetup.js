@@ -14,7 +14,7 @@ jest.mock("rollbar-react-native", () => {
   };
 });
 
-jest.mock("./source/scripts/rollbar", () => {
+jest.mock("./source/logic/rollbar", () => {
   return {
     rollbar: {
       log: () => undefined,
@@ -30,5 +30,12 @@ jest.mock("./source/scripts/rollbar", () => {
 jest.mock("react-native-device-info", () => {
   return {
     getVersion: () => 1,
+  };
+});
+
+jest.mock("react-native-encrypted-storage", () => {
+  return {
+    getItem: () => undefined,
+    setItem: () => undefined,
   };
 });

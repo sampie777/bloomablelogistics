@@ -53,6 +53,7 @@ export namespace ServerHtml {
       const createdAt = columns[1]
         .replace(new RegExp(" *<br ?/> *", "gi"), " ")
         .match(new RegExp(">(.*?)$"))?.[1]
+        .trim()
         .replace(" ", "T");
       const partner = columns[2]
         .replace(new RegExp(" *<br ?/> *", "gi"), " ")
@@ -71,7 +72,8 @@ export namespace ServerHtml {
         .filter(it => it);
       const deliverAtDate = columns[6]
         .replace(new RegExp(" *<br ?/> *", "gi"), " ")
-        .match(new RegExp(">(.*?)$"))?.[1];
+        .match(new RegExp(">(.*?)$"))?.[1]
+        .trim();
       const paymentType = columns[7]
         .replace(new RegExp(" *<br ?/> *", "gi"), " ")
         .replace("<td>", "")
