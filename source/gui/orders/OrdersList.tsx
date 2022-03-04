@@ -64,6 +64,7 @@ const OrdersList: React.FC<Props> = () => {
 
   const setAndSortOrders = (_orders: Order[]) => {
     setOrders(_orders
+      .sort((a, b) => (a.number || 0) - (b.number || 0))
       .sort((a, b) => {
         if (a.deliverAtDate && b.deliverAtDate) {
           return a.deliverAtDate.getTime() - b.deliverAtDate.getTime();

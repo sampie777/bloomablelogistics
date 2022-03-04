@@ -39,7 +39,7 @@ export namespace ServerHtml {
     }
 
     const extractTable = (_html: string) => _html
-      .match(new RegExp("<table class=\"table table-bordered table-striped table-small\">(.*?)</table>", "i"))?.[1];
+      .match(new RegExp("<table class=\"table table-bordered table-striped table-small orders-dashboard\">(.*?)</table>", "i"))?.[1];
     const extractTableBody = (_html: string) => _html
       .match(new RegExp("<tbody>(.*?)</tbody>", "i"))?.[1].trim();
 
@@ -49,7 +49,7 @@ export namespace ServerHtml {
       columns.pop();
 
       const id = columns[0].match(new RegExp("orderId=(.*?)'"))?.[1];
-      const number = columns[0].match(new RegExp(">(\\d+)</a>$"))?.[1];
+      const number = columns[0].match(new RegExp(">(\\d+)</a>"))?.[1];
       const createdAt = columns[1]
         .replace(new RegExp(" *<br ?/> *", "gi"), " ")
         .match(new RegExp(">(.*?)$"))?.[1]
@@ -76,20 +76,20 @@ export namespace ServerHtml {
         .replace(new RegExp(" *<br ?/> *", "gi"), " ")
         .replace("<td>", "")
         .trim();
-      const florist = columns[8]
-        .replace(new RegExp(" *<br ?/> *", "gi"), " ")
-        .replace("<td>", "")
-        .trim();
-      const orderValue = columns[9]
-        .replace(new RegExp(".*> R"), "")
+      // const florist = columns[8]
+      //   .replace(new RegExp(" *<br ?/> *", "gi"), " ")
+      //   .replace("<td>", "")
+      //   .trim();
+      // const orderValue = columns[9]
+      //   .replace(new RegExp(".*> R"), "")
+      //   .replace(",", "")
+      //   .trim();
+      const orderCosts = columns[8]
+        .replace(new RegExp(".*> ?R"), "")
         .replace(",", "")
         .trim();
-      const orderCosts = columns[10]
-        .replace(new RegExp(".*> R"), "")
-        .replace(",", "")
-        .trim();
-      const accepted = columns[11].match(new RegExp(">(.{0,2})</span>$"))?.[1].toUpperCase() === "Y";
-      const delivered = columns[12].match(new RegExp(">(.{0,2})</span>$"))?.[1].toUpperCase() === "Y";
+      const accepted = columns[9].match(new RegExp(">(.{0,2})</span>$"))?.[1].toUpperCase() === "Y";
+      const delivered = columns[10].match(new RegExp(">(.{0,2})</span>$"))?.[1].toUpperCase() === "Y";
       const deleted = row.match(new RegExp("<tr class=\"deletedOrder\">")) != null;
 
       order.id = id;
@@ -100,10 +100,10 @@ export namespace ServerHtml {
       order.clientEmail = !email ? email : decode(email, { level: "html5" });
       order.clientPhones = phones.map(it => decode(it, { level: "html5" }));
       order.paymentType = !paymentType ? paymentType : decode(paymentType, { level: "html5" });
-      order.florist = !florist ? florist : decode(florist, { level: "html5" });
+      // order.florist = !florist ? florist : decode(florist, { level: "html5" });
       order.deliverAtDate = deliverAtDate === undefined ? undefined : new Date(deliverAtDate);
-      order.orderValue = orderValue === undefined ? 0 : +orderValue;
-      order.orderCosts = orderCosts === undefined ? 0 : +orderCosts;
+      // order.orderValue = orderValue === undefined ? undefined : +orderValue;
+      order.orderCosts = orderCosts === undefined || orderCosts.includes("TBD") ? undefined : +orderCosts;
       order.accepted = accepted;
       order.delivered = delivered;
       order.deleted = deleted;
@@ -177,12 +177,12 @@ export namespace ServerHtml {
         .trim());
     }
 
-    const company = columns[i++][1].
-    replace(new RegExp(".*\"> "), "")
+    const company = columns[i++][1]
+      .replace(new RegExp(".*\"> "), "")
       .replace(new RegExp("<small.*"), "")
       .trim();
-    const unit = columns[i++][1].
-    replace(new RegExp(".*\"> "), "")
+    const unit = columns[i++][1]
+      .replace(new RegExp(".*\"> "), "")
       .replace(new RegExp("<small.*"), "")
       .trim();
     const address = columns[i++][1]

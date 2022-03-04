@@ -9,8 +9,8 @@ export class Order {
   deliverAtDate: Date | undefined;
   paymentType: string | undefined;
   florist: string | undefined;
-  orderValue: number = 0;
-  orderCosts: number = 0;
+  orderValue: number | undefined;
+  orderCosts: number | undefined;
   accepted: boolean = false;
   delivered: boolean = false;
   deleted: boolean = false;

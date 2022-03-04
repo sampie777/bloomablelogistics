@@ -9,14 +9,18 @@ interface Props {
 
 const OrderCosts: React.FC<Props> = ({ order }) => {
   return <View style={styles.container}>
+    {order.orderValue === undefined ? <View /> :
       <View style={styles.row}>
         <FontAwesome5Icon name={"shopping-cart"} solid style={styles.icon} />
-        <Text style={styles.orderValue}>R {order.orderValue}</Text>
+        <Text style={styles.orderValue}>R {order.orderValue.toFixed(2)}</Text>
       </View>
+    }
+    {order.orderCosts === undefined ? undefined :
       <View style={styles.row}>
         <FontAwesome5Icon name={"cart-arrow-down"} solid style={styles.icon} />
-        <Text style={styles.orderCosts}>R {order.orderCosts}</Text>
+        <Text style={styles.orderCosts}>R {order.orderCosts.toFixed(2)}</Text>
       </View>
+    }
   </View>;
 };
 
@@ -25,15 +29,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 5,
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
-    paddingBottom: 3,
   },
-  orderValue: {},
-  orderCosts: {},
+  orderValue: {
+    marginBottom: 8,
+  },
+  orderCosts: {
+    marginBottom: 8,
+  },
   icon: {
     marginRight: 10,
     minWidth: 16,
