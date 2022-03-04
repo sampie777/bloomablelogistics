@@ -15,7 +15,7 @@ const ClientInfo: React.FC<Props> = ({ order }) => {
   return <View style={styles.container}>
     <TouchableOpacity onPress={() => setCollapsed(!collapsed)}>
       <View style={styles.row}>
-        <FontAwesome5Icon name={"user"} solid style={styles.icon} />
+        <FontAwesome5Icon name={"user-tie"} solid style={styles.icon} />
         <Text style={styles.name} selectable={true}>{order.clientName}</Text>
         <FontAwesome5Icon name={collapsed ? "chevron-down" : "chevron-up"} />
       </View>

@@ -50,7 +50,7 @@ describe("ServerHtml", () => {
   });
 
   it("Parses order details correctly", () => {
-    const { recipient, orderValue } = ServerHtml.orderDetailsResponseToRecipient(orderDetails1Response);
+    const { recipient, orderValue, products } = ServerHtml.orderDetailsResponseToOrderDetails(orderDetails1Response);
 
     expect(recipient).not.toBeUndefined();
     expect(recipient!.name).toBe("ASdsf Ssdfs");
@@ -67,6 +67,21 @@ describe("ServerHtml", () => {
       "\n" +
       "Abv, cdd & Dilan");
     expect(recipient!.specialInstructions).toBeUndefined();
+
     expect(orderValue).toBe(620);
+
+    expect(products).not.toBeUndefined();
+    expect(products!.length).toBe(4);
+    expect(products![3].name).toBe("Orange Rose Bouquet");
+    expect(products![3].size).toBe("Medium (12 Roses) - AS SHOWN");
+    expect(products![3].quantity).toBe("x 1");
+    expect(products![3].retailPrice).toBe(620);
+    expect(products![3].guidelines).toBe("1 x Ribbon\n" +
+      "1 x Additional Delivery Fee\n" +
+      "2 x Tissue Paper Plain [ Mixed]\n" +
+      "8 x Greenery [ Green]\n" +
+      "12 x Roses [ Orange]");
+    expect(products![3].description).toBe("Please email admin@gmail.com quoting your order number if there are any variations of flowers used in this creation. If the customer is informed of any changes you are more likely to receive better reviews. Thank you.");
+    expect(products![3].image).toBe("https://www.bloomable.co.za/Uploads/Images/9f65fa64-4657-4abb-9e41-e3529a25ba4d.jpg");
   });
 });

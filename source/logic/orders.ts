@@ -53,8 +53,9 @@ export namespace Orders {
     }
     return server.getOrderDetailsPage(order.id)
       .then((html: string) => {
-        const { recipient, orderValue } = ServerHtml.orderDetailsResponseToRecipient(html);
+        const { recipient, orderValue, products } = ServerHtml.orderDetailsResponseToOrderDetails(html);
         order.recipient = recipient;
+        order.products = products;
         if (order.orderValue === undefined) {
           order.orderValue = orderValue;
         }

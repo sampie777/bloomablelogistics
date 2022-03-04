@@ -13,12 +13,14 @@ const AdditionalInfo: React.FC<Props> = ({ order }) => {
   return <View style={styles.container}>
     <TouchableOpacity onPress={() => setCollapsed(!collapsed)}>
       <View style={styles.row}>
-        <FontAwesome5Icon name={"user-tie"} style={styles.icon} />
+        <FontAwesome5Icon name={"briefcase"} style={styles.icon} />
         <Text style={styles.partner}>{order.partner}</Text>
         <FontAwesome5Icon name={collapsed ? "chevron-down" : "chevron-up"} />
       </View>
+    </TouchableOpacity>
 
-      {collapsed ? undefined : <View>
+    {collapsed ? undefined : <View>
+      <TouchableOpacity onPress={() => setCollapsed(!collapsed)}>
         {!order.paymentType ? undefined :
           <View style={styles.row}>
             <FontAwesome5Icon name={"credit-card"} style={styles.icon} />
@@ -33,10 +35,11 @@ const AdditionalInfo: React.FC<Props> = ({ order }) => {
         }
         <View style={styles.row}>
           <FontAwesome5Icon name={"calendar-plus"} style={styles.icon} />
-          <Text style={styles.createdAt}>Created on {format(order.createdAt, "%YYYY-%mm-%dd at %HH:%MM") || "unknown"}</Text>
+          <Text style={styles.createdAt}>Created
+            on {format(order.createdAt, "%YYYY-%mm-%dd at %HH:%MM") || "unknown"}</Text>
         </View>
-      </View>}
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </View>}
   </View>;
 };
 

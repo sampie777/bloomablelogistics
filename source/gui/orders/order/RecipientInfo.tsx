@@ -5,6 +5,7 @@ import { lightColors } from "../../theme";
 import UrlLink from "../../utils/UrlLink";
 import { Order } from "../../../logic/models";
 import { Orders } from "../../../logic/orders";
+import Products from "./products/Products";
 
 interface Props {
   order: Order;
@@ -71,7 +72,7 @@ const RecipientInfo: React.FC<Props> = ({ order, onRecipientUpdated }) => {
   return <View style={styles.container}>
     <TouchableOpacity onPress={() => setCollapsed(!collapsed)}>
       <View style={styles.row}>
-        <FontAwesome5Icon name={"address-card"} solid style={styles.icon} />
+        <FontAwesome5Icon name={"user"} solid style={styles.icon} />
         <Text style={styles.name} selectable={true}>{order.recipient.name}</Text>
 
         {!order.recipient.specialInstructions ? undefined :
@@ -135,6 +136,8 @@ const RecipientInfo: React.FC<Props> = ({ order, onRecipientUpdated }) => {
           <Text style={styles.message} selectable={true}>{order.recipient.message}</Text>
         </View>
       }
+
+      <Products products={order.products} />
     </View>}
   </View>;
 };

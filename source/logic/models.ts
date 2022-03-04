@@ -15,6 +15,7 @@ export class Order {
   delivered: boolean = false;
   deleted: boolean = false;
   recipient: Recipient | null | undefined;  // null when recipient not available, undefined when recipient not yet fetched
+  products: Product[] | undefined;
 }
 
 export class Recipient {
@@ -25,4 +26,14 @@ export class Recipient {
   address: string = "";
   message: string | undefined;
   specialInstructions: string | undefined;
+}
+
+export class Product {
+  name: string | undefined;
+  size: string | undefined;
+  quantity: string | undefined;
+  retailPrice: number | undefined;
+  guidelines: string | undefined;
+  description: string | undefined;
+  image: string | undefined;
 }
