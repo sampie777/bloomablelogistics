@@ -10,8 +10,7 @@ export namespace Orders {
   export const fetchPage = (page: number = 1): Promise<Order[]> => {
     return server.getOrdersPage(page)
       .then((html: string) => {
-        const orders = ServerHtml.ordersResponseToOrders(html);
-        return fetchDetailsForOrders(orders);
+        return ServerHtml.ordersResponseToOrders(html);
       });
   };
 

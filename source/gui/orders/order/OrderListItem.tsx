@@ -12,9 +12,10 @@ import { Order } from "../../../logic/models";
 
 interface Props {
   order: Order;
+  onOrderUpdated?: () => void;
 }
 
-const OrderListItem: React.FC<Props> = ({ order }) => {
+const OrderListItem: React.FC<Props> = ({ order, onOrderUpdated }) => {
   return <View style={[styles.container, (order.deleted ? styles.deleted : {})]}>
     <View style={styles.row}>
       <Text style={styles.number} selectable={true}>{order.number}</Text>
@@ -25,8 +26,7 @@ const OrderListItem: React.FC<Props> = ({ order }) => {
       </View>
     </View>
 
-    {order.recipient == null ? undefined :
-      <RecipientInfo recipient={order.recipient} />}
+    <RecipientInfo order={order} onRecipientUpdated={onOrderUpdated} />
     <OrderCosts order={order} />
     <ClientInfo order={order} />
     <AdditionalInfo order={order} />

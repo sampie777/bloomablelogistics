@@ -11,18 +11,17 @@ interface Props {
 }
 
 const OrdersList: React.FC<Props> = () => {
-  let isMounted = true;
-  let fetchPage = useRef(0);
+  const isMounted = useRef(false);
+  const fetchPage = useRef(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
     fetchOrders();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    isMounted = true;
+    isMounted.current = true;
     return () => {
-      isMounted = false;
+      isMounted.current = false;
     };
   }, []);
 
@@ -39,7 +38,7 @@ const OrdersList: React.FC<Props> = () => {
     fetchPage.current++;
     Orders.fetchPage(fetchPage.current)
       .then(_orders => {
-        if (!isMounted) {
+        if (!isMounted.current) {
           return;
         }
 
@@ -47,37 +46,44 @@ const OrdersList: React.FC<Props> = () => {
           _orders = orders.concat(_orders);
         }
 
-        setOrders(
-          _orders
-            .sort((a, b) => {
-              if (a.deliverAtDate && b.deliverAtDate) {
-                return a.deliverAtDate.getTime() - b.deliverAtDate.getTime();
-              } else if (a.deliverAtDate) {
-                return 1;
-              } else if (b.deliverAtDate) {
-                return -1;
-              } else {
-                return (a.number || 0) - (b.number || 0);
-              }
-            })
-            .reverse());
+        setAndSortOrders(_orders);
       })
       .catch(error => {
-        if (!isMounted) {
+        if (!isMounted.current) {
           return;
         }
         setErrorMessage(error.toString());
       })
       .finally(() => {
-        if (!isMounted) {
+        if (!isMounted.current) {
           return;
         }
         setIsProcessing(false);
       });
   };
 
+  const setAndSortOrders = (_orders: Order[]) => {
+    setOrders(_orders
+      .sort((a, b) => {
+        if (a.deliverAtDate && b.deliverAtDate) {
+          return a.deliverAtDate.getTime() - b.deliverAtDate.getTime();
+        } else if (a.deliverAtDate) {
+          return 1;
+        } else if (b.deliverAtDate) {
+          return -1;
+        } else {
+          return (a.number || 0) - (b.number || 0);
+        }
+      })
+      .reverse());
+  };
+
+  const onOrderUpdated = () => {
+    setAndSortOrders(orders);
+  };
+
   const renderOrderItem = ({ item }: ListRenderItemInfo<Order>) => {
-    return <OrderListItem order={item} />;
+    return <OrderListItem order={item} onOrderUpdated={onOrderUpdated} />;
   };
 
   return <View style={styles.container}>

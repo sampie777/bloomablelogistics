@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import server, { LoginError } from "../../logic/bloomable/server";
 import LoadingOverlay from "../utils/LoadingOverlay";
@@ -10,7 +10,7 @@ interface Props {
 }
 
 const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
-  let isMounted = true;
+  const isMounted = useRef(false);
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -18,10 +18,9 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
   let passwordInput: TextInput | null = null;
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    isMounted = true;
+    isMounted.current = true;
     return () => {
-      isMounted = false;
+      isMounted.current = false;
     };
   }, []);
 
@@ -47,7 +46,7 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
 
     server.login(username, password)
       .then(() => {
-        if (!isMounted) {
+        if (!isMounted.current) {
           return;
         }
 
@@ -58,7 +57,7 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
         onLoggedIn?.();
       })
       .catch(error => {
-        if (!isMounted) {
+        if (!isMounted.current) {
           return;
         }
 
@@ -69,7 +68,7 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
         }
       })
       .finally(() => {
-        if (!isMounted) {
+        if (!isMounted.current) {
           return;
         }
 
