@@ -16,6 +16,10 @@ const OrderStatus: React.FC<Props> = ({ order }) => {
       style={[styles.delivered, styles.boolean, (order.delivered ? styles.booleanPositive : styles.booleanNegative)]}>
       {order.delivered ? "Delivered" : "Not delivered"}
     </Text>
+    {!order.deleted ? undefined : <Text
+      style={[styles.deleted, styles.boolean, styles.booleanError]}>
+      Deleted
+    </Text>}
   </View>;
 };
 
@@ -26,6 +30,7 @@ const styles = StyleSheet.create({
   },
   accepted: {},
   delivered: {},
+  deleted: {},
   boolean: {
     borderRadius: 30,
     paddingHorizontal: 10,
@@ -38,6 +43,10 @@ const styles = StyleSheet.create({
   },
   booleanNegative: {
     backgroundColor: "#ec8700",
+    color: "#fff",
+  },
+  booleanError: {
+    backgroundColor: "#ec0000",
     color: "#fff",
   },
 });
