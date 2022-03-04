@@ -4,7 +4,7 @@ import { emptyPromise, emptyPromiseWithValue } from "../utils";
 import Geocoder from "react-native-geocoding";
 import { LatLng } from "react-native-maps";
 
-Geocoder.init("AIzaSyA8uU_syJ-3tNJQFca_aKAwzXwSH6YTKmw");
+Geocoder.init("");
 
 export namespace Location {
   export const ordersToMapOrders = (orders: Order[], callback?: (orders: Order[]) => void) => {
