@@ -32,7 +32,7 @@ export function format(date: Date | string | undefined, _format: string) {
     .replace(/%f/g, date.getMilliseconds().toString().padStart(3, "0"));
 }
 
-export const emptyPromise = () => new Promise((resolve => resolve(null)));
+export const emptyPromise = (): Promise<null> => new Promise((resolve => resolve(null)));
 export const emptyPromiseWithValue = <T>(v: T): Promise<T> => new Promise((resolve => resolve(v)));
 
 export function capitalize(word: string) {

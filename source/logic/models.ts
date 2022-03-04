@@ -1,3 +1,5 @@
+import { LatLng } from "react-native-maps";
+
 export class Order {
   id: string | undefined;
   number: number | undefined;
@@ -26,6 +28,7 @@ export class Recipient {
   address: string = "";
   message: string | undefined;
   specialInstructions: string | undefined;
+  location: LatLng | undefined;
 }
 
 export class Product {

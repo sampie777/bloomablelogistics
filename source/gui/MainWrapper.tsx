@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Button, StyleSheet, View } from "react-native";
 import LoginScreen from "./login/LoginScreen";
 import Map from "./map/Map";
 import OrdersList from "./orders/OrdersList";
@@ -13,6 +13,7 @@ interface Props {
 
 const MainWrapper: React.FC<Props> = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(server.isLoggedIn());
+  const [showMap, setShowMap] = useState(false);
   const [mapOrders, setMapOrders] = useState<Order[]>([]);
 
   const reloadLoginStatus = () => {
@@ -21,8 +22,9 @@ const MainWrapper: React.FC<Props> = () => {
 
   return <View style={styles.container}>
     <LoginScreen onLoggedInChange={reloadLoginStatus} />
+    <Button title={"Map"} onPress={() => setShowMap(!showMap)} />
 
-    <Map orders={mapOrders} />
+    {!showMap ? undefined : <Map orders={mapOrders} />}
 
     {!isLoggedIn ? undefined : <OrdersList setMapOrders={setMapOrders} />}
 

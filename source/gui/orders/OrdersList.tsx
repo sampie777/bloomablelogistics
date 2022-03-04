@@ -5,6 +5,7 @@ import OrderListItem from "./order/OrderListItem";
 import ListEmptyComponent from "./ListEmptyComponent";
 import ListHeaderComponent from "./ListHeaderComponent";
 import { Order } from "../../logic/models";
+import { Location } from "../../logic/location/Location";
 
 interface Props {
   setMapOrders?: (orders: Order[]) => void;
@@ -13,6 +14,7 @@ interface Props {
 const OrdersList: React.FC<Props> = ({ setMapOrders }) => {
   const isMounted = useRef(false);
   const fetchPage = useRef(0);
+  const orderLocationTimeout = useRef<NodeJS.Timeout | null>();
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -77,12 +79,15 @@ const OrdersList: React.FC<Props> = ({ setMapOrders }) => {
         }
       })
       .reverse());
-
-    setMapOrders?.(orders);
   };
 
   const onOrderUpdated = () => {
     setAndSortOrders(orders);
+
+    if (orderLocationTimeout.current) {
+      clearTimeout(orderLocationTimeout.current);
+    }
+    orderLocationTimeout.current = setTimeout(() => Location.ordersToMapOrders(orders, setMapOrders), 2000);
   };
 
   const renderOrderItem = ({ item }: ListRenderItemInfo<Order>) => {
