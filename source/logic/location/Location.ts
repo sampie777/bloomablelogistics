@@ -3,8 +3,9 @@ import { rollbar } from "../rollbar";
 import { emptyPromise, emptyPromiseWithValue } from "../utils";
 import Geocoder from "react-native-geocoding";
 import { LatLng } from "react-native-maps";
+import Config from "react-native-config";
 
-Geocoder.init("");
+Geocoder.init(Config.GOOGLE_MAPS_API_KEY);
 
 export namespace Location {
   export const ordersToMapOrders = (orders: Order[], callback?: (orders: Order[]) => void) => {

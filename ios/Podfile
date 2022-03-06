@@ -16,6 +16,8 @@ target 'bloomablelogistics' do
 
   pod 'RNDeviceInfo', :path => '../node_modules/react-native-device-info'
 
+  pod 'react-native-config', :path => '../node_modules/react-native-config'
+
   target 'bloomablelogisticsTests' do
     inherit! :complete
     # Pods for testing
