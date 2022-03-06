@@ -12,6 +12,7 @@ export class LoginError extends Error {
 
 class Server {
   private cookie: string | undefined = undefined;
+  private cookieRecalled: boolean = false;
 
   setCookie(value: string) {
     this.cookie = value;
@@ -75,9 +76,12 @@ class Server {
     return this.cookie !== undefined;
   }
 
+  isCookieRecalled = () => this.cookieRecalled;
+
   recallCookie() {
     return EncryptedStorage.getItem("cookie")
       .then(value => {
+        this.cookieRecalled = true;
         if (value) {
           this.setCookie(value);
         }

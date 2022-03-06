@@ -4,6 +4,7 @@ import server, { LoginError } from "../../logic/bloomable/server";
 import LoadingOverlay from "../utils/LoadingOverlay";
 import { lightColors } from "../theme";
 import { displayName } from "../../../app.json";
+import { rollbar } from "../../logic/rollbar";
 
 interface Props {
   onLoggedIn?: () => void;
@@ -64,6 +65,7 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
         if (error instanceof LoginError) {
           setErrorMessage(error.message);
         } else {
+          rollbar.error(`Error for login credentials respond: ${error}`, error);
           setErrorMessage(error.toString());
         }
       })

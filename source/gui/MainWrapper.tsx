@@ -1,40 +1,50 @@
-import React, { useState } from "react";
-import { Button, StyleSheet, View } from "react-native";
-import LoginScreen from "./login/LoginScreen";
-import Map from "./map/Map";
-import OrdersList from "./orders/OrdersList";
-import AppInformation from "./appInformation/AppInformation";
-import server from "../logic/bloomable/server";
-import { Order } from "../logic/models";
+import React from "react";
+import { StyleSheet, View } from "react-native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { routes } from "../routes";
+import Dashboard from "./dashboard/Dashboard";
+import MapOverview from "./map/MapOverview";
+import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
+import { lightColors } from "./theme";
+
+const TabNav = createBottomTabNavigator();
 
 interface Props {
 
 }
 
 const MainWrapper: React.FC<Props> = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(server.isLoggedIn());
-  const [showMap, setShowMap] = useState(false);
-  const [mapOrders, setMapOrders] = useState<Order[]>([]);
-
-  const reloadLoginStatus = () => {
-    setIsLoggedIn(server.isLoggedIn());
-  };
-
   return <View style={styles.container}>
-    <LoginScreen onLoggedInChange={reloadLoginStatus} />
-    <Button title={"Map"} onPress={() => setShowMap(!showMap)} />
-
-    {!showMap ? undefined : <Map orders={mapOrders} />}
-
-    {!isLoggedIn ? undefined : <OrdersList setMapOrders={setMapOrders} />}
-
-    <AppInformation />
+    <TabNav.Navigator initialRouteName={routes.Dashboard}
+                      screenOptions={{
+                        tabBarStyle: styles.tabBar,
+                      }}>
+      <TabNav.Screen name={routes.Dashboard} component={Dashboard}
+                     options={{
+                       headerShown: false,
+                       tabBarIcon: ({ focused, color, size }) =>
+                         <FontAwesome5Icon name="home" size={size} color={color} />,
+                     }} />
+      <TabNav.Screen name={routes.Map} component={MapOverview}
+                     options={{
+                       headerShown: false,
+                       tabBarIcon: ({ focused, color, size }) =>
+                         <FontAwesome5Icon name="map-marker-alt" size={size} color={color} />,
+                     }} />
+    </TabNav.Navigator>
   </View>;
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  tabBar: {
+    paddingBottom: 10,
+    paddingTop: 7,
+    height: 60,
+    backgroundColor: lightColors.surface1,
+    borderTopColor: lightColors.background,
   },
 });
 

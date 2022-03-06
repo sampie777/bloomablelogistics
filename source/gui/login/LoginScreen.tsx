@@ -1,42 +1,64 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import server from "../../logic/bloomable/server";
 import LoggedInView from "./LoggedInView";
 import NotLoggedInView from "./NotLoggedInView";
 import LoadingOverlay from "../utils/LoadingOverlay";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { ParamList, routes } from "../../routes";
 
 interface Props {
-  onLoggedInChange?: () => void;
 }
 
-const LoginScreen: React.FC<Props> = ({ onLoggedInChange }) => {
+const LoginScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }) => {
+  const isMounted = useRef(false);
   const [isLoggedIn, setIsLoggedIn] = useState(server.isLoggedIn());
   const [isProcessing, setIsProcessing] = useState(true);
 
-  const _onLoggedInChange = () => {
-    setIsLoggedIn(server.isLoggedIn());
-    onLoggedInChange?.();
+  const onLoggedInChange = () => {
+    if (!server.isLoggedIn()) {
+      return;
+    }
+
+    navigation.navigate(routes.Main);
+    navigation.reset({
+      index: 0,
+      routes: [{ name: routes.Main }],
+    });
   };
 
   useEffect(() => {
-    server.recallCookie()
-      .then(() => {
-        _onLoggedInChange();
-        setIsProcessing(false);
-      });
+    isMounted.current = true;
+
+    if (!server.isCookieRecalled()) {
+      server.recallCookie()
+        .then(() => {
+          if (!isMounted.current) {
+            return;
+          }
+          setIsProcessing(false);
+          onLoggedInChange();
+        });
+    } else {
+      onLoggedInChange();
+    }
+    return () => {
+      isMounted.current = false;
+    };
   });
 
-  return <View style={[styles.container, { flex: isLoggedIn ? 0 : 1 }]}>
+  return <View style={styles.container}>
     <LoadingOverlay isVisible={isProcessing} />
     {isProcessing ? undefined : (!isLoggedIn ?
-      <NotLoggedInView onLoggedIn={_onLoggedInChange} /> :
-      <LoggedInView onLoggedOut={_onLoggedInChange} />)
+      <NotLoggedInView onLoggedIn={onLoggedInChange} /> :
+      <LoggedInView onLoggedOut={onLoggedInChange} />)
     }
   </View>;
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     justifyContent: "center",
   },
 });

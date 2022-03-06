@@ -23,14 +23,12 @@ const LoggedInView: React.FC<Props> = ({ onLoggedOut }) => {
 
 const styles = StyleSheet.create({
   container: {
-    borderBottomWidth: 1,
-    borderBottomColor: lightColors.primaryLight,
-    paddingVertical: 10,
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {},
   logoutButton: {
-    alignSelf: "flex-end",
-    marginHorizontal: 10,
   },
   logoutButtonText: {
     backgroundColor: lightColors.primary,

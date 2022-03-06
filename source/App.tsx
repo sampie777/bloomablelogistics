@@ -5,16 +5,16 @@ import {
 } from "react-native";
 import ErrorBoundary from "./gui/utils/ErrorBoundary";
 import { lightColors } from "./gui/theme";
-import MainWrapper from "./gui/MainWrapper";
+import AppRoot from "./gui/AppRoot";
 
 const App = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ErrorBoundary>
-        <MainWrapper />
+        <AppRoot />
       </ErrorBoundary>
 
-      <StatusBar barStyle={"default"}
+      <StatusBar barStyle={"dark-content"}
                  backgroundColor={lightColors.background}
                  hidden={false} />
     </SafeAreaView>
