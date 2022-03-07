@@ -1,110 +1,28 @@
-import React, { useEffect, useRef, useState } from "react";
-import { FlatList, ListRenderItemInfo, RefreshControl, StyleSheet, Text, View } from "react-native";
-import { Orders } from "../../logic/orders";
+import React from "react";
+import { FlatList, ListRenderItemInfo, StyleSheet, View } from "react-native";
 import OrderListItem from "./order/OrderListItem";
 import ListEmptyComponent from "./ListEmptyComponent";
 import ListHeaderComponent from "./ListHeaderComponent";
 import { Order } from "../../logic/models";
-import { Location } from "../../logic/location/Location";
+import { useRecoilValue } from "recoil";
+import { selectedDateOrdersState } from "../../logic/recoil";
 
 interface Props {
   setMapOrders?: (orders: Order[]) => void;
 }
 
 const OrdersList: React.FC<Props> = ({ setMapOrders }) => {
-  const isMounted = useRef(false);
-  const fetchPage = useRef(0);
-  const orderLocationTimeout = useRef<NodeJS.Timeout | null>();
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
-  const [orders, setOrders] = useState<Order[]>([]);
-
-  useEffect(() => {
-    fetchOrders();
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
-  const fetchOrders = () => {
-    fetchPage.current = 0;
-    setOrders([]);
-    fetchNextOrderPage();
-  };
-
-  const fetchNextOrderPage = () => {
-    setIsProcessing(true);
-    setErrorMessage(undefined);
-
-    fetchPage.current++;
-    Orders.fetchPage(fetchPage.current)
-      .then(_orders => {
-        if (!isMounted.current) {
-          return;
-        }
-
-        if (fetchPage.current > 1) {
-          _orders = orders.concat(_orders);
-        }
-
-        setAndSortOrders(_orders);
-      })
-      .catch(error => {
-        if (!isMounted.current) {
-          return;
-        }
-        setErrorMessage(error.toString());
-      })
-      .finally(() => {
-        if (!isMounted.current) {
-          return;
-        }
-        setIsProcessing(false);
-      });
-  };
-
-  const setAndSortOrders = (_orders: Order[]) => {
-    setOrders(_orders
-      .sort((a, b) => (a.number || 0) - (b.number || 0))
-      .sort((a, b) => {
-        if (a.deliverAtDate && b.deliverAtDate) {
-          return a.deliverAtDate.getTime() - b.deliverAtDate.getTime();
-        } else if (a.deliverAtDate) {
-          return 1;
-        } else if (b.deliverAtDate) {
-          return -1;
-        } else {
-          return (a.number || 0) - (b.number || 0);
-        }
-      })
-      .reverse());
-  };
-
-  const onOrderUpdated = () => {
-    setAndSortOrders(orders);
-
-    if (orderLocationTimeout.current) {
-      clearTimeout(orderLocationTimeout.current);
-    }
-    orderLocationTimeout.current = setTimeout(() => Location.ordersToMapOrders(orders, setMapOrders), 2000);
-  };
+  const orders = useRecoilValue(selectedDateOrdersState);
 
   const renderOrderItem = ({ item }: ListRenderItemInfo<Order>) => {
-    return <OrderListItem order={item} onOrderUpdated={onOrderUpdated} />;
+    return <OrderListItem order={item} />;
   };
 
   return <View style={styles.container}>
-    {errorMessage === undefined ? undefined :
-      <Text style={styles.error}>{errorMessage}</Text>}
-
     <FlatList data={orders}
               contentContainerStyle={styles.list}
-              refreshControl={<RefreshControl onRefresh={fetchOrders}
-                                              refreshing={isProcessing} />}
               renderItem={renderOrderItem}
               keyExtractor={order => order.id + ""}
-              onEndReached={fetchNextOrderPage}
               onEndReachedThreshold={2}
               ListEmptyComponent={ListEmptyComponent}
               ListHeaderComponent={<ListHeaderComponent orders={orders} />}

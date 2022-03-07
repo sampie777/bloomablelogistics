@@ -1,10 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { ActivityIndicator, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../../theme";
 import UrlLink from "../../utils/UrlLink";
 import { Order } from "../../../logic/models";
-import { Orders } from "../../../logic/orders";
 import Products from "./products/Products";
 
 interface Props {
@@ -13,57 +12,18 @@ interface Props {
 }
 
 const RecipientInfo: React.FC<Props> = ({ order, onRecipientUpdated }) => {
-  const isMounted = useRef(false);
   const [collapsed, setCollapsed] = useState(true);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    isMounted.current = true;
-    if (order.recipient === undefined) {
-      fetchRecipient();
-    }
-    return () => {
-      isMounted.current = false;
-    };
-  }, [order.id]);
-
-  const fetchRecipient = () => {
-    setIsProcessing(true);
-    setErrorMessage(undefined);
-
-    Orders.fetchDetailsForOrder(order)
-      .then(() => {
-        if (!isMounted.current) {
-          return;
-        }
-
-        onRecipientUpdated?.();
-      })
-      .catch(error => {
-        if (!isMounted.current) {
-          return;
-        }
-        setErrorMessage(error.toString());
-      })
-      .finally(() => {
-        if (!isMounted.current) {
-          return;
-        }
-        setIsProcessing(false);
-      });
-  };
 
   if (!order.recipient) {
     return <View style={[styles.container, styles.loadingContainer]}>
-      {!isProcessing ? undefined :
+      {order.recipient !== undefined ? undefined :
         <ActivityIndicator style={styles.loading} color={styles.loading.color} />
       }
 
-      {errorMessage === undefined ? undefined :
+      {order.recipient !== null ? undefined :
         <View style={styles.row}>
           <FontAwesome5Icon name={"exclamation-circle"} solid style={[styles.icon, styles.error]} />
-          <Text style={styles.error}>{errorMessage}</Text>
+          <Text style={styles.error}>Failed to load recipient</Text>
         </View>
       }
     </View>;
@@ -93,35 +53,37 @@ const RecipientInfo: React.FC<Props> = ({ order, onRecipientUpdated }) => {
           </View>)
       }
 
-      <View style={styles.row}>
-        <FontAwesome5Icon name={"map-marker-alt"} solid style={styles.icon} />
-        <View style={styles.address}>
-          {!order.recipient.company ? undefined :
-            <View style={styles.row}>
-              <Text style={styles.addressLabel}>Company:</Text>
-              <Text style={styles.addressValue} selectable={true}>{order.recipient.company}</Text>
-            </View>
-          }
-          {!order.recipient.unit ? undefined :
-            <View style={styles.row}>
-              <Text style={styles.addressLabel}>Unit:</Text>
-              <Text style={styles.addressValue} selectable={true}>{order.recipient.unit}</Text>
-            </View>
-          }
-          {!order.recipient.address ? undefined :
-            <View style={styles.row}>
-              <Text style={styles.addressLabel}>Address:</Text>
-              <UrlLink url={Platform.select({ ios: "maps:0,0?q=", android: "geo:0,0?q=" }) + order.recipient.address}
-                       style={{ flex: 1 }}>
-                <Text style={[styles.addressValue, styles.url]}
-                      selectable={true}>
-                  {order.recipient.address}
-                </Text>
-              </UrlLink>
-            </View>
-          }
+      {!(order.recipient.company || order.recipient.unit || order.recipient.address) ? undefined :
+        <View style={styles.row}>
+          <FontAwesome5Icon name={"map-marker-alt"} solid style={styles.icon} />
+          <View style={styles.address}>
+            {!order.recipient.company ? undefined :
+              <View style={styles.row}>
+                <Text style={styles.addressLabel}>Company:</Text>
+                <Text style={styles.addressValue} selectable={true}>{order.recipient.company}</Text>
+              </View>
+            }
+            {!order.recipient.unit ? undefined :
+              <View style={styles.row}>
+                <Text style={styles.addressLabel}>Unit:</Text>
+                <Text style={styles.addressValue} selectable={true}>{order.recipient.unit}</Text>
+              </View>
+            }
+            {!order.recipient.address ? undefined :
+              <View style={styles.row}>
+                <Text style={styles.addressLabel}>Address:</Text>
+                <UrlLink url={Platform.select({ ios: "maps:0,0?q=", android: "geo:0,0?q=" }) + order.recipient.address}
+                         style={{ flex: 1 }}>
+                  <Text style={[styles.addressValue, styles.url]}
+                        selectable={true}>
+                    {order.recipient.address}
+                  </Text>
+                </UrlLink>
+              </View>
+            }
+          </View>
         </View>
-      </View>
+      }
 
       {!order.recipient.specialInstructions ? undefined :
         <View style={styles.row}>

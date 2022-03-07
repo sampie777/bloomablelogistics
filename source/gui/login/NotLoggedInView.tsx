@@ -63,10 +63,10 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
         }
 
         if (error instanceof LoginError) {
-          setErrorMessage(error.message);
+          setErrorMessage(error.message || error.toString() || "Undefined login error occurred. Try again.");
         } else {
           rollbar.error(`Error for login credentials respond: ${error}`, error);
-          setErrorMessage(error.toString());
+          setErrorMessage(error.toString() || "Undefined error occurred. Try again.");
         }
       })
       .finally(() => {

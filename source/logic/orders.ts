@@ -1,7 +1,7 @@
 import server from "./bloomable/server";
 import { ServerHtml } from "./bloomable/html";
 import { config } from "./config";
-import { emptyPromise, emptyPromiseWithValue } from "./utils";
+import { emptyPromiseWithValue } from "./utils";
 import { Order } from "./models";
 
 export namespace Orders {
@@ -44,21 +44,48 @@ export namespace Orders {
     }
 
     return fetchDetailsForOrder(nextOrder)
-      .then(() => fetchDetailsForOrders(orders));
+      .then((order) => {
+        orders = orders.filter(it => it !== nextOrder);
+        orders.push(order);
+        return fetchDetailsForOrders(orders);
+      });
   };
 
-  export const fetchDetailsForOrder = (order: Order) => {
+  export const fetchDetailsForOrder = (order: Order): Promise<Order> => {
     if (!order.id) {
-      return emptyPromise();
+      return emptyPromiseWithValue(order);
     }
+    if (order.recipient !== undefined) {
+      return emptyPromiseWithValue(order);
+    }
+
     return server.getOrderDetailsPage(order.id)
       .then((html: string) => {
         const { recipient, orderValue, products } = ServerHtml.orderDetailsResponseToOrderDetails(html);
-        order.recipient = recipient;
-        order.products = products;
-        if (order.orderValue === undefined) {
-          order.orderValue = orderValue;
+        const updatedOrder = Order.clone(order);
+        updatedOrder.recipient = recipient;
+        updatedOrder.products = products;
+        if (updatedOrder.orderValue === undefined) {
+          updatedOrder.orderValue = orderValue;
         }
+        return updatedOrder;
       });
   };
+
+  export const sort = (orders: Order[]): Order[] =>
+    orders
+      .sort((a, b) => (a.number || 0) - (b.number || 0))
+      .sort((a, b) => (b.delivered ? 1 : -1) - (a.delivered ? 1 : -1))
+      .sort((a, b) => {
+        if (a.deliverAtDate && b.deliverAtDate) {
+          return a.deliverAtDate.getTime() - b.deliverAtDate.getTime();
+        } else if (a.deliverAtDate) {
+          return 1;
+        } else if (b.deliverAtDate) {
+          return -1;
+        } else {
+          return (a.number || 0) - (b.number || 0);
+        }
+      })
+      .reverse();
 }

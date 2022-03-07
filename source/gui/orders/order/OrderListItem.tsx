@@ -22,7 +22,7 @@ const OrderListItem: React.FC<Props> = ({ order, onOrderUpdated }) => {
 
       <View style={styles.deliverAtDate}>
         <FontAwesome5Icon name={"truck"} style={styles.icon} />
-        <Text style={styles.deliverAtDateDate}>{format(order.deliverAtDate, "%YYYY-%mm-%dd") || "unknown"}</Text>
+        <Text style={styles.deliverAtDateDate}>{format(order.deliverAtDate, "%dd-%mm-%YYYY") || "unknown"}</Text>
       </View>
     </View>
 

@@ -37,13 +37,13 @@ export namespace ServerHtml {
 
     const table = extractTable(html);
     if (!table) {
-      rollbar.error("Could not find table in html");
+      rollbar.error("Could not find order list table in html");
       return [];
     }
 
     const body = extractTableBody(table);
     if (!body) {
-      rollbar.error("Could not find body in html");
+      rollbar.error("Could not find order list table body in html");
       return [];
     }
 
@@ -137,7 +137,7 @@ export namespace ServerHtml {
 
     const table = extractTable(html);
     if (!table) {
-      rollbar.error("Could not find table in html");
+      rollbar.error("Could not find order details table in html");
       return {};
     }
 
@@ -239,7 +239,7 @@ export namespace ServerHtml {
 
     const table = extractTable(html);
     if (!table) {
-      rollbar.error("Could not find table in html");
+      rollbar.error("Could not find products table in html");
       return [];
     }
 
