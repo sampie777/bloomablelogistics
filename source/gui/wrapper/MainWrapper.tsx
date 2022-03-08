@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     paddingTop: 7,
     height: 60,
-    backgroundColor: lightColors.surface1,
+    backgroundColor: lightColors.surface2,
     borderTopColor: lightColors.background,
   },
 });

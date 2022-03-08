@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { useRecoilValue } from "recoil";
 import { selectedDateOrdersState } from "../../logic/recoil";
 import ProgressBar from "./ProgressBar";
+import { lightColors } from "../theme";
 
 interface Props {
 
@@ -13,10 +14,11 @@ const ProgressView: React.FC<Props> = () => {
   const delivered = orders.filter(it => it.delivered).length;
 
   return <View style={styles.container}>
-    {/*<Text style={styles.title}>Remaining:</Text>*/}
     <View style={styles.fractionView}>
-      <Text style={[styles.fractionNumeratorText, (delivered === orders.length ? styles.delivered : {})]}>{orders.length - delivered}</Text>
+      <Text
+        style={[styles.fractionNumeratorText, (delivered === orders.length ? styles.delivered : {})]}>{orders.length - delivered}</Text>
       <Text style={styles.fractionDividerText}>/ {orders.length}</Text>
+      <Text style={styles.description}>remaining</Text>
     </View>
 
     <ProgressBar />
@@ -28,9 +30,6 @@ const styles = StyleSheet.create({
     paddingVertical: 30,
     alignItems: "center",
   },
-  title: {
-    fontFamily: "sans-serif-light",
-  },
   fractionView: {
     flexDirection: "row",
     alignItems: "flex-end",
@@ -39,12 +38,19 @@ const styles = StyleSheet.create({
     color: "#ec8700",
     fontSize: 70,
     fontFamily: "sans-serif-light",
+    marginLeft: 40,
   },
   fractionDividerText: {
     fontSize: 30,
     paddingBottom: 11,
     paddingLeft: 10,
     fontFamily: "sans-serif-thin",
+  },
+  description: {
+    paddingBottom: 15,
+    paddingLeft: 8,
+    fontFamily: "sans-serif-light",
+    color: lightColors.textLighter,
   },
   delivered: {
     color: "#00c900",
