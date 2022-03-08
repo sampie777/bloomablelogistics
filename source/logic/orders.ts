@@ -1,6 +1,6 @@
 import server from "./bloomable/server";
 import { ServerHtml } from "./bloomable/html";
-import { config } from "./config";
+import { config } from "../config";
 import { emptyPromiseWithValue } from "./utils";
 import { Order, Recipient } from "./models";
 
