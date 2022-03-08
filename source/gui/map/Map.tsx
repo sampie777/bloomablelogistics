@@ -1,26 +1,26 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { StyleSheet, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import { Order } from "../../logic/models";
+import { Location } from "../../logic/location/Locations";
 
 interface Props {
-  orders: Order[];
+  locations: Location[];
 }
 
-const Map: React.FC<Props> = ({ orders }) => {
+const Map: React.FC<Props> = ({ locations }) => {
   const mapRef = useRef<MapView | null>();
 
   useEffect(() => {
-    setTimeout(() => fitMap(), 1000);
-  }, []);
-
-  useEffect(() => {
     fitMap();
-  }, [orders]);
+  }, [locations]);
 
   const fitMap = () => {
+    if (locations.length === 0) {
+      return;
+    }
+
     mapRef.current?.fitToSuppliedMarkers(
-      orders.map(order => order.number?.toString() || ""),
+      locations.map(it => it.key),
       {
         edgePadding: {
           top: 50,
@@ -42,14 +42,12 @@ const Map: React.FC<Props> = ({ orders }) => {
                longitudeDelta: 0.3,
              }}
              userLocationPriority={"balanced"}>
-      {orders
-        .filter(it => it.recipient?.location)
-        .map(it =>
-          <Marker key={it.number?.toString()}
-                  coordinate={it.recipient!.location!}
-                  identifier={it.number?.toString() || ""}
-                  title={it.number?.toString()}
-                  description={it.recipient?.address || it.recipient?.name} />)}
+      {locations.map(it =>
+        <Marker key={it.key}
+                coordinate={{ ...it }}
+                identifier={it.key}
+                title={it.order.number?.toString()}
+                description={it.order.recipient?.address || it.order.recipient?.name} />)}
     </MapView>
   </View>;
 };

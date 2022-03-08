@@ -50,7 +50,6 @@ export class Recipient {
   address: string = "";
   message: string | undefined;
   specialInstructions: string | undefined;
-  location: LatLng | undefined;
 }
 
 export class Product {

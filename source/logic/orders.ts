@@ -2,7 +2,7 @@ import server from "./bloomable/server";
 import { ServerHtml } from "./bloomable/html";
 import { config } from "./config";
 import { emptyPromiseWithValue } from "./utils";
-import { Order } from "./models";
+import { Order, Recipient } from "./models";
 
 export namespace Orders {
   let fetchedOrders: Order[] = [];
