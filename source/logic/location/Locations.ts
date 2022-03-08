@@ -3,8 +3,6 @@ import { rollbar } from "../rollbar";
 import { emptyPromise, emptyPromiseWithValue } from "../utils";
 import Geocoder from "react-native-geocoding";
 import Config from "react-native-config";
-import { config } from "../config";
-const openrouteservice = require("openrouteservice-js");
 
 Geocoder.init(Config.GOOGLE_MAPS_API_KEY);
 
@@ -40,7 +38,7 @@ export namespace Locations {
       return emptyPromise();
     }
 
-    return getGeoCode(order.recipient!.address)
+    return googleMapsGeoCode(order.recipient!.address)
       .then((coordinates) => {
         if (coordinates == null) {
           return null;
@@ -52,14 +50,6 @@ export namespace Locations {
           order: order,
         } as Location;
       });
-  };
-
-  export const getGeoCode = (address: string): Promise<{ latitude: number, longitude: number } | null> => {
-    if (config.useOpenRouteService) {
-      return openRouteServiceGeoCode(address);
-    } else {
-      return googleMapsGeoCode(address);
-    }
   };
 
   export const googleMapsGeoCode = (address: string): Promise<{ latitude: number, longitude: number } | null> => {
@@ -76,30 +66,7 @@ export namespace Locations {
         };
       })
       .catch(error => {
-        rollbar.error(`Failed to get results from Google geocoder for address ${address}: ${error}`, error);
-        return null;
-      });
-  };
-
-  export const openRouteServiceGeoCode = (address: string): Promise<{ latitude: number, longitude: number } | null> => {
-    const geoCoder = new openrouteservice.Geocode({ api_key: Config.OPEN_ROUTES_SERVICE_API_KEY });
-    return geoCoder.geocode({
-      text: address,
-      boundary_country: ["ZA"],
-    })
-      .then((result: any) => {
-        if (result.features.length === 0) {
-          return null;
-        }
-
-        const coordinates = result.features[0].geometry.coordinates as number[];
-        return {
-          latitude: coordinates[0],
-          longitude: coordinates[1],
-        };
-      })
-      .catch((error: any) => {
-        rollbar.error(`Failed to get results from Google geocoder for address ${address}: ${error}`, error);
+        rollbar.error(`Failed to get results from Google geocoder for address '${address}': ${error}`, error);
         return null;
       });
   };
