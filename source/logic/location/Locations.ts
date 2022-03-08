@@ -3,6 +3,7 @@ import { rollbar } from "../rollbar";
 import { emptyPromise, emptyPromiseWithValue } from "../utils";
 import Geocoder from "react-native-geocoding";
 import Config from "react-native-config";
+import { locationCache } from "../cache";
 
 Geocoder.init(Config.GOOGLE_MAPS_API_KEY);
 
@@ -11,6 +12,11 @@ export interface Location {
   latitude: number,
   longitude: number,
   order: Order,
+}
+
+interface Coordinate {
+  latitude: number,
+  longitude: number,
 }
 
 export namespace Locations {
@@ -34,11 +40,12 @@ export namespace Locations {
   };
 
   export const getLocationForOrder = (order: Order): Promise<Location | null> => {
-    if (!order.recipient?.address) {
+    const address = order.recipient?.address;
+    if (!address) {
       return emptyPromise();
-    }
 
-    return googleMapsGeoCode(order.recipient!.address)
+    }
+    return getCoordinatesForAddress(address)
       .then((coordinates) => {
         if (coordinates == null) {
           return null;
@@ -52,7 +59,48 @@ export namespace Locations {
       });
   };
 
-  export const googleMapsGeoCode = (address: string): Promise<{ latitude: number, longitude: number } | null> => {
+  export const getCoordinatesForAddress = (address: string): Promise<Coordinate | null> => {
+    return getFromCache(address)
+      .then(coordinates => {
+        if (coordinates) {
+          return coordinates;
+        }
+        return googleMapsGeoCode(address)
+          .then(uncachedCoordinates => {
+            if (uncachedCoordinates) {
+              storeInCache(address, uncachedCoordinates);
+            }
+            return uncachedCoordinates;
+          });
+      });
+  };
+
+  export const getFromCache = (address: string): Promise<Coordinate | null> => {
+    return locationCache.get(address)
+      .then(result => {
+        if (!result) {
+          return null;
+        }
+        return JSON.parse(result);
+      })
+      .catch(error => {
+        rollbar.error(`Failed to get results from location cache for address '${address}': ${error}`, error);
+        return null;
+      });
+  };
+
+  export const storeInCache = (address: string, coordinates: Coordinate) => {
+    if (!address) {
+      return;
+    }
+
+    locationCache.set(address, JSON.stringify(coordinates))
+      .catch(error => {
+        rollbar.error(`Failed to store location in location cache for address '${address}': ${error}`, error);
+      });
+  };
+
+  export const googleMapsGeoCode = (address: string): Promise<Coordinate | null> => {
     return Geocoder.from(address)
       .then((result) => {
         if (result.results.length === 0) {
