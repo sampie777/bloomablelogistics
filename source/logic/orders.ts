@@ -8,6 +8,31 @@ export namespace Orders {
   let fetchedOrders: Order[] = [];
 
   export const fetchPage = (page: number = 1): Promise<Order[]> => {
+    if (config.offlineData) {
+      const order1 = new Order();
+      order1.id = "123456789";
+      order1.number = 12345;
+      order1.clientName = "Client name";
+      order1.partner = "Partner";
+      order1.florist = "Florist";
+      order1.createdAt = new Date();
+      order1.deliverAtDate = new Date();
+      const order2 = new Order();
+      order2.id = "123456709";
+      order2.number = 456;
+      order2.clientName = "Client name";
+      order2.partner = "Partner";
+      order2.florist = "Florist";
+      order2.createdAt = new Date();
+      order2.deliverAtDate = new Date();
+      order2.deliverAtDate.setDate(8);
+
+      return emptyPromiseWithValue([
+        order1,
+        order2,
+      ]);
+    }
+
     return server.getOrdersPage(page)
       .then((html: string) => {
         return ServerHtml.ordersResponseToOrders(html);
@@ -57,6 +82,14 @@ export namespace Orders {
     }
     if (order.recipient !== undefined) {
       return emptyPromiseWithValue(order);
+    }
+
+    if (config.offlineData) {
+      const updatedOrder = Order.clone(order);
+      updatedOrder.recipient = new Recipient();
+      updatedOrder.recipient.name = "recipient name";
+      updatedOrder.recipient.address = "the address";
+      return emptyPromiseWithValue(updatedOrder);
     }
 
     return server.getOrderDetailsPage(order.id)
