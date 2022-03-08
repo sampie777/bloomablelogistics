@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRecoilState } from "recoil";
 import { selectedDateState } from "../../logic/recoil";
-import { format } from "../../logic/utils";
+import { formatDateToWords } from "../../logic/utils";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../theme";
 
@@ -34,7 +34,7 @@ const DateHeader: React.FC<Props> = () => {
 
     <TouchableOpacity style={styles.middle} onPress={today}>
       <Text style={styles.currentDateText}>
-        {format(selectedDate, "%dd-%mm-%YYYY")}
+        {formatDateToWords(selectedDate, "%dd-%mm-%YYYY")}
       </Text>
     </TouchableOpacity>
 
@@ -66,6 +66,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     paddingVertical: 15,
+    textTransform: "capitalize",
   },
 
   arrow: {

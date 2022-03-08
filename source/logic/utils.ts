@@ -32,6 +32,35 @@ export function format(date: Date | string | undefined, _format: string) {
     .replace(/%f/g, date.getMilliseconds().toString().padStart(3, "0"));
 }
 
+export const formatDateToWords = (date: Date | string | undefined, defaultFormat: string) => {
+  if (date === undefined) {
+    return "unknown";
+  }
+
+  const now = new Date();
+  date = dateFrom(date);
+  if (isToday(now, date)) {
+    return "today";
+  } else if (isTomorrow(now, date)) {
+    return "tomorrow";
+  } else if (isYesterday(now, date)) {
+    return "yesterday";
+  }
+  return format(date, defaultFormat);
+};
+
+export const isToday = (ref: Date, date: Date): boolean => {
+  return date.getFullYear() === ref.getFullYear() && date.getMonth() === ref.getMonth() && date.getDate() === ref.getDate();
+};
+
+export const isTomorrow = (ref: Date, date: Date): boolean => {
+  return isToday(new Date(ref.getTime() + 24 * 60 * 60 * 1000), date);
+};
+
+export const isYesterday = (ref: Date, date: Date): boolean => {
+  return isToday(new Date(ref.getTime() - 24 * 60 * 60 * 1000), date);
+};
+
 export const emptyPromise = (): Promise<null> => new Promise((resolve => resolve(null)));
 export const emptyPromiseWithValue = <T>(v: T): Promise<T> => new Promise((resolve => resolve(v)));
 
