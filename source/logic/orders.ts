@@ -25,11 +25,22 @@ export namespace Orders {
       order2.florist = "Florist";
       order2.createdAt = new Date();
       order2.deliverAtDate = new Date();
-      order2.deliverAtDate.setDate(8);
+      order2.accepted = true;
+      const order3 = new Order();
+      order3.id = "1234568";
+      order3.number = 19987;
+      order3.clientName = "Client name 2";
+      order3.partner = "Partner 2";
+      order3.florist = "Florist 2";
+      order3.createdAt = new Date();
+      order3.deliverAtDate = new Date();
+      order3.accepted = true;
+      order3.delivered = true;
 
       return emptyPromiseWithValue([
         order1,
         order2,
+        order3,
       ]);
     }
 

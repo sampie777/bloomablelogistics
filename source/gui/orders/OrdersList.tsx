@@ -2,10 +2,10 @@ import React from "react";
 import { FlatList, ListRenderItemInfo, StyleSheet, View } from "react-native";
 import OrderListItem from "./order/OrderListItem";
 import ListEmptyComponent from "./ListEmptyComponent";
-import ListHeaderComponent from "./ListHeaderComponent";
 import { Order } from "../../logic/models";
 import { useRecoilValue } from "recoil";
 import { selectedDateOrdersState } from "../../logic/recoil";
+import ProgressView from "../dashboard/ProgressView";
 
 interface Props {
   setMapOrders?: (orders: Order[]) => void;
@@ -25,7 +25,7 @@ const OrdersList: React.FC<Props> = ({ setMapOrders }) => {
               keyExtractor={order => order.id + ""}
               onEndReachedThreshold={2}
               ListEmptyComponent={ListEmptyComponent}
-              ListHeaderComponent={<ListHeaderComponent orders={orders} />}
+              ListHeaderComponent={<ProgressView />}
     />
   </View>;
 };
