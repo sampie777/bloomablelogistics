@@ -19,7 +19,7 @@ const Map: React.FC<Props> = ({ locations }) => {
       return;
     }
 
-    mapRef.current?.fitToSuppliedMarkers(
+    setTimeout(() => mapRef.current?.fitToSuppliedMarkers(
       locations.map(it => it.key),
       {
         edgePadding: {
@@ -28,13 +28,14 @@ const Map: React.FC<Props> = ({ locations }) => {
           bottom: 50,
           left: 50,
         },
-      });
+      }), 500);
   };
 
   return <View style={styles.container}>
     <MapView style={{ flex: 1 }}
              ref={ref => mapRef.current = ref}
              showsUserLocation={true}
+             maxZoomLevel={19}
              initialRegion={{
                latitude: -25.763144,
                longitude: 28.1,

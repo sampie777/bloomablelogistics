@@ -5,6 +5,7 @@ import { selectedDateOrdersState } from "../../logic/recoil";
 import { Location, Locations } from "../../logic/location/Locations";
 import Map from "./Map";
 import { useFocusEffect } from "@react-navigation/native";
+import LoadingOverlay from "../utils/LoadingOverlay";
 
 interface Props {
 
@@ -15,6 +16,7 @@ const MapOverview: React.FC<Props> = () => {
   const isDirty = useRef(false);
   const orders = useRecoilValue(selectedDateOrdersState);
   const [locations, setLocations] = useState<Location[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useFocusEffect(React.useCallback(() => {
     isMounted.current = true;
@@ -36,12 +38,21 @@ const MapOverview: React.FC<Props> = () => {
   }, [orders]);
 
   const loadLocations = () => {
+    if (orders.length === 0) {
+      setLocations([]);
+      setIsProcessing(false);
+      return;
+    }
+
+    setIsProcessing(true);
     Locations.locationsForOrders(orders)
-      .then((result) => setLocations(result));
+      .then((result) => setLocations(result))
+      .finally(() => setIsProcessing(false));
   };
 
   return <View style={styles.container}>
     <Map locations={locations} />
+    <LoadingOverlay isVisible={isProcessing} />
   </View>;
 };
 
