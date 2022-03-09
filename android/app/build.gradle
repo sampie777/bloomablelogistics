@@ -176,10 +176,10 @@ android {
         }
         release {
             if (project.hasProperty('HYMNBOOK_UPLOAD_STORE_FILE')) {
-                storeFile file(HYMNBOOK_UPLOAD_STORE_FILE)
-                storePassword HYMNBOOK_UPLOAD_STORE_PASSWORD
-                keyAlias HYMNBOOK_UPLOAD_KEY_ALIAS
-                keyPassword HYMNBOOK_UPLOAD_KEY_PASSWORD
+                storeFile file(BLOOMABLE_UPLOAD_STORE_FILE)
+                storePassword BLOOMABLE_UPLOAD_STORE_PASSWORD
+                keyAlias BLOOMABLE_UPLOAD_KEY_ALIAS
+                keyPassword BLOOMABLE_UPLOAD_KEY_PASSWORD
             }
         }
     }
