@@ -18,7 +18,9 @@ class Server {
     this.cookie = value;
   }
 
-  login(username: string, password: string) {
+  getCookie = () => this.cookie;
+
+  login(username: string, password: string, maxRetries: number = 1): Promise<any> {
     this.logout();
     const formData = "Referrer=&ReturnUrl=&ShowCreateAccountButton=True&Username=" + username + "&Password=" + password + "&RememberMe=true&RememberMe=false&X-Requested-With=XMLHttpRequest";
 
@@ -48,7 +50,12 @@ class Server {
           return;
         }
 
-        throw new LoginError(ServerHtml.loginResponseToError(html));
+        const message = ServerHtml.loginResponseToError(html);
+        if (maxRetries > 0 && message.trim().length === 0) {
+          rollbar.warning(`Retrying login due to html response: '${html}'`);
+          return this.login(username, password, maxRetries - 1);
+        }
+        throw new LoginError(message);
       })
       .catch(error => {
         if (!(error instanceof LoginError)) {
@@ -58,13 +65,15 @@ class Server {
       });
   }
 
-  private processCookie(cookies: string) {
-    cookies.split(";")
-      .filter(it => it.startsWith("SAFlorist="))
-      .forEach(it => {
-        const part = it.trim();
-        this.cookie = part.substring("SAFlorist=".length, part.length);
-      });
+  processCookie(cookies: string) {
+    cookies.split(",")
+      .forEach(cookie => cookie.split(";")
+        .filter(it => it.trim().startsWith("SAFlorist="))
+        .forEach(it => {
+          const part = it.trim();
+          this.cookie = part.substring("SAFlorist=".length, part.length);
+        }),
+      );
   }
 
   logout() {
