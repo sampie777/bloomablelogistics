@@ -27,7 +27,7 @@ const MapOverview: React.FC<Props> = () => {
     return () => {
       isMounted.current = false;
     };
-  }, []));
+  }, [orders]));
 
   useEffect(() => {
     if (!isMounted.current) {
