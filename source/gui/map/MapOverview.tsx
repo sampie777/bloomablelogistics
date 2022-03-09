@@ -38,6 +38,8 @@ const MapOverview: React.FC<Props> = () => {
   }, [orders]);
 
   const loadLocations = () => {
+    isDirty.current = false;
+
     if (orders.length === 0) {
       setLocations([]);
       setIsProcessing(false);
