@@ -65,13 +65,13 @@ export namespace Locations {
         if (coordinates) {
           return coordinates;
         }
-        return googleMapsGeoCode(address)
-          .then(uncachedCoordinates => {
-            if (uncachedCoordinates) {
-              storeInCache(address, uncachedCoordinates);
-            }
-            return uncachedCoordinates;
-          });
+        return googleMapsGeoCode(address);
+      })
+      .then(coordinates => {
+        if (coordinates) {
+          storeInCache(address, coordinates);
+        }
+        return coordinates;
       });
   };
 
