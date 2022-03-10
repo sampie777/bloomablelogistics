@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from "react";
-import { StyleSheet, View } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import { StyleSheet, Text, View } from "react-native";
+import MapView, { Callout, Marker } from "react-native-maps";
 import { Location } from "../../logic/location/Locations";
+import { lightColors } from "../theme";
 
 interface Props {
   locations: Location[];
@@ -51,7 +52,15 @@ const Map: React.FC<Props> = ({ locations, onMarkerPress }) => {
                 coordinate={{ ...it }}
                 identifier={it.key}
                 title={it.orders.length === 1 ? `${it.orders.length} order` : `${it.orders.length} orders`}
-                onCalloutPress={() => onMarkerPress?.(it)} />)}
+                onCalloutPress={() => onMarkerPress?.(it)}>
+          <Callout tooltip={true}>
+            <View style={styles.calloutContainer}>
+              <Text style={styles.calloutText}>
+                {it.orders.length === 1 ? `${it.orders.length} order` : `${it.orders.length} orders`}
+              </Text>
+            </View>
+          </Callout>
+        </Marker>)}
     </MapView>
   </View>;
 };
@@ -59,6 +68,21 @@ const Map: React.FC<Props> = ({ locations, onMarkerPress }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  calloutContainer: {
+    backgroundColor: "white",
+    paddingVertical: 10,
+    marginBottom: 5,
+    borderRadius: 30,
+    width: 100,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: lightColors.border,
+  },
+  calloutText: {
+    color: "black",
+    textAlign: "center",
+    fontWeight: "bold",
   },
 });
 
