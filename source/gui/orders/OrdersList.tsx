@@ -3,17 +3,14 @@ import { FlatList, ListRenderItemInfo, StyleSheet, View } from "react-native";
 import OrderListItem from "./order/OrderListItem";
 import ListEmptyComponent from "./ListEmptyComponent";
 import { Order } from "../../logic/models";
-import { useRecoilValue } from "recoil";
-import { selectedDateOrdersState } from "../../logic/recoil";
 import ProgressView from "../dashboard/ProgressView";
 
 interface Props {
-  setMapOrders?: (orders: Order[]) => void;
+  orders: Order[];
+  showHeader: boolean;
 }
 
-const OrdersList: React.FC<Props> = ({ setMapOrders }) => {
-  const orders = useRecoilValue(selectedDateOrdersState);
-
+const OrdersList: React.FC<Props> = ({ orders, showHeader }) => {
   const renderOrderItem = ({ item }: ListRenderItemInfo<Order>) => {
     return <OrderListItem order={item} />;
   };
@@ -25,7 +22,7 @@ const OrdersList: React.FC<Props> = ({ setMapOrders }) => {
               keyExtractor={order => order.id + ""}
               onEndReachedThreshold={2}
               ListEmptyComponent={ListEmptyComponent}
-              ListHeaderComponent={<ProgressView />}
+              ListHeaderComponent={showHeader ? ProgressView : undefined}
     />
   </View>;
 };
@@ -38,7 +35,8 @@ const styles = StyleSheet.create({
     color: "#800",
   },
   list: {
-    // flex: 1,
+    paddingTop: 30,
+    paddingBottom: 80,
   },
 });
 

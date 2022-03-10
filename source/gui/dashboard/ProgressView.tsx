@@ -27,7 +27,7 @@ const ProgressView: React.FC<Props> = () => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 30,
+    paddingBottom: 30,
     alignItems: "center",
   },
   fractionView: {

@@ -5,9 +5,10 @@ import { Location } from "../../logic/location/Locations";
 
 interface Props {
   locations: Location[];
+  onMarkerPress?: (location: Location | undefined) => void;
 }
 
-const Map: React.FC<Props> = ({ locations }) => {
+const Map: React.FC<Props> = ({ locations, onMarkerPress }) => {
   const mapRef = useRef<MapView | null>();
 
   useEffect(() => {
@@ -35,7 +36,9 @@ const Map: React.FC<Props> = ({ locations }) => {
     <MapView style={{ flex: 1 }}
              ref={ref => mapRef.current = ref}
              showsUserLocation={true}
+             moveOnMarkerPress={false}
              maxZoomLevel={19}
+             onPress={() => onMarkerPress?.(undefined)}
              initialRegion={{
                latitude: -25.763144,
                longitude: 28.1,
@@ -47,8 +50,8 @@ const Map: React.FC<Props> = ({ locations }) => {
         <Marker key={it.key}
                 coordinate={{ ...it }}
                 identifier={it.key}
-                title={it.order.number?.toString()}
-                description={it.order.recipient?.address || it.order.recipient?.name} />)}
+                title={it.orders.length === 1 ? `${it.orders.length} order` : `${it.orders.length} orders`}
+                onCalloutPress={() => onMarkerPress?.(it)} />)}
     </MapView>
   </View>;
 };

@@ -11,7 +11,7 @@ export interface Location {
   key: any,
   latitude: number,
   longitude: number,
-  order: Order,
+  orders: Order[],
 }
 
 interface Coordinate {
@@ -21,11 +21,12 @@ interface Coordinate {
 
 export namespace Locations {
   export const locationsForOrders = (orders: Order[]): Promise<Location[]> => {
-    return getLocationsForOrders(orders.filter(it => it.recipient?.address), []);
+    return getLocationsForOrders(orders.filter(it => it.recipient?.address), [])
+      .then(locations => mergeOrdersByLocation(locations));
   };
 
   export const getLocationsForOrders = (orders: Order[], locations: Location[]): Promise<Location[]> => {
-    const nextOrder = orders.find(it => !locations.some(location => location.order === it));
+    const nextOrder = orders.find(it => !locations.some(location => location.orders.includes(it)));
     if (nextOrder === undefined) {
       return emptyPromiseWithValue(locations);
     }
@@ -54,7 +55,7 @@ export namespace Locations {
           key: order.id || (Math.random() * 1000).toString(),
           latitude: coordinates.latitude,
           longitude: coordinates.longitude,
-          order: order,
+          orders: [order],
         } as Location;
       });
   };
@@ -117,5 +118,28 @@ export namespace Locations {
         rollbar.error(`Failed to get results from Google geocoder for address '${address}': ${error}`, error);
         return null;
       });
+  };
+
+  export const mergeOrdersByLocation = (locations: Location[]): Location[] => {
+    const result: Location[] = [];
+    locations.forEach(location => {
+      const match = result.find(it => overlap(it, location));
+
+      if (match) {
+        // Merge these orders into one location
+        match.orders = match.orders.concat(location.orders);
+      } else {
+        // Add as new location
+        result.push(location);
+      }
+    });
+    result.forEach(it => {
+      it.key = it.key + "_" + it.orders.length;
+    });
+    return result;
+  };
+
+  export const overlap = (a: Location, b: Location): boolean => {
+    return a.latitude === b.latitude && a.longitude === b.longitude;
   };
 }

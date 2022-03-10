@@ -4,7 +4,8 @@ import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 const LoadingOverlay: React.FC<{
   isVisible: boolean;
   text?: string | null;
-}> = ({ isVisible, text }) => {
+  opacity?: number;
+}> = ({ isVisible, text, opacity }) => {
   if (!isVisible) {
     return null;
   }
@@ -13,8 +14,14 @@ const LoadingOverlay: React.FC<{
     text = "Loading...";
   }
 
+  let backgroundColor = "#fffc";
+  if (opacity !== undefined) {
+    backgroundColor = "#fff";
+    backgroundColor += Math.round(Math.max(0, Math.min(1, opacity)) * 15).toString(16);
+  }
+
   return (
-    <View style={[styles.container]}>
+    <View style={[styles.container, { backgroundColor: backgroundColor }]}>
       <ActivityIndicator style={styles.icon}
                          size={styles.icon.fontSize}
                          color={styles.icon.color} />
@@ -30,7 +37,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     position: "absolute",
-    backgroundColor: "#fffc",
     top: 0,
     left: 0,
     right: 0,
