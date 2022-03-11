@@ -142,4 +142,8 @@ export namespace Locations {
   export const overlap = (a: Location, b: Location): boolean => {
     return a.latitude === b.latitude && a.longitude === b.longitude;
   };
+
+  export const allOrdersDelivered = (location: Location): boolean => {
+    return location.orders.every(it => it.delivered);
+  };
 }

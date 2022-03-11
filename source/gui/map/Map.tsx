@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import MapView, { Callout, Marker } from "react-native-maps";
-import { Location } from "../../logic/location/Locations";
+import { Location, Locations } from "../../logic/location/Locations";
 import { lightColors } from "../theme";
 
 interface Props {
@@ -52,7 +52,8 @@ const Map: React.FC<Props> = ({ locations, onMarkerPress }) => {
                 coordinate={{ ...it }}
                 identifier={it.key}
                 title={it.orders.length === 1 ? `${it.orders.length} order` : `${it.orders.length} orders`}
-                onCalloutPress={() => onMarkerPress?.(it)}>
+                onCalloutPress={() => onMarkerPress?.(it)}
+                pinColor={Locations.allOrdersDelivered(it) ? "#00c900" : "red"}>
           <Callout tooltip={true}>
             <View style={styles.calloutContainer}>
               <Text style={styles.calloutText}>
