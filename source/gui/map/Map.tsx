@@ -47,7 +47,7 @@ const Map: React.FC<Props> = ({ locations, onMarkerPress }) => {
                longitudeDelta: 0.3,
              }}
              userLocationPriority={"balanced"}>
-      {locations.map(it =>
+      {locations.reverse().map(it =>
         <Marker key={it.key}
                 coordinate={{ ...it }}
                 identifier={it.key}
