@@ -21,7 +21,7 @@ interface Coordinate {
 
 export namespace Locations {
   export const locationsForOrders = (orders: Order[]): Promise<Location[]> => {
-    return getLocationsForOrders(orders.filter(it => it.recipient?.address), [])
+    return getLocationsForOrders(orders.filter(it => it.recipient?.address && !it.deleted), [])
       .then(locations => mergeOrdersByLocation(locations));
   };
 
