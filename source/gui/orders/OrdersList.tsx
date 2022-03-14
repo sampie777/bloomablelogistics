@@ -1,6 +1,6 @@
 import React from "react";
 import { FlatList, ListRenderItemInfo, StyleSheet, View } from "react-native";
-import OrderListItem from "./order/OrderListItem";
+import OrderItem from "./order/OrderItem";
 import ListEmptyComponent from "./ListEmptyComponent";
 import { Order } from "../../logic/models";
 import ProgressView from "../dashboard/ProgressView";
@@ -12,7 +12,7 @@ interface Props {
 
 const OrdersList: React.FC<Props> = ({ orders, showHeader }) => {
   const renderOrderItem = ({ item }: ListRenderItemInfo<Order>) => {
-    return <OrderListItem order={item} />;
+    return <OrderItem order={item} />;
   };
 
   return <View style={styles.container}>

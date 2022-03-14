@@ -91,6 +91,7 @@ export namespace Orders {
     orders
       .sort((a, b) => (a.number || 0) - (b.number || 0))
       .sort((a, b) => (b.delivered ? 1 : -1) - (a.delivered ? 1 : -1))
+      .sort((a, b) => (b.deleted ? 1 : -1) - (a.deleted ? 1 : -1))
       .sort((a, b) => {
         if (a.deliverAtDate && b.deliverAtDate) {
           return a.deliverAtDate.getTime() - b.deliverAtDate.getTime();

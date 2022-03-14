@@ -9,7 +9,8 @@ interface Props {
 }
 
 const ProgressBar: React.FC<Props> = () => {
-  const orders = useRecoilValue(selectedDateOrdersState);
+  const orders = useRecoilValue(selectedDateOrdersState)
+    .filter(it => !it.deleted);
 
   if (orders.length === 0) {
     return null;

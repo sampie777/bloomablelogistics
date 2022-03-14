@@ -15,7 +15,7 @@ interface Props {
   onOrderUpdated?: () => void;
 }
 
-const OrderListItem: React.FC<Props> = ({ order, onOrderUpdated }) => {
+const OrderItem: React.FC<Props> = ({ order, onOrderUpdated }) => {
   return <View style={[styles.container, (order.deleted ? styles.deleted : {})]}>
     <View style={styles.row}>
       <Text style={styles.number} selectable={true}>{order.number}</Text>
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   deleted: {
-    backgroundColor: "#aaa",
+    backgroundColor: "#eaeaea",
   },
 
   row: {
@@ -73,5 +73,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default OrderListItem;
+export default OrderItem;
 
