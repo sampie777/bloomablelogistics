@@ -15,7 +15,7 @@ const App = () => {
       </ErrorBoundary>
 
       <StatusBar barStyle={"dark-content"}
-                 backgroundColor={lightColors.background}
+                 backgroundColor={lightColors.surface2}
                  hidden={false} />
     </SafeAreaView>
   );
