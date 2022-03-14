@@ -19,26 +19,26 @@ export class Order {
   recipient: Recipient | null | undefined;  // null when recipient not available, undefined when recipient not yet fetched
   products: Product[] | undefined;
 
-  static clone(order: Order): Order {
-    const newOrder = new Order();
-    newOrder.id = order.id;
-    newOrder.number = order.number;
-    newOrder.createdAt = order.createdAt;
-    newOrder.partner = order.partner;
-    newOrder.clientName = order.clientName;
-    newOrder.clientEmail = order.clientEmail;
-    newOrder.clientPhones = order.clientPhones;
-    newOrder.deliverAtDate = order.deliverAtDate;
-    newOrder.paymentType = order.paymentType;
-    newOrder.florist = order.florist;
-    newOrder.orderValue = order.orderValue;
-    newOrder.orderCosts = order.orderCosts;
-    newOrder.accepted = order.accepted;
-    newOrder.delivered = order.delivered;
-    newOrder.deleted = order.deleted;
-    newOrder.recipient = order.recipient;
-    newOrder.products = order.products;
-    return newOrder;
+  static clone(from: Order): Order {
+    const to = new Order();
+    to.id = from.id;
+    to.number = from.number;
+    to.createdAt = from.createdAt;
+    to.partner = from.partner;
+    to.clientName = from.clientName;
+    to.clientEmail = from.clientEmail;
+    to.clientPhones = from.clientPhones;
+    to.deliverAtDate = from.deliverAtDate;
+    to.paymentType = from.paymentType;
+    to.florist = from.florist;
+    to.orderValue = from.orderValue;
+    to.orderCosts = from.orderCosts;
+    to.accepted = from.accepted;
+    to.delivered = from.delivered;
+    to.deleted = from.deleted;
+    to.recipient = from.recipient ? Recipient.clone(from.recipient) : from.recipient;
+    to.products = from.products?.map(it => Product.clone(it));
+    return to;
   }
 }
 
@@ -50,6 +50,18 @@ export class Recipient {
   address: string = "";
   message: string | undefined;
   specialInstructions: string | undefined;
+
+  static clone(from: Recipient): Recipient {
+    const to = new Recipient();
+    to.name = from.name;
+    to.phones = from.phones;
+    to.company = from.company;
+    to.unit = from.unit;
+    to.address = from.address;
+    to.message = from.message;
+    to.specialInstructions = from.specialInstructions;
+    return to;
+  }
 }
 
 export class Product {
@@ -60,4 +72,16 @@ export class Product {
   guidelines: string | undefined;
   description: string | undefined;
   image: string | undefined;
+
+  static clone(from: Product): Product {
+    const to = new Product();
+    to.name = from.name;
+    to.size = from.size;
+    to.quantity = from.quantity;
+    to.retailPrice = from.retailPrice;
+    to.guidelines = from.guidelines;
+    to.description = from.description;
+    to.image = from.image;
+    return to;
+  }
 }

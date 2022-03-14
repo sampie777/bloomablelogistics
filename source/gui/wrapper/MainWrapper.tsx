@@ -30,7 +30,7 @@ const MainWrapper: React.FC<Props> = () => {
   useEffect(() => {
     isMounted.current = true;
 
-    if (!isProcessing && orders.length === 0) {
+    if (!isProcessing && fetchPage.current === 0) {
       fetchOrders();
     }
     return () => {

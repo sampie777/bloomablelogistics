@@ -2,6 +2,7 @@ import { rollbar } from "../rollbar";
 import { api, throwErrorsIfNotOk } from "../api";
 import { ServerHtml } from "./html";
 import EncryptedStorage from "react-native-encrypted-storage";
+import { emptyPromise } from "../utils";
 
 export class LoginError extends Error {
   constructor(message: string) {
@@ -19,9 +20,18 @@ class Server {
   }
 
   getCookie = () => this.cookie;
+  isDemoUser = () => this.cookie === "demo";
 
   login(username: string, password: string, maxRetries: number = 1): Promise<any> {
     this.logout();
+
+    if (username === "demo" && password === "demo") {
+      rollbar.info("Demo account logged in");
+      this.setCookie("demo");
+      this.storeCookie();
+      return emptyPromise();
+    }
+
     const formData = "Referrer=&ReturnUrl=&ShowCreateAccountButton=True&Username=" + username + "&Password=" + password + "&RememberMe=true&RememberMe=false&X-Requested-With=XMLHttpRequest";
 
     return fetch(api.url.login(), {
