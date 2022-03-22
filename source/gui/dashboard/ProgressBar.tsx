@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
   percentage: {
     paddingLeft: 20,
     fontFamily: "sans-serif-light",
+    color: lightColors.text,
   },
 });
 

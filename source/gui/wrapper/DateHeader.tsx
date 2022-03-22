@@ -67,12 +67,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingVertical: 15,
     textTransform: "capitalize",
+    color: lightColors.text,
   },
 
   arrow: {
     fontWeight: "bold",
     fontSize: 16,
     textAlign: "center",
+    color: lightColors.text,
   },
 });
 

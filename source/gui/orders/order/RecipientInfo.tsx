@@ -38,7 +38,7 @@ const RecipientInfo: React.FC<Props> = ({ order, onRecipientUpdated }) => {
         {!order.recipient.specialInstructions ? undefined :
           <FontAwesome5Icon name={"exclamation-triangle"} solid style={[styles.icon, { color: "#f38300" }]} />}
 
-        <FontAwesome5Icon name={collapsed ? "chevron-down" : "chevron-up"} />
+        <FontAwesome5Icon name={collapsed ? "chevron-down" : "chevron-up"} style={styles.iconCollapse} />
       </View>
     </TouchableOpacity>
 
@@ -131,12 +131,17 @@ const styles = StyleSheet.create({
   icon: {
     marginRight: 10,
     minWidth: 16,
+    color: lightColors.text,
+  },
+  iconCollapse: {
+    color: lightColors.text,
   },
 
   name: {
     flex: 1,
     paddingVertical: 8,
     fontWeight: "bold",
+    color: lightColors.text,
   },
   phone: {
     color: lightColors.url,
@@ -149,9 +154,11 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     marginRight: 10,
     minWidth: 65,
+    color: lightColors.text,
   },
   addressValue: {
     flex: 1,
+    color: lightColors.text,
   },
 
   specialInstructions: {
@@ -164,6 +171,7 @@ const styles = StyleSheet.create({
     backgroundColor: lightColors.surface2,
     marginTop: 10,
     marginBottom: 10,
+    color: lightColors.text,
   },
 
   message: {
@@ -174,6 +182,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 15,
     backgroundColor: lightColors.surface2,
+    color: lightColors.text,
   },
 
   url: {

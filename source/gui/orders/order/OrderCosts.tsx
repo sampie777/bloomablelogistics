@@ -2,6 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { Order } from "../../../logic/models";
+import { lightColors } from "../../theme";
 
 interface Props {
   order: Order;
@@ -36,12 +37,15 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   orderValue: {
+    color: lightColors.text,
   },
   orderCosts: {
+    color: lightColors.text,
   },
   icon: {
     marginRight: 10,
     minWidth: 16,
+    color: lightColors.text,
   },
 });
 

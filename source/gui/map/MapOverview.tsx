@@ -7,6 +7,7 @@ import Map from "./Map";
 import { useFocusEffect } from "@react-navigation/native";
 import LoadingOverlay from "../utils/LoadingOverlay";
 import SelectedLocationOverlay from "./SelectedLocationOverlay";
+import { lightColors } from "../theme";
 
 interface Props {
 
@@ -87,6 +88,7 @@ const MapOverview: React.FC<Props> = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: lightColors.background,
   },
 });
 

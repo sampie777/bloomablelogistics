@@ -91,6 +91,7 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
 
       <TextInput placeholder={"Username"}
                  style={styles.input}
+                 placeholderTextColor={styles.placeholder.color}
                  maxLength={255}
                  value={username}
                  onChangeText={setUserName}
@@ -102,6 +103,7 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
       <TextInput placeholder={"Password"}
                  ref={ref => passwordInput = ref}
                  style={styles.input}
+                 placeholderTextColor={styles.placeholder.color}
                  maxLength={255}
                  value={password}
                  onChangeText={setPassword}
@@ -121,6 +123,7 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: lightColors.background,
   },
   header: {
     flex: 2,
@@ -148,6 +151,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 30,
     paddingHorizontal: 20,
     color: lightColors.text,
+  },
+  placeholder: {
+    color: lightColors.textLighter,
   },
   button: {
     backgroundColor: lightColors.primary,

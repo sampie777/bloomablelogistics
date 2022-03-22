@@ -116,6 +116,7 @@ const MainWrapper: React.FC<Props> = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: lightColors.background,
   },
   row: {
     flexDirection: "row",
@@ -132,6 +133,7 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginRight: 10,
+    color: lightColors.text,
   },
   error: {
     color: "#800",

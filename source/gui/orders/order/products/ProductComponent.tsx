@@ -49,6 +49,7 @@ const styles = StyleSheet.create({
   icon: {
     marginRight: 10,
     minWidth: 16,
+    color: lightColors.text,
   },
   image: {
     resizeMode: "contain",
@@ -58,23 +59,33 @@ const styles = StyleSheet.create({
   name: {
     fontWeight: "bold",
     flex: 1,
+    color: lightColors.text,
   },
-  size: { flex: 1 },
-  quantity: {},
-  retailPrice: {},
+  size: {
+    flex: 1,
+    color: lightColors.text,
+  },
+  quantity: {
+    color: lightColors.text,
+  },
+  retailPrice: {
+    color: lightColors.text,
+  },
   guidelines: {
     borderLeftWidth: 1,
     borderLeftColor: lightColors.border,
     marginVertical: 8,
     paddingHorizontal: 10,
-    fontStyle: "italic"
+    fontStyle: "italic",
+    color: lightColors.text,
   },
   description: {
     borderLeftWidth: 1,
     borderLeftColor: lightColors.border,
     marginVertical: 8,
     paddingHorizontal: 10,
-    fontStyle: "italic"
+    fontStyle: "italic",
+    color: lightColors.text,
   },
 });
 

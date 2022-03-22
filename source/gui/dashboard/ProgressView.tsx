@@ -46,6 +46,7 @@ const styles = StyleSheet.create({
     paddingBottom: 11,
     paddingLeft: 10,
     fontFamily: "sans-serif-thin",
+    color: lightColors.text,
   },
   description: {
     paddingBottom: 15,

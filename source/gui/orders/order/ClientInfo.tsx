@@ -17,7 +17,7 @@ const ClientInfo: React.FC<Props> = ({ order }) => {
       <View style={styles.row}>
         <FontAwesome5Icon name={"user-tie"} solid style={styles.icon} />
         <Text style={styles.name} selectable={true}>{order.clientName}</Text>
-        <FontAwesome5Icon name={collapsed ? "chevron-down" : "chevron-up"} />
+        <FontAwesome5Icon name={collapsed ? "chevron-down" : "chevron-up"} style={styles.iconCollapse} />
       </View>
     </TouchableOpacity>
 
@@ -50,9 +50,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingBottom: 3,
   },
+  iconCollapse: {
+    color: lightColors.text,
+  },
   name: {
     paddingVertical: 5,
     flex: 1,
+    color: lightColors.text,
   },
   email: {
     color: lightColors.url,
@@ -60,6 +64,7 @@ const styles = StyleSheet.create({
   icon: {
     marginRight: 10,
     minWidth: 16,
+    color: lightColors.text,
   },
   phone: {
     color: lightColors.url,

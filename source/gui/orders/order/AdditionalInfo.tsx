@@ -3,6 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { format } from "../../../logic/utils";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { Order } from "../../../logic/models";
+import { lightColors } from "../../theme";
 
 interface Props {
   order: Order;
@@ -15,7 +16,7 @@ const AdditionalInfo: React.FC<Props> = ({ order }) => {
       <View style={styles.row}>
         <FontAwesome5Icon name={"briefcase"} style={styles.icon} />
         <Text style={styles.partner}>{order.partner}</Text>
-        <FontAwesome5Icon name={collapsed ? "chevron-down" : "chevron-up"} />
+        <FontAwesome5Icon name={collapsed ? "chevron-down" : "chevron-up"} style={styles.iconCollapse} />
       </View>
 
       {collapsed ? undefined : <View>
@@ -51,14 +52,25 @@ const styles = StyleSheet.create({
   icon: {
     marginRight: 10,
     minWidth: 16,
+    color: lightColors.text,
+  },
+  iconCollapse: {
+    color: lightColors.text,
   },
   partner: {
     paddingVertical: 5,
     flex: 1,
+    color: lightColors.text,
   },
-  paymentType: {},
-  florist: {},
-  createdAt: {},
+  paymentType: {
+    color: lightColors.text,
+  },
+  florist: {
+    color: lightColors.text,
+  },
+  createdAt: {
+    color: lightColors.text,
+  },
 });
 
 export default AdditionalInfo;

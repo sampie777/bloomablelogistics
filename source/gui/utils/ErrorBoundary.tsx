@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { rollbar } from "../../logic/rollbar";
+import { lightColors } from "../theme";
 
 interface ComponentProps {
 }
@@ -82,12 +83,14 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
     textAlign: "center",
     fontFamily: "sans-serif-thin",
+    color: lightColors.text,
   },
   header: {
     fontSize: 30,
     marginBottom: 50,
     paddingHorizontal: 30,
     alignSelf: "center",
+    color: lightColors.text,
   },
   details: {
     flex: 1,
@@ -97,6 +100,7 @@ const styles = StyleSheet.create({
     fontFamily: "sans-serif-light",
     marginBottom: 20,
     paddingHorizontal: 30,
+    color: lightColors.text,
   },
   code: {
     paddingTop: 5,

@@ -31,9 +31,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  error: {
-    color: "#800",
-  },
   list: {
     paddingTop: 30,
     paddingBottom: 80,

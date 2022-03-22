@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Order } from "../../../logic/models";
+import { lightColors } from "../../theme";
 
 interface Props {
   order: Order;
@@ -36,6 +37,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     marginRight: 10,
+    color: lightColors.text,
   },
   booleanPositive: {
     backgroundColor: "#00c900",

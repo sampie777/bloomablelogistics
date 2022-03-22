@@ -66,10 +66,12 @@ const styles = StyleSheet.create({
   deliverAtDateDate: {
     fontWeight: "bold",
     fontSize: 16,
+    color: lightColors.text,
   },
   icon: {
     marginRight: 10,
     minWidth: 16,
+    color: lightColors.text,
   },
 });
 
