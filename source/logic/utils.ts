@@ -16,20 +16,20 @@ export function format(date: Date | string | undefined, _format: string) {
   date = dateFrom(date);
 
   return _format
-    .replace(/%dd/g, date.getDate().toString().padStart(2, "0"))
-    .replace(/%d/g, date.getDate().toString())
-    .replace(/%mm/g, (date.getMonth() + 1).toString().padStart(2, "0"))
-    .replace(/%m/g, (date.getMonth() + 1).toString())
-    .replace(/%YYYY/g, date.getFullYear().toString())
-    .replace(/%YY/g, (date.getFullYear() % 100).toString())
-    .replace(/%Y/g, date.getFullYear().toString())
-    .replace(/%HH/g, date.getHours().toString().padStart(2, "0"))
-    .replace(/%H/g, date.getHours().toString())
-    .replace(/%MM/g, date.getMinutes().toString().padStart(2, "0"))
-    .replace(/%M/g, date.getMinutes().toString())
-    .replace(/%SS/g, date.getSeconds().toString().padStart(2, "0"))
-    .replace(/%S/g, date.getSeconds().toString())
-    .replace(/%f/g, date.getMilliseconds().toString().padStart(3, "0"));
+    .replace(/%dd/g, date.getUTCDate().toString().padStart(2, "0"))
+    .replace(/%d/g, date.getUTCDate().toString())
+    .replace(/%mm/g, (date.getUTCMonth() + 1).toString().padStart(2, "0"))
+    .replace(/%m/g, (date.getUTCMonth() + 1).toString())
+    .replace(/%YYYY/g, date.getUTCFullYear().toString())
+    .replace(/%YY/g, (date.getUTCFullYear() % 100).toString())
+    .replace(/%Y/g, date.getUTCFullYear().toString())
+    .replace(/%HH/g, date.getUTCHours().toString().padStart(2, "0"))
+    .replace(/%H/g, date.getUTCHours().toString())
+    .replace(/%MM/g, date.getUTCMinutes().toString().padStart(2, "0"))
+    .replace(/%M/g, date.getUTCMinutes().toString())
+    .replace(/%SS/g, date.getUTCSeconds().toString().padStart(2, "0"))
+    .replace(/%S/g, date.getUTCSeconds().toString())
+    .replace(/%f/g, date.getUTCMilliseconds().toString().padStart(3, "0"));
 }
 
 export const formatDateToWords = (date: Date | string | undefined, defaultFormat: string) => {
