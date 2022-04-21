@@ -1,6 +1,6 @@
 import { Order } from "../models";
 import { rollbar } from "../rollbar";
-import { emptyPromise, emptyPromiseWithValue } from "../utils";
+import { emptyPromise, emptyPromiseWithValue, hashCyrb53 } from "../utils";
 import Geocoder from "react-native-geocoding";
 import Config from "react-native-config";
 import { locationCache } from "../cache";
@@ -77,7 +77,7 @@ export namespace Locations {
   };
 
   export const getFromCache = (address: string): Promise<Coordinate | null> => {
-    return locationCache.get(address)
+    return locationCache.get(hashCyrb53(address))
       .then(result => {
         if (!result) {
           return null;
@@ -95,7 +95,7 @@ export namespace Locations {
       return;
     }
 
-    locationCache.set(address, JSON.stringify(coordinates))
+    locationCache.set(hashCyrb53(address), JSON.stringify(coordinates))
       .catch(error => {
         rollbar.error(`Failed to store location in location cache for address '${address}': ${error}`, error);
       });
