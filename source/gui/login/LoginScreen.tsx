@@ -41,6 +41,7 @@ const LoginScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }
         });
     } else {
       onLoggedInChange();
+      setIsProcessing(false);
     }
     return () => {
       isMounted.current = false;
