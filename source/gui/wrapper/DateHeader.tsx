@@ -38,7 +38,7 @@ const DateHeader: React.FC<Props> = () => {
 
     <TouchableOpacity style={styles.middle} onPress={today}>
       <Text style={styles.currentDateText}>
-        {formatDateToWords(selectedDate, "%dd-%mm-%YYYY")}
+        {formatDateToWords(selectedDate, "%dddd (%dd-%mm-%YYYY)")}
       </Text>
     </TouchableOpacity>
 
