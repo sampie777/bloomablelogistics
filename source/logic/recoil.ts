@@ -1,6 +1,7 @@
 import { atom, selector } from "recoil";
 import { Order } from "./models";
 import { Orders } from "./orders";
+import { getNextDay } from "./utils";
 
 export const ordersState = atom<Order[]>({
   key: "orders",
@@ -31,7 +32,7 @@ export const selectedDateOrdersState = selector<Order[]>({
     startDate.setSeconds(0);
     startDate.setMilliseconds(0);
 
-    const endDate = new Date(selectedDate.getTime() + 24 * 60 * 60 * 1000);
+    const endDate = getNextDay(selectedDate);
     endDate.setHours(0);
     endDate.setMinutes(0);
     endDate.setSeconds(0);
@@ -39,5 +40,22 @@ export const selectedDateOrdersState = selector<Order[]>({
 
     return Orders.sort(orders.filter(it => it.deliverAtDate &&
       startDate <= it.deliverAtDate && it.deliverAtDate < endDate));
+  },
+});
+
+export const upcomingOrdersState = selector<Order[]>({
+  key: "upcomingOrders",
+  get: ({ get }) => {
+    const orders = get(ordersState);
+    const selectedDate = get(selectedDateState);
+
+    const startDate = getNextDay(selectedDate);
+    startDate.setHours(0);
+    startDate.setMinutes(0);
+    startDate.setSeconds(0);
+    startDate.setMilliseconds(0);
+
+    return Orders.sort(orders.filter(it => it.deliverAtDate &&
+      startDate <= it.deliverAtDate));
   },
 });

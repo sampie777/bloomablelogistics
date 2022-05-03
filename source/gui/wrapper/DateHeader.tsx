@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useRecoilState } from "recoil";
-import { selectedDateState } from "../../logic/recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { selectedDateState, upcomingOrdersState } from "../../logic/recoil";
 import { formatDateToWords, getNextDay, getPreviousDay } from "../../logic/utils";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../theme";
@@ -12,6 +12,7 @@ interface Props {
 
 const DateHeader: React.FC<Props> = () => {
   const [selectedDate, setSelectedDate] = useRecoilState(selectedDateState);
+  const upcomingOrders = useRecoilValue(upcomingOrdersState);
 
   const nextDay = () => {
     const newDate = getNextDay(selectedDate);
@@ -30,6 +31,9 @@ const DateHeader: React.FC<Props> = () => {
   return <View style={styles.container}>
     <TouchableOpacity style={styles.side} onPress={previousDay}>
       <FontAwesome5Icon name={"chevron-left"} style={styles.arrow} />
+      {!upcomingOrders || upcomingOrders.length === 0 ? undefined :
+        <View style={{ width: styles.badge.minWidth + styles.badge.marginRight }} />
+      }
     </TouchableOpacity>
 
     <TouchableOpacity style={styles.middle} onPress={today}>
@@ -39,6 +43,10 @@ const DateHeader: React.FC<Props> = () => {
     </TouchableOpacity>
 
     <TouchableOpacity style={styles.side} onPress={nextDay}>
+      {!upcomingOrders || upcomingOrders.length === 0 ? undefined :
+        <Text style={styles.badge}>{upcomingOrders.length}</Text>
+      }
+
       <FontAwesome5Icon name={"chevron-right"} style={styles.arrow} />
     </TouchableOpacity>
   </View>;
@@ -55,7 +63,9 @@ const styles = StyleSheet.create({
   side: {
     alignSelf: "stretch",
     justifyContent: "center",
-    minWidth: 60,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 25,
   },
   middle: {
     flex: 1,
@@ -75,6 +85,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     color: lightColors.text,
+  },
+
+  badge: {
+    fontSize: 12,
+    height: 18,
+    minWidth: 18,
+    backgroundColor: lightColors.background,
+    lineHeight: 17,
+    color: lightColors.text,
+    borderRadius: 20,
+    textAlign: "center",
+    marginRight: 10,
   },
 });
 
