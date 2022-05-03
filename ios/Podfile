@@ -18,6 +18,8 @@ target 'bloomablelogistics' do
 
   pod 'react-native-config', :path => '../node_modules/react-native-config'
 
+  pod 'RNReanimated', :path => '../node_modules/react-native-reanimated'
+
   target 'bloomablelogisticsTests' do
     inherit! :complete
     # Pods for testing

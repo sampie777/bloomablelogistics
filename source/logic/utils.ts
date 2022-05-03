@@ -61,6 +61,9 @@ export const isYesterday = (ref: Date, date: Date): boolean => {
   return isToday(new Date(ref.getTime() - 24 * 60 * 60 * 1000), date);
 };
 
+export const getPreviousDay = (ref: Date): Date => new Date(ref.getTime() - 24 * 60 * 60 * 1000);
+export const getNextDay = (ref: Date): Date => new Date(ref.getTime() + 24 * 60 * 60 * 1000);
+
 export const emptyPromise = (): Promise<null> => new Promise((resolve => resolve(null)));
 export const emptyPromiseWithValue = <T>(v: T): Promise<T> => new Promise((resolve => resolve(v)));
 
@@ -123,4 +126,14 @@ export const hashCyrb53 = (input: string, seed = 0): string => {
   h2 = Math.imul(h2 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h1 >>> 13), 326649909);
   const output = 4294967296 * (2097151 & h2) + (h1 >>> 0);
   return output.toString();
+};
+
+export const calculateSwipeDirection = (startX: number, startY: number, endX: number, endY: number) => {
+  const figureHorizontalDirection = (delta: number) => (delta > 0 ? "SWIPE_RIGHT" : "SWIPE_LEFT");
+  const figureVerticalDirection = (delta: number) => (delta > 0 ? "SWIPE_DOWN" : "SWIPE_UP");
+
+  const dx = endX - startX;
+  const dy = endY - startY;
+
+  return Math.abs(dx) > Math.abs(dy) ? figureHorizontalDirection(dx) : figureVerticalDirection(dy);
 };

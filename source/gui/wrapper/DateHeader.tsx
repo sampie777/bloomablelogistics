@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRecoilState } from "recoil";
 import { selectedDateState } from "../../logic/recoil";
-import { formatDateToWords } from "../../logic/utils";
+import { formatDateToWords, getNextDay, getPreviousDay } from "../../logic/utils";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../theme";
 
@@ -14,12 +14,12 @@ const DateHeader: React.FC<Props> = () => {
   const [selectedDate, setSelectedDate] = useRecoilState(selectedDateState);
 
   const nextDay = () => {
-    const newDate = new Date(selectedDate.getTime() + 24 * 60 * 60 * 1000);
+    const newDate = getNextDay(selectedDate);
     setSelectedDate(newDate);
   };
 
   const previousDay = () => {
-    const newDate = new Date(selectedDate.getTime() - 24 * 60 * 60 * 1000);
+    const newDate = getPreviousDay(selectedDate);
     setSelectedDate(newDate);
   };
 
