@@ -1,14 +1,20 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Dimensions, FlatList, GestureResponderEvent, ListRenderItemInfo, StyleSheet, View } from "react-native";
+import { Dimensions, FlatList, ListRenderItemInfo, StyleSheet } from "react-native";
 import OrderItem from "./order/OrderItem";
 import ListEmptyComponent from "./ListEmptyComponent";
 import { Order } from "../../logic/models";
 import ProgressView from "../dashboard/ProgressView";
-import { calculateSwipeDirection, getNextDay, getPreviousDay } from "../../logic/utils";
+import { getNextDay, getPreviousDay } from "../../logic/utils";
 import { useRecoilState } from "recoil";
 import { selectedDateState } from "../../logic/recoil";
-import GestureRecognizer from "react-native-swipe-gestures";
 import Animated, { Easing } from "react-native-reanimated";
+import {
+  Directions,
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
+} from "react-native-gesture-handler";
+import { config } from "../../config";
 
 interface Props {
   orders: Order[];
@@ -45,12 +51,12 @@ const OrdersList: React.FC<Props> = ({ orders, showHeader }) => {
     animateDayTransition(-1, newDate);
   };
 
-  const animateDayTransition = (direction: number, newDate?: Date) => {
+  const animateDayTransition = (direction: number, newDate?: Date, duration = 200) => {
     swipeDirection.current = direction;
 
     Animated.timing(animatedHorizontalOffset, {
       toValue: direction * screenWidth,
-      duration: 200,
+      duration: duration,
       easing: direction === 0 ? Easing.out(Easing.ease) : Easing.in(Easing.ease),
     }).start(() => {
       if (newDate) {
@@ -59,34 +65,51 @@ const OrdersList: React.FC<Props> = ({ orders, showHeader }) => {
     });
   };
 
-  const onSwipeEnd = (e: GestureResponderEvent) => {
-    endX = e.nativeEvent.pageX;
-    endY = e.nativeEvent.pageY;
+  const swipeGesture = Gesture.Fling()
+    .direction(Directions.RIGHT | Directions.LEFT)
+    .numberOfPointers(1)
+    .onBegin((e) => {
+      startX = e.absoluteX;
+      startY = e.absoluteY;
+    })
+    .onTouchesMove((e) => {
+      if (e.allTouches.length === 0) {
+        return;
+      }
 
-    const direction = calculateSwipeDirection(startX, startY, endX, endY);
-    if (direction === "SWIPE_LEFT") {
-      goToNextDay();
-    } else if (direction === "SWIPE_RIGHT") {
-      goToPreviousDay();
-    }
-  };
+      const currentX = e.allTouches[0].absoluteX;
+      const dx = currentX - startX;
+
+      if (Math.abs(dx) < config.ordersListSwipeMinXOffset / 2) {
+        return;
+      }
+
+      animatedHorizontalOffset.setValue(dx - (dx > 0 ? 1 : -1) * config.ordersListSwipeMinXOffset / 2);
+    })
+    .onFinalize((e) => {
+      const currentX = e.absoluteX;
+      const currentY = e.absoluteY;
+      const dx = currentX - startX;
+      const dy = currentY - startY;
+
+      if (Math.abs(dx) < config.ordersListSwipeMinXOffset || Math.abs(dy) > config.ordersListSwipeMaxYOffset) {
+        animateDayTransition(0, undefined, 400);
+        return;
+      }
+
+      if (dx < 0) {
+        goToNextDay();
+      } else {
+        goToPreviousDay();
+      }
+    });
 
   const renderOrderItem = ({ item }: ListRenderItemInfo<Order>) => {
     return <OrderItem order={item} />;
   };
 
-  return <View style={styles.container}>
-    <GestureRecognizer style={styles.container}
-                       onTouchStart={(e) => {
-                         startX = e.nativeEvent.pageX;
-                         startY = e.nativeEvent.pageY;
-                       }}
-                       onTouchEnd={onSwipeEnd}
-                       config={{
-                         velocityThreshold: 1,
-                         directionalOffsetThreshold: 60,
-                         gestureIsClickThreshold: 100,
-                       }}>
+  return <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureDetector gesture={swipeGesture}>
       <Animated.View style={[styles.container, animatedStyle.listContainer]}
                      onLayout={(e) => setScreenWidth(e.nativeEvent.layout.width)}>
         <FlatList data={orders}
@@ -98,8 +121,8 @@ const OrdersList: React.FC<Props> = ({ orders, showHeader }) => {
                   ListHeaderComponent={showHeader ? ProgressView : undefined}
         />
       </Animated.View>
-    </GestureRecognizer>
-  </View>;
+    </GestureDetector>
+  </GestureHandlerRootView>;
 };
 
 const styles = StyleSheet.create({
