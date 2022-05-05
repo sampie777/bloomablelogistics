@@ -1,10 +1,20 @@
 import React, { useState } from "react";
-import { ActivityIndicator, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Platform,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../../theme";
 import UrlLink from "../../utils/UrlLink";
 import { Order } from "../../../logic/models";
 import Products from "./products/Products";
+import Clipboard from "@react-native-clipboard/clipboard";
+import { isAndroid } from "../../../logic/utils";
 
 interface Props {
   order: Order;
@@ -28,6 +38,17 @@ const RecipientInfo: React.FC<Props> = ({ order, onRecipientUpdated }) => {
       }
     </View>;
   }
+
+  const copyAddress = () => {
+    if (!order.recipient?.address) {
+      return;
+    }
+    Clipboard.setString(order.recipient.address);
+
+    if (isAndroid) {
+      ToastAndroid.showWithGravity("Address copied!", ToastAndroid.SHORT, ToastAndroid.CENTER);
+    }
+  };
 
   return <View style={styles.container}>
     <TouchableOpacity onPress={() => setCollapsed(!collapsed)}>
@@ -73,7 +94,8 @@ const RecipientInfo: React.FC<Props> = ({ order, onRecipientUpdated }) => {
               <View style={styles.row}>
                 <Text style={styles.addressLabel}>Address:</Text>
                 <UrlLink url={Platform.select({ ios: "maps:0,0?q=", android: "geo:0,0?q=" }) + order.recipient.address}
-                         style={{ flex: 1 }}>
+                         style={{ flex: 1 }}
+                         onLongPress={copyAddress}>
                   <Text style={[styles.addressValue, styles.url]}
                         selectable={true}>
                     {order.recipient.address}

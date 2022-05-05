@@ -5,13 +5,15 @@ import { openLink } from "../../logic/utils";
 const UrlLink: React.FC<{
   url: string,
   style?: Array<Object> | Object,
-  onOpened?: () => void
+  onOpened?: () => void,
+  onLongPress?: () => void,
 }> =
   ({
      children,
      url,
      style = [],
      onOpened,
+     onLongPress,
    }) => {
     const open = () => {
       openLink(url)
@@ -21,7 +23,7 @@ const UrlLink: React.FC<{
 
     return (
       <View style={style}>
-        <TouchableOpacity onPress={open}>
+        <TouchableOpacity onPress={open} onLongPress={onLongPress}>
           <View>
             {children}
           </View>
