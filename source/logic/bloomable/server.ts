@@ -69,7 +69,7 @@ class Server {
       })
       .catch(error => {
         if (!(error instanceof LoginError)) {
-          rollbar.error(`Error logging in on server`, error);
+          rollbar.error(`Error logging in on server: ${error}`, error);
         }
         throw error;
       });
@@ -129,7 +129,7 @@ class Server {
       .then(throwErrorsIfNotOk)
       .then(response => response.text())
       .catch(error => {
-        rollbar.error(`Error fetching orders data`, error);
+        rollbar.error(`Error fetching orders data: ${error}`, error);
         throw error;
       });
   }
@@ -139,7 +139,7 @@ class Server {
       .then(throwErrorsIfNotOk)
       .then(response => response.text())
       .catch(error => {
-        rollbar.error(`Error fetching order details data`, error);
+        rollbar.error(`Error fetching order details data: ${error}`, error);
         throw error;
       });
   }

@@ -37,13 +37,13 @@ export namespace ServerHtml {
 
     const table = extractTable(html);
     if (!table) {
-      rollbar.error("Could not find order list table in html");
+      rollbar.error("Could not find order list table in html", { html: html });
       return [];
     }
 
     const body = extractTableBody(table);
     if (!body) {
-      rollbar.error("Could not find order list table body in html");
+      rollbar.error("Could not find order list table body in html", { html: html });
       return [];
     }
 
@@ -129,7 +129,7 @@ export namespace ServerHtml {
     products?: Product[];
   }
 
-  export const orderDetailsResponseToOrderDetails = (html: string): OrderDetails => {
+  export const orderDetailsResponseToOrderDetails = (html: string, orderId?: string): OrderDetails => {
     const extractTable = (_html: string) => _html
       .match(new RegExp("<table style=\"width: 100%;\"> (<tr> <td colspan=\"4\".*?)</table> *</table>", "i"))?.[1];
 
@@ -137,7 +137,7 @@ export namespace ServerHtml {
 
     const table = extractTable(html);
     if (!table) {
-      rollbar.error("Could not find order details table in html");
+      rollbar.error("Could not find order details table in html for order: " + orderId, { html: html });
       return {};
     }
 
@@ -147,7 +147,7 @@ export namespace ServerHtml {
     return {
       recipient: orderDetailsResponseToRecipient(rows),
       orderValue: getOrderValueFromDetails(rows),
-      products: orderDetailsResponseToProducts(html),
+      products: orderDetailsResponseToProducts(html, orderId),
     };
   };
 
@@ -233,13 +233,13 @@ export namespace ServerHtml {
     return orderValue;
   };
 
-  export const orderDetailsResponseToProducts = (html: string): Product[] => {
+  export const orderDetailsResponseToProducts = (html: string, orderId?: string): Product[] => {
     const extractTable = (_html: string) => _html
       .match(new RegExp("<td colspan=\"4\"> *<table style=\"width: 100%\">(.*?)</table> *</td> *</tr> *<tr> *<td colspan=\"4\"", "i"))?.[1];
 
     const table = extractTable(html);
     if (!table) {
-      rollbar.error("Could not find products table in html");
+      rollbar.error("Could not find products table in html for order: " + orderId, { html: html });
       return [];
     }
 

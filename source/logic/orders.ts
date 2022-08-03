@@ -76,7 +76,7 @@ export namespace Orders {
 
     return server.getOrderDetailsPage(order.id)
       .then((html: string) => {
-        const { recipient, orderValue, products } = ServerHtml.orderDetailsResponseToOrderDetails(html);
+        const { recipient, orderValue, products } = ServerHtml.orderDetailsResponseToOrderDetails(html, order.id);
         const updatedOrder = Order.clone(order);
         updatedOrder.recipient = recipient;
         updatedOrder.products = products;
