@@ -235,7 +235,7 @@ export namespace ServerHtml {
 
   export const orderDetailsResponseToProducts = (html: string, orderId?: string): Product[] => {
     const extractTable = (_html: string) => _html
-      .match(new RegExp("<td colspan=\"4\"> *<table style=\"width: 100%\">(.*?)</table> *</td> *</tr> *<tr> *<td colspan=\"4\"", "i"))?.[1];
+      .match(new RegExp("<td colspan=\"4\"> *<table style=\"width: 100%\">(.*?)</table> *</td> *</tr> *<tr> *<td colspan=\"(4\"|2\">&nbsp;)", "i"))?.[1];
 
     const table = extractTable(html);
     if (!table) {

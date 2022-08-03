@@ -1,6 +1,7 @@
 import { ordersDashboardResponse } from "../../resources/BloomableOrdersDashboardResponse";
 import { orderDetails1Response } from "../../resources/BloomableOrderDetailsResponse1";
 import { ServerHtml } from "../../../source/logic/bloomable/html";
+import { orderDetailsWithSundryValueResponse } from "../../resources/BloomableOrderDetailsWithSundryValue";
 
 describe("ServerHtml", () => {
   it("Parses HTML page with orders correctly", () => {
@@ -91,5 +92,53 @@ describe("ServerHtml", () => {
     expect(products![3].extras![0].name).toBe("Small Orange Rose Bouquet");
     expect(products![3].extras![0].description).toBe("Included in price above (R 115.00)");
     expect(products![3].extras![0].image).toBe("https://www.bloomable.co.za/Uploads/Images/7c7435c9-6ee6-4f13-9b8f-5a4f83fb2301.jpg");
+  });
+
+  it("Parses order details with a sundry value correctly", () => {
+    const { recipient, orderValue, products } = ServerHtml.orderDetailsResponseToOrderDetails(orderDetailsWithSundryValueResponse);
+
+    expect(recipient).not.toBeUndefined();
+    expect(recipient!.name).toBe("Maria Madelein");
+    expect(recipient!.phones.length).toBe(1);
+    expect(recipient!.phones[0]).toBe("+27 981515555");
+    expect(recipient!.company).toBe("");
+    expect(recipient!.unit).toBe("Premier Mats & Accesories");
+    expect(recipient!.address).toBe("111, Moepel Street, Derdepoort 765-Jr, Pretoria, Gauteng, 0186");
+    expect(recipient!.message).toBe("Happy birthday!\n" +
+      "\n" +
+      "New Zealand\n" +
+      "\n" +
+      "H\n" +
+      "\n" +
+      "XOXOXO");
+    expect(recipient!.specialInstructions).toBe("R1210.05 added to the order for extra flowers. Customer requests please make it special");
+
+    expect(orderValue).toBe(3640.05);
+
+    expect(products).not.toBeUndefined();
+    expect(products!.length).toBe(2);
+    expect(products![0].extras?.length).toBe(0);
+    expect(products![1].extras?.length).toBe(0);
+
+    expect(products![0].name).toBe("My Heart's Desire");
+    expect(products![0].size).toBe("50 Roses - AS SHOWN");
+    expect(products![0].quantity).toBe("x 1");
+    expect(products![0].retailPrice).toBe(2125);
+    expect(products![0].guidelines).toBe("1 x Twyne [ Brown]\n" +
+      "1 x Additional Delivery Fee\n" +
+      "2 x Kraft Paper [ Brown]\n" +
+      "10 x Greenery [ Green]\n" +
+      "25 x Roses [ Red]\n" +
+      "25 x Roses [ Dark Pink ]");
+    expect(products![0].description).toBe("Please email admin@gmail.com quoting your order number if there are any variations of flowers used in this creation. If the customer is informed of any changes you are more likely to receive better reviews. Thank you. Please ensure 100% customer satisfaction.");
+    expect(products![0].image).toBe("https://www.bloomable.co.za/Uploads/Images/080c261e-22e4-482b-9788-d3110e052496.jpg");
+
+    expect(products![1].name).toBe("Lindor Cornet Milk");
+    expect(products![1].size).toBe("200g");
+    expect(products![1].quantity).toBe("x 1");
+    expect(products![1].retailPrice).toBe(305);
+    expect(products![1].guidelines).toBe("1 x Lindor Cornet Milk 200g [ 200 g/ml]");
+    expect(products![1].description).toBe("");
+    expect(products![1].image).toBe("https://www.bloomable.co.za/Uploads/Images/8fee7dae-d14a-4ba1-980a-427e60ba7ab5.jpg");
   });
 });
