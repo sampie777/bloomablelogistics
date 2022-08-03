@@ -9,6 +9,7 @@ import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import OrderCosts from "./OrderCosts";
 import RecipientInfo from "./RecipientInfo";
 import { Order } from "../../../logic/models";
+import UrlLink from "../../utils/UrlLink";
 
 interface Props {
   order: Order;
@@ -18,7 +19,9 @@ interface Props {
 const OrderItem: React.FC<Props> = ({ order, onOrderUpdated }) => {
   return <View style={[styles.container, (order.deleted ? styles.deleted : {})]}>
     <View style={styles.row}>
-      <Text style={styles.number} selectable={true}>{order.number}</Text>
+      <UrlLink url={`https://www.bloomable.co.za/Code/Orders/Summary?orderId=${order.id}`}>
+        <Text style={styles.number} selectable={true}>{order.number}</Text>
+      </UrlLink>
 
       <View style={styles.deliverAtDate}>
         <FontAwesome5Icon name={"truck"} style={styles.icon} />
