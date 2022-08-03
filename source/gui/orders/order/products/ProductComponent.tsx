@@ -1,5 +1,5 @@
-import React from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import React, { useState } from "react";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Product } from "../../../../logic/models";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../../../theme";
@@ -10,8 +10,21 @@ interface Props {
 }
 
 const ProductComponent: React.FC<Props> = ({ product }) => {
+  const [enlargeImage, setEnlargeImage] = useState(false);
+
+  const toggleImage = () => {
+    setEnlargeImage(!enlargeImage);
+  };
+
   return <View style={styles.container}>
-    {product.image === undefined ? undefined : <Image source={{ uri: product.image }} style={styles.image} />}
+    {product.image === undefined ? undefined :
+      <TouchableOpacity onPress={toggleImage}>
+        <Image source={{ uri: product.image }}
+               resizeMode={"contain"}
+               style={[styles.image, (!enlargeImage ? {} : styles.imageEnlarged)]} />
+      </TouchableOpacity>
+    }
+
     <View style={styles.row}>
       <Text style={styles.name}>{product.name}</Text>
       {product.quantity === undefined ? undefined : <Text style={styles.quantity}> {product.quantity}</Text>}
@@ -59,6 +72,9 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
     height: 200,
     marginBottom: 15,
+  },
+  imageEnlarged: {
+    height: 400,
   },
   name: {
     fontWeight: "bold",
