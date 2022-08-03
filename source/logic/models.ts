@@ -1,5 +1,3 @@
-import { LatLng } from "react-native-maps";
-
 export class Order {
   id: string | undefined;
   number: number | undefined;
@@ -64,6 +62,20 @@ export class Recipient {
   }
 }
 
+export class ProductExtra {
+  name: string | undefined;
+  description: string | undefined;
+  image: string | undefined;
+
+  static clone(from: ProductExtra): ProductExtra {
+    const to = new ProductExtra();
+    to.name = from.name;
+    to.description = from.description;
+    to.image = from.image;
+    return to;
+  }
+}
+
 export class Product {
   name: string | undefined;
   size: string | undefined;
@@ -72,6 +84,7 @@ export class Product {
   guidelines: string | undefined;
   description: string | undefined;
   image: string | undefined;
+  extras: ProductExtra[] | undefined;
 
   static clone(from: Product): Product {
     const to = new Product();
@@ -82,6 +95,7 @@ export class Product {
     to.guidelines = from.guidelines;
     to.description = from.description;
     to.image = from.image;
+    to.extras = from.extras?.map(it => ProductExtra.clone(it));
     return to;
   }
 }

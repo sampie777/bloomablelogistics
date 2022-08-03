@@ -72,6 +72,10 @@ describe("ServerHtml", () => {
 
     expect(products).not.toBeUndefined();
     expect(products!.length).toBe(4);
+    expect(products![0].extras?.length).toBe(0);
+    expect(products![1].extras?.length).toBe(0);
+    expect(products![2].extras?.length).toBe(0);
+
     expect(products![3].name).toBe("Orange Rose Bouquet");
     expect(products![3].size).toBe("Medium (12 Roses) - AS SHOWN");
     expect(products![3].quantity).toBe("x 1");
@@ -83,5 +87,9 @@ describe("ServerHtml", () => {
       "12 x Roses [ Orange]");
     expect(products![3].description).toBe("Please email admin@gmail.com quoting your order number if there are any variations of flowers used in this creation. If the customer is informed of any changes you are more likely to receive better reviews. Thank you.");
     expect(products![3].image).toBe("https://www.bloomable.co.za/Uploads/Images/9f65fa64-4657-4abb-9e41-e3529a25ba4d.jpg");
+    expect(products![3].extras?.length).toBe(1);
+    expect(products![3].extras![0].name).toBe("Small Orange Rose Bouquet");
+    expect(products![3].extras![0].description).toBe("Included in price above (R 115.00)");
+    expect(products![3].extras![0].image).toBe("https://www.bloomable.co.za/Uploads/Images/7c7435c9-6ee6-4f13-9b8f-5a4f83fb2301.jpg");
   });
 });

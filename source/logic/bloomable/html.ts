@@ -1,6 +1,6 @@
 import { rollbar } from "../rollbar";
 import { decode } from "html-entities";
-import { Order, Product, Recipient } from "../models";
+import { Order, Product, ProductExtra, Recipient } from "../models";
 import { HtmlUtils } from "./htmlUtils";
 
 export namespace ServerHtml {
@@ -297,6 +297,39 @@ export namespace ServerHtml {
     product.retailPrice = retailPrice === undefined ? retailPrice : +retailPrice;
     product.guidelines = decode(guidelines, { level: "html5" });
     product.description = decode(description, { level: "html5" });
+    product.extras = getProductExtrasFromRow(row);
     return product;
+  };
+
+  export const getProductExtrasFromRow = (row: string): ProductExtra[] => {
+    let table = row.substring(row.lastIndexOf("<table"));
+    let rows = table.split("</tr>")
+      .map(it => it.trim())
+      .filter(it => it);
+    if (rows.length === 0) {
+      return [];
+    }
+
+    if (rows[0].includes(">Guidelines required for this item:</span>") || rows[0].includes(">Description and special instructions:</strong>")) {
+      rows = rows.slice(1);
+    }
+
+    return rows.map(it => {
+      const image = it.match(new RegExp("src=\"(.*?)\""))?.[1];
+      const cols = it.split("</td>")
+        .map(col => col.trim());
+
+      let name, description;
+      if (cols.length > 1) {
+        name = cols[1].match(new RegExp(">(.*?)<br ?/?>"))?.[1];
+        description = cols[1].match(new RegExp("<b>(.*?)</b>"))?.[1];
+      }
+
+      const extra = new ProductExtra();
+      extra.image = image?.trim();
+      extra.name = name?.trim();
+      extra.description = description?.trim();
+      return extra;
+    });
   };
 }
