@@ -3,6 +3,7 @@ import { Image, StyleSheet, Text, View } from "react-native";
 import { Product } from "../../../../logic/models";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../../../theme";
+import ProductExtraComponent from "./ProductExtraComponent";
 
 interface Props {
   product: Product;
@@ -32,6 +33,9 @@ const ProductComponent: React.FC<Props> = ({ product }) => {
       <FontAwesome5Icon name={"comment"} style={styles.icon} />
       <Text style={styles.description}>{product.description}</Text>
     </View>}
+
+    {product.extras?.map((it, index) =>
+      <ProductExtraComponent item={it} key={index + (it.name || "")} />)}
   </View>;
 };
 

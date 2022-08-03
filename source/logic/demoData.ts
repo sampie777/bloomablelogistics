@@ -82,6 +82,13 @@ export const demoOrders = [
       "retailPrice": 615,
       "guidelines": "1 x Kraft Paper [ Brown]\n1 x Twyne [ Brown]\n1 x Additional Delivery Fee\n2 x Golden Rod [ Yellow]\n2 x Snapdragons [ Orange]\n2 x Gerberas [ Orange]\n2 x Alstromeria [ Orange]\n3 x Roses [ Orange]\n4 x Chrysanthemums [ Orange]\n8 x Greenery [ Green]",
       "description": "Please email care@bloomable.co.za quoting your order number if there are any variations of flowers used in this creation. If the customer is informed of any changes you are more likely to receive better reviews. Thank you. Please ensure 100% customer satisfaction.",
+      "extras": [
+        {
+          "image": "https://www.bloomable.co.za/Uploads/Images/7c7435c9-6ee6-4f13-9b8f-5a4f83fb2301.jpg",
+          "name": "Vase White Rose Bouquet",
+          "description": "Included in price above (R 280.00)",
+        },
+      ],
     }],
   },
   {
@@ -264,5 +271,5 @@ export const demoOrders = [
       "guidelines": "",
       "description": "",
     }],
-  }
-  ] as unknown as Order[];
+  },
+] as unknown as Order[];
