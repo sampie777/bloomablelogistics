@@ -96,6 +96,7 @@ const MainWrapper: React.FC<Props> = () => {
     <TabNav.Navigator initialRouteName={routes.Dashboard}
                       screenOptions={{
                         tabBarStyle: styles.tabBar,
+                        tabBarActiveTintColor: styles.tabBarActiveLabel.color as string,
                       }}>
       <TabNav.Screen name={routes.Dashboard} component={Dashboard}
                      options={{
@@ -144,6 +145,9 @@ const styles = StyleSheet.create({
     height: 60,
     backgroundColor: lightColors.surface2,
     borderTopColor: lightColors.background,
+  },
+  tabBarActiveLabel: {
+    color: lightColors.primary,
   },
 });
 
