@@ -3,7 +3,6 @@ import { StyleSheet, Text, View } from "react-native";
 import { format } from "../../../logic/utils";
 import { lightColors } from "../../theme";
 import ClientInfo from "./ClientInfo";
-import AdditionalInfo from "./AdditionalInfo";
 import OrderStatus from "./OrderStatus";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import OrderCosts from "./OrderCosts";
@@ -32,7 +31,6 @@ const OrderItem: React.FC<Props> = ({ order, onOrderUpdated }) => {
     <RecipientInfo order={order} onRecipientUpdated={onOrderUpdated} />
     <OrderCosts order={order} />
     <ClientInfo order={order} />
-    <AdditionalInfo order={order} />
     <OrderStatus order={order} />
   </View>;
 };

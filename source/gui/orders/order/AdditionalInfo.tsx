@@ -10,40 +10,36 @@ interface Props {
 }
 
 const AdditionalInfo: React.FC<Props> = ({ order }) => {
-  const [collapsed, setCollapsed] = useState(true);
   return <View style={styles.container}>
-    <TouchableOpacity onPress={() => setCollapsed(!collapsed)}>
-      <View style={styles.row}>
-        <FontAwesome5Icon name={"briefcase"} style={styles.icon} />
-        <Text style={styles.partner}>{order.partner}</Text>
-        <FontAwesome5Icon name={collapsed ? "chevron-down" : "chevron-up"} style={styles.iconCollapse} />
-      </View>
+    <View style={styles.row}>
+      <FontAwesome5Icon name={"briefcase"} style={[styles.icon, styles.iconPartner]} />
+      <Text style={styles.partner}>{order.partner}</Text>
+    </View>
 
-      {collapsed ? undefined : <View>
-        {!order.paymentType ? undefined :
-          <View style={styles.row}>
-            <FontAwesome5Icon name={"credit-card"} style={styles.icon} />
-            <Text style={styles.paymentType}>{order.paymentType}</Text>
-          </View>
-        }
-        {!order.florist ? undefined :
-          <View style={styles.row}>
-            <FontAwesome5Icon name={"user-tag"} style={styles.icon} />
-            <Text style={styles.florist}>{order.florist}</Text>
-          </View>
-        }
-        <View style={styles.row}>
-          <FontAwesome5Icon name={"calendar-plus"} style={styles.icon} />
-          <Text style={styles.createdAt}>Created
-            on {format(order.createdAt, "%YYYY-%mm-%dd at %HH:%MM") || "unknown"}</Text>
-        </View>
-      </View>}
-    </TouchableOpacity>
+    {!order.paymentType ? undefined :
+      <View style={styles.row}>
+        <FontAwesome5Icon name={"credit-card"} style={styles.icon} />
+        <Text style={styles.paymentType}>{order.paymentType}</Text>
+      </View>
+    }
+    {!order.florist ? undefined :
+      <View style={styles.row}>
+        <FontAwesome5Icon name={"user-tag"} style={styles.icon} />
+        <Text style={styles.florist}>{order.florist}</Text>
+      </View>
+    }
+    <View style={styles.row}>
+      <FontAwesome5Icon name={"calendar-plus"} style={styles.icon} />
+      <Text style={styles.createdAt}>Created
+        on {format(order.createdAt, "%YYYY-%mm-%dd at %HH:%MM") || "unknown"}</Text>
+    </View>
   </View>;
 };
 
 const styles = StyleSheet.create({
-  container: {},
+  container: {
+    marginTop: 10,
+  },
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -54,13 +50,16 @@ const styles = StyleSheet.create({
     minWidth: 16,
     color: lightColors.text,
   },
-  iconCollapse: {
-    color: lightColors.text,
+  iconPartner: {
+    paddingTop: 10,
   },
   partner: {
-    paddingVertical: 5,
     flex: 1,
     color: lightColors.text,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderStyle: "dashed",
+    borderColor: "#ddd",
   },
   paymentType: {
     color: lightColors.text,

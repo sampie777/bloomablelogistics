@@ -4,6 +4,7 @@ import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import UrlLink from "../../utils/UrlLink";
 import { lightColors } from "../../theme";
 import { Order } from "../../../logic/models";
+import AdditionalInfo from "./AdditionalInfo";
 
 interface Props {
   order: Order;
@@ -39,6 +40,8 @@ const ClientInfo: React.FC<Props> = ({ order }) => {
           </UrlLink>
         </View>)
       }
+
+      <AdditionalInfo order={order} />
     </View>}
   </View>;
 };
