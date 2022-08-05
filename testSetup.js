@@ -39,3 +39,9 @@ jest.mock("react-native-encrypted-storage", () => {
     setItem: () => undefined,
   };
 });
+
+jest.mock("./source/logic/cache", () => {
+  return {
+    locationCache: () => undefined,
+  };
+});

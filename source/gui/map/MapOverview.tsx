@@ -8,6 +8,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import LoadingOverlay from "../utils/LoadingOverlay";
 import SelectedLocationOverlay from "./SelectedLocationOverlay";
 import { lightColors } from "../theme";
+import SmartAddressButton from "./SmartAddressButton";
 
 interface Props {
 
@@ -20,6 +21,7 @@ const MapOverview: React.FC<Props> = () => {
   const [locations, setLocations] = useState<Location[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<Location | undefined>(undefined);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [useSmartAddress, setUseSmartAddress] = useState(true);
 
   useFocusEffect(React.useCallback(() => {
     isMounted.current = true;
@@ -38,13 +40,13 @@ const MapOverview: React.FC<Props> = () => {
       return;
     }
     loadLocations();
-  }, [orders]);
+  }, [orders, useSmartAddress]);
 
   useFocusEffect(
     React.useCallback(() => {
       BackHandler.addEventListener("hardwareBackPress", onBackPress);
       return () => BackHandler.removeEventListener("hardwareBackPress", onBackPress);
-    }, [selectedLocation])
+    }, [selectedLocation]),
   );
 
   const onBackPress = (): boolean => {
@@ -67,7 +69,7 @@ const MapOverview: React.FC<Props> = () => {
     }
 
     setIsProcessing(true);
-    Locations.locationsForOrders(orders)
+    Locations.locationsForOrders(orders, useSmartAddress)
       .then((result) => setLocations(result))
       .finally(() => setIsProcessing(false));
   };
@@ -76,12 +78,17 @@ const MapOverview: React.FC<Props> = () => {
     setSelectedLocation(location);
   };
 
+  const toggleSmartAddress = () => {
+    setUseSmartAddress(!useSmartAddress);
+  };
+
   return <View style={styles.container}>
     <Map locations={locations} onMarkerPress={onMarkerPress} />
-    <LoadingOverlay isVisible={isProcessing} opacity={0.1} />
+    <SmartAddressButton enabled={useSmartAddress} onPress={toggleSmartAddress} />
     {selectedLocation === undefined ? undefined :
       <SelectedLocationOverlay location={selectedLocation}
                                unselectLocation={() => onMarkerPress(undefined)} />}
+    <LoadingOverlay isVisible={isProcessing} opacity={0.1} />
   </View>;
 };
 
