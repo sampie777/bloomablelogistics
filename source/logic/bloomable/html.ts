@@ -330,6 +330,7 @@ export namespace ServerHtml {
       extra.name = name?.trim();
       extra.description = description?.trim();
       return extra;
-    });
+    })
+      .filter(it => it.image || it.name || it.description);
   };
 }
