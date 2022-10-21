@@ -24,7 +24,7 @@
     "react-native": "0.70.3",
     "react-native-cache": "^2.0.2",
     "react-native-config": "^1.4.5",
-    "react-native-device-info": "^8.3.1",
+    "react-native-device-info": "^10.3.0",
     "react-native-encrypted-storage": "^4.0.2",
     "react-native-geocoding": "^0.5.0",
     "react-native-gesture-handler": "^2.4.1",

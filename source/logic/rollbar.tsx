@@ -16,10 +16,10 @@ const configuration = new Configuration(
           code_version: getVersion(),
         },
       },
-      person: {
-        id: getUniqueId(),
-      },
     },
   });
 
 export const rollbar = new Client(configuration);
+
+getUniqueId().then(value => rollbar.setPerson(value))
+  .catch(e => console.error(e));
