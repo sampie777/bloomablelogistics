@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { PermissionsAndroid, Platform, StyleSheet, Text, View } from "react-native";
+import { Permissions } from "../../logic/permissions";
 import MapView, { Callout, Marker } from "react-native-maps";
 import { Location, Locations } from "../../logic/location/Locations";
 import { lightColors } from "../theme";
@@ -11,10 +12,21 @@ interface Props {
 
 const Map: React.FC<Props> = ({ locations, onMarkerPress }) => {
   const mapRef = useRef<MapView | null>();
+  const [hasLocationPermission, setHasLocationPermission] = useState(false);
 
   useEffect(() => {
+    requestLocationPermission();
     fitMap();
   }, [locations]);
+
+  const requestLocationPermission = () => {
+    if (Platform.OS !== "android") {
+      return;
+    }
+
+    Permissions.askPermission(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
+      .then(isGranted => setHasLocationPermission(isGranted));
+  };
 
   const fitMap = () => {
     if (locations.length === 0) {
@@ -36,7 +48,7 @@ const Map: React.FC<Props> = ({ locations, onMarkerPress }) => {
   return <View style={styles.container}>
     <MapView style={{ flex: 1 }}
              ref={ref => mapRef.current = ref}
-             showsUserLocation={true}
+             showsUserLocation={hasLocationPermission}
              moveOnMarkerPress={false}
              maxZoomLevel={19}
              onPress={() => onMarkerPress?.(undefined)}
