@@ -7,7 +7,7 @@ import ProgressView from "../dashboard/ProgressView";
 import { getNextDay, getPreviousDay } from "../../logic/utils";
 import { useRecoilState } from "recoil";
 import { selectedDateState } from "../../logic/recoil";
-import Animated, { Easing } from "react-native-reanimated";
+import Animated, { EasingNode } from "react-native-reanimated";
 import {
   Directions,
   Gesture,
@@ -57,7 +57,7 @@ const OrdersList: React.FC<Props> = ({ orders, showHeader }) => {
     Animated.timing(animatedHorizontalOffset, {
       toValue: direction * screenWidth,
       duration: duration,
-      easing: direction === 0 ? Easing.out(Easing.ease) : Easing.in(Easing.ease),
+      easing: direction === 0 ? EasingNode.out(EasingNode.ease) : EasingNode.in(EasingNode.ease),
     }).start(() => {
       if (newDate) {
         setSelectedDate(newDate);
