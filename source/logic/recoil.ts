@@ -1,7 +1,9 @@
-import { atom, selector } from "recoil";
+import { atom, RecoilEnv, selector } from "recoil";
 import { Order } from "./models";
 import { Orders } from "./orders";
 import { getNextDay } from "./utils";
+
+RecoilEnv.RECOIL_DUPLICATE_ATOM_KEY_CHECKING_ENABLED = false;
 
 export const ordersState = atom<Order[]>({
   key: "orders",
