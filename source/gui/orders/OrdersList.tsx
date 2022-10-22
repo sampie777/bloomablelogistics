@@ -7,7 +7,13 @@ import ProgressView from "../dashboard/ProgressView";
 import { getNextDay, getPreviousDay } from "../../logic/utils";
 import { useRecoilState } from "recoil";
 import { selectedDateState } from "../../logic/recoil";
-import Animated, { Easing } from "react-native-reanimated";
+import Animated, {
+  Easing,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import {
   Directions,
   Gesture,
@@ -22,22 +28,24 @@ interface Props {
 }
 
 const OrdersList: React.FC<Props> = ({ orders, showHeader }) => {
-  let startX = 0, startY = 0, endX = 0, endY = 0;
+  let startX = 0, startY = 0;
 
+  const _newDateRef = useRef<Date | undefined>(undefined);
   const swipeDirection = useRef<number>(0);
   const [screenWidth, setScreenWidth] = useState(0);
   const [selectedDate, setSelectedDate] = useRecoilState(selectedDateState);
 
-  const animatedHorizontalOffset = new Animated.Value<number>(swipeDirection.current * -1 * Dimensions.get("window").width);
-  const animatedStyle = {
-    listContainer: {
+  const animatedHorizontalOffset = useSharedValue(0);
+  const animatedContainerStyle = useAnimatedStyle(() => {
+    return {
       transform: [
-        { translateX: animatedHorizontalOffset },
+        { translateX: animatedHorizontalOffset.value },
       ],
-    },
-  };
+    };
+  });
 
   useEffect(() => {
+    animatedHorizontalOffset.value = swipeDirection.current * -1 * Dimensions.get("window").width;
     animateDayTransition(0);
   }, [orders]);
 
@@ -52,20 +60,24 @@ const OrdersList: React.FC<Props> = ({ orders, showHeader }) => {
   };
 
   const animateDayTransition = (direction: number, newDate?: Date, duration = 200) => {
+    _newDateRef.current = newDate;
     swipeDirection.current = direction;
 
-    Animated.timing(animatedHorizontalOffset, {
-      toValue: direction * screenWidth,
+    animatedHorizontalOffset.value = withTiming(direction * screenWidth, {
       duration: duration,
       easing: direction === 0 ? Easing.out(Easing.ease) : Easing.in(Easing.ease),
-    }).start(() => {
-      if (newDate) {
-        setSelectedDate(newDate);
-      }
-    });
+    }, () => runOnJS(updateSelectedDate)());
+  };
+
+  const updateSelectedDate = () => {
+    if (_newDateRef.current) {
+      setSelectedDate(_newDateRef.current);
+    }
+    _newDateRef.current = undefined;
   };
 
   const swipeGesture = Gesture.Fling()
+    .runOnJS(true)
     .direction(Directions.RIGHT | Directions.LEFT)
     .numberOfPointers(1)
     .onBegin((e) => {
@@ -84,7 +96,7 @@ const OrdersList: React.FC<Props> = ({ orders, showHeader }) => {
         return;
       }
 
-      animatedHorizontalOffset.setValue(dx - (dx > 0 ? 1 : -1) * config.ordersListSwipeMinXOffset / 2);
+      animatedHorizontalOffset.value = dx - (dx > 0 ? 1 : -1) * config.ordersListSwipeMinXOffset / 2;
     })
     .onFinalize((e) => {
       const currentX = e.absoluteX;
@@ -110,7 +122,7 @@ const OrdersList: React.FC<Props> = ({ orders, showHeader }) => {
 
   return <GestureHandlerRootView style={{ flex: 1 }}>
     <GestureDetector gesture={swipeGesture}>
-      <Animated.View style={[styles.container, animatedStyle.listContainer]}
+      <Animated.View style={[styles.container, animatedContainerStyle]}
                      onLayout={(e) => setScreenWidth(e.nativeEvent.layout.width)}>
         <FlatList data={orders}
                   contentContainerStyle={styles.list}
