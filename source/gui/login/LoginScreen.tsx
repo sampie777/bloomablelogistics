@@ -7,9 +7,6 @@ import LoadingOverlay from "../utils/LoadingOverlay";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ParamList, routes } from "../../routes";
 
-interface Props {
-}
-
 const LoginScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }) => {
   const isMounted = useRef(false);
   const [isLoggedIn, setIsLoggedIn] = useState(server.isLoggedIn());
@@ -30,8 +27,8 @@ const LoginScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }
   useEffect(() => {
     isMounted.current = true;
 
-    if (!server.isCookieRecalled()) {
-      server.recallCookie()
+    if (!server.isCredentialsRecalled()) {
+      server.recallCredentials()
         .then(() => {
           if (!isMounted.current) {
             return;
@@ -46,7 +43,7 @@ const LoginScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }
     return () => {
       isMounted.current = false;
     };
-  });
+  }, []);
 
   return <View style={styles.container}>
     <LoadingOverlay isVisible={isProcessing} />

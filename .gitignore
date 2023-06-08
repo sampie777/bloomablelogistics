@@ -70,3 +70,5 @@ sourcemap.ios.js
 upload_source_map.sh
 index.android.bundle
 ios/assets
+
+google-services.json
