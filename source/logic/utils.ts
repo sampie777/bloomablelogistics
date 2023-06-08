@@ -123,6 +123,7 @@ export function openLink(url: string): Promise<any> {
 }
 
 export const isAndroid = Platform.OS === "android";
+export const isIOS = Platform.OS === "ios";
 
 export class ValidationError extends Error {
 }

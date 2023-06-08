@@ -7,9 +7,6 @@ import LoadingOverlay from "../utils/LoadingOverlay";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ParamList, routes } from "../../routes";
 
-interface Props {
-}
-
 const LoginScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }) => {
   const isMounted = useRef(false);
   const [isLoggedIn, setIsLoggedIn] = useState(server.isLoggedIn());

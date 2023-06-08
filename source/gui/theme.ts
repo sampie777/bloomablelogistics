@@ -1,4 +1,5 @@
 import { ColorValue } from "react-native";
+import { isIOS } from "../logic/utils";
 
 export interface ThemeColors {
   primary: ColorValue,
@@ -22,6 +23,8 @@ export interface ThemeColors {
   borderVariant: ColorValue,
   notesColor: ColorValue,
   notesLines: ColorValue,
+  switchComponentThumb: ColorValue,
+  switchComponentBackground?: ColorValue,
 }
 
 export const lightColors: ThemeColors = {
@@ -46,29 +49,6 @@ export const lightColors: ThemeColors = {
   borderVariant: "#ccc",
   notesColor: "#222",
   notesLines: "#444",
+  switchComponentThumb: isIOS ? "#fff" : "dodgerblue",
+  switchComponentBackground: isIOS ? "#eee" : undefined,
 };
-
-export const darkColors: ThemeColors = {
-  primary: "dodgerblue",
-  primaryVariant: "#1576d5",
-  primaryLight: "#2776cc",
-  background: "#202020",
-  surface1: "#303030",
-  surface2: "#3a3a3a",
-  surface3: "#3a3a3a",
-  onPrimary: "#eee",
-  text: "#eee",
-  textLight: "#ccc",
-  textLighter: "#ccc",
-  textHeader: "#eee",
-  verseTitle: "#e0e0e0",
-  url: "#57a4fd",
-  button: "#3a3a3a",
-  buttonVariant: "#303030",
-  border: "#202020",
-  borderLight: "#202020",
-  borderVariant: "#aaa",
-  notesColor: "#d0d0d0",
-  notesLines: "#888",
-};
-
