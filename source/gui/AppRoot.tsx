@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { routes } from "../routes";
 import MainWrapper from "./wrapper/MainWrapper";
 import LoginScreen from "./login/LoginScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { RecoilRoot } from "recoil";
+import { PermissionsAndroid, Platform } from "react-native";
+import { Permissions } from "../logic/permissions";
 
 const RootNav = createNativeStackNavigator();
 
@@ -13,6 +15,14 @@ interface Props {
 }
 
 const AppRoot: React.FC<Props> = () => {
+  useEffect(() => {
+    if (Platform.OS !== "android") {
+      return;
+    }
+
+    Permissions.askPermission(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+  });
+
   return <RecoilRoot>
     <NavigationContainer>
       <RootNav.Navigator initialRouteName={routes.Login}
