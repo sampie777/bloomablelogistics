@@ -1,5 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Dimensions, FlatList, ListRenderItemInfo, StyleSheet } from "react-native";
+import {
+  Dimensions,
+  ListRenderItemInfo,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  StyleSheet,
+} from "react-native";
 import OrderItem from "./order/OrderItem";
 import ListEmptyComponent from "./ListEmptyComponent";
 import { Order } from "../../logic/models";
@@ -18,16 +24,16 @@ import {
   Directions,
   Gesture,
   GestureDetector,
-  GestureHandlerRootView,
 } from "react-native-gesture-handler";
 import { config } from "../../config";
 
 interface Props {
   orders: Order[];
   showHeader: boolean;
+  onScrollViewScroll?: (e: NativeSyntheticEvent<NativeScrollEvent>) => void;
 }
 
-const OrdersList: React.FC<Props> = ({ orders, showHeader }) => {
+const OrdersList: React.FC<Props> = ({ orders, showHeader, onScrollViewScroll }) => {
   let startX = 0, startY = 0;
 
   const _newDateRef = useRef<Date | undefined>(undefined);
@@ -123,23 +129,23 @@ const OrdersList: React.FC<Props> = ({ orders, showHeader }) => {
 
   const refreshOrders = () => setOrdersOutdated(true);
 
-  return <GestureHandlerRootView style={{ flex: 1 }}>
-    <GestureDetector gesture={swipeGesture}>
-      <Animated.View style={[styles.container, animatedContainerStyle]}
-                     onLayout={(e) => setScreenWidth(e.nativeEvent.layout.width)}>
-        <FlatList data={orders}
-                  contentContainerStyle={styles.list}
-                  renderItem={renderOrderItem}
-                  keyExtractor={order => order.id + ""}
-                  onEndReachedThreshold={2}
-                  onRefresh={refreshOrders}
-                  refreshing={ordersOutdated}
-                  ListEmptyComponent={ListEmptyComponent}
-                  ListHeaderComponent={showHeader ? ProgressView : undefined}
-        />
-      </Animated.View>
-    </GestureDetector>
-  </GestureHandlerRootView>;
+  return <GestureDetector gesture={swipeGesture}>
+    <Animated.View style={[styles.container, animatedContainerStyle]}
+                   onLayout={(e) => setScreenWidth(e.nativeEvent.layout.width)}>
+      <Animated.FlatList data={orders}
+                         contentContainerStyle={styles.list}
+                         renderItem={renderOrderItem}
+                         keyExtractor={order => order.id + ""}
+                         onEndReachedThreshold={2}
+                         onRefresh={refreshOrders}
+                         refreshing={ordersOutdated}
+                         ListEmptyComponent={ListEmptyComponent}
+                         ListHeaderComponent={showHeader ? ProgressView : undefined}
+                         onScroll={onScrollViewScroll}
+                         scrollEventThrottle={1}
+      />
+    </Animated.View>
+  </GestureDetector>;
 };
 
 const styles = StyleSheet.create({
