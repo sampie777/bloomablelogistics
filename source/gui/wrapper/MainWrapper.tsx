@@ -7,7 +7,7 @@ import MapOverview from "../map/MapOverview";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../theme";
 import { useRecoilState } from "recoil";
-import { ordersState } from "../../logic/recoil";
+import { ordersOutdatedState, ordersState } from "../../logic/recoil";
 import { Orders } from "../../logic/orders";
 import { Order } from "../../logic/models";
 import LoadingOverlay from "../utils/LoadingOverlay";
@@ -26,17 +26,26 @@ const MainWrapper: React.FC<Props> = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const [orders, setOrders] = useRecoilState(ordersState);
+  const [ordersOutdated, setOrdersOutdated] = useRecoilState(ordersOutdatedState);
 
   useEffect(() => {
     isMounted.current = true;
 
     if (!isProcessing && fetchPage.current === 0) {
-      fetchOrders();
+      setOrdersOutdated(true);
     }
+
     return () => {
       isMounted.current = false;
     };
   });
+
+  useEffect(() => {
+    if (!isProcessing && ordersOutdated) {
+      setOrdersOutdated(false);
+      fetchOrders();
+    }
+  }, [ordersOutdated]);
 
   const fetchOrders = () => {
     fetchPage.current = 0;

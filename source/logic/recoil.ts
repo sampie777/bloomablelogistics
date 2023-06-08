@@ -8,18 +8,16 @@ RecoilEnv.RECOIL_DUPLICATE_ATOM_KEY_CHECKING_ENABLED = false;
 export const ordersState = atom<Order[]>({
   key: "orders",
   default: [],
-  effects: [
-    ({ setSelf, trigger }) => {
-      if (trigger === "get") {
-        console.log("Get trigger for atom");
-      }
-    },
-  ],
 });
 
 export const selectedDateState = atom<Date>({
   key: "selectedDate",
   default: new Date(),
+});
+
+export const ordersOutdatedState = atom<boolean>({
+  key: "ordersOutdated",
+  default: true,
 });
 
 export const selectedDateOrdersState = selector<Order[]>({

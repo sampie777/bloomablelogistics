@@ -6,7 +6,7 @@ import { Order } from "../../logic/models";
 import ProgressView from "../dashboard/ProgressView";
 import { getNextDay, getPreviousDay } from "../../logic/utils";
 import { useRecoilState } from "recoil";
-import { selectedDateState } from "../../logic/recoil";
+import { ordersOutdatedState, selectedDateState } from "../../logic/recoil";
 import Animated, {
   Easing,
   runOnJS,
@@ -34,6 +34,7 @@ const OrdersList: React.FC<Props> = ({ orders, showHeader }) => {
   const swipeDirection = useRef<number>(0);
   const [screenWidth, setScreenWidth] = useState(0);
   const [selectedDate, setSelectedDate] = useRecoilState(selectedDateState);
+  const [ordersOutdated, setOrdersOutdated] = useRecoilState(ordersOutdatedState);
 
   const animatedHorizontalOffset = useSharedValue(0);
   const animatedContainerStyle = useAnimatedStyle(() => {
@@ -120,6 +121,8 @@ const OrdersList: React.FC<Props> = ({ orders, showHeader }) => {
     return <OrderItem order={item} />;
   };
 
+  const refreshOrders = () => setOrdersOutdated(true);
+
   return <GestureHandlerRootView style={{ flex: 1 }}>
     <GestureDetector gesture={swipeGesture}>
       <Animated.View style={[styles.container, animatedContainerStyle]}
@@ -129,6 +132,8 @@ const OrdersList: React.FC<Props> = ({ orders, showHeader }) => {
                   renderItem={renderOrderItem}
                   keyExtractor={order => order.id + ""}
                   onEndReachedThreshold={2}
+                  onRefresh={refreshOrders}
+                  refreshing={ordersOutdated}
                   ListEmptyComponent={ListEmptyComponent}
                   ListHeaderComponent={showHeader ? ProgressView : undefined}
         />
