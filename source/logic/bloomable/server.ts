@@ -3,6 +3,7 @@ import { api, throwErrorsIfNotOk } from "../api";
 import { ServerHtml } from "./html";
 import EncryptedStorage from "react-native-encrypted-storage";
 import { emptyPromise } from "../utils";
+import { Notifications } from "../notifications";
 
 export class LoginError extends Error {
   constructor(message: string) {
@@ -13,14 +14,20 @@ export class LoginError extends Error {
 
 class Server {
   private cookie: string | undefined = undefined;
-  private cookieRecalled: boolean = false;
+  private username: string | undefined = undefined;
+  private credentialsRecalled: boolean = false;
 
   setCookie(value: string) {
     this.cookie = value;
   }
 
+  setUsername(value: string) {
+    this.username = value;
+  }
+
   getCookie = () => this.cookie;
-  isDemoUser = () => this.cookie === "demo";
+  getUsername = () => this.username;
+  isDemoUser = () => this.username === "demo";
 
   login(username: string, password: string, maxRetries: number = 1): Promise<any> {
     this.logout();
@@ -28,7 +35,8 @@ class Server {
     if (username === "demo" && password === "demo") {
       rollbar.info("Demo account logged in");
       this.setCookie("demo");
-      this.storeCookie();
+      this.setUsername("demo");
+      this.storeCredentials();
       return emptyPromise();
     }
 
@@ -51,7 +59,8 @@ class Server {
           this.processCookie(cookies);
         }
 
-        this.storeCookie();
+        this.setUsername(username);
+        this.storeCredentials();
 
         return response.text();
       })
@@ -88,38 +97,55 @@ class Server {
 
   logout() {
     this.cookie = undefined;
-    this.storeCookie();
+    this.username = undefined;
+    this.storeCredentials();
+    Notifications.unsubscribe();
   }
 
   isLoggedIn() {
-    return this.cookie !== undefined;
+    return this.cookie !== undefined && this.username !== undefined;
   }
 
-  isCookieRecalled = () => this.cookieRecalled;
+  isCredentialsRecalled = () => this.credentialsRecalled;
 
-  recallCookie() {
+  recallCredentials() {
     return EncryptedStorage.getItem("cookie")
       .then(value => {
-        this.cookieRecalled = true;
         if (value) {
           this.setCookie(value);
         }
       })
       .catch(error => {
-        rollbar.critical(`Error getting EncryptedStorage item: ${error}`, error);
-      });
+        rollbar.critical(`Error getting EncryptedStorage 'cookie' item: ${error}`, error);
+      }).then(() =>
+        EncryptedStorage.getItem("username")
+          .then(value => {
+            this.credentialsRecalled = true;
+            if (value) {
+              this.setUsername(value);
+            }
+          })
+          .catch(error => {
+            rollbar.critical(`Error getting EncryptedStorage 'username' item: ${error}`, error);
+          }),
+      );
   }
 
-  storeCookie() {
-    if (this.cookie !== undefined) {
-      EncryptedStorage.setItem("cookie", this.cookie)
+  storeCredentials() {
+    this.storageUpdateOrRemove("cookie", this.cookie);
+    this.storageUpdateOrRemove("username", this.username);
+  }
+
+  private storageUpdateOrRemove(key: string, value: string | undefined) {
+    if (value !== undefined) {
+      EncryptedStorage.setItem(key, value)
         .catch(error => {
-          rollbar.critical(`Error setting EncryptedStorage item: ${error}`, error);
+          rollbar.critical(`Error setting EncryptedStorage '${key}' item: ${error}`, error);
         });
     } else {
-      EncryptedStorage.removeItem("cookie")
+      EncryptedStorage.removeItem(key)
         .catch(error => {
-          rollbar.error(`Error clearing EncryptedStorage item: ${error}`, error);
+          rollbar.error(`Error clearing EncryptedStorage '${key}' item: ${error}`, error);
         });
     }
   }

@@ -30,8 +30,8 @@ const LoginScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }
   useEffect(() => {
     isMounted.current = true;
 
-    if (!server.isCookieRecalled()) {
-      server.recallCookie()
+    if (!server.isCredentialsRecalled()) {
+      server.recallCredentials()
         .then(() => {
           if (!isMounted.current) {
             return;
@@ -46,7 +46,7 @@ const LoginScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }
     return () => {
       isMounted.current = false;
     };
-  });
+  }, []);
 
   return <View style={styles.container}>
     <LoadingOverlay isVisible={isProcessing} />

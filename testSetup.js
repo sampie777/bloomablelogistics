@@ -45,3 +45,14 @@ jest.mock("./source/logic/cache", () => {
     locationCache: () => undefined,
   };
 });
+
+jest.mock("@react-native-firebase/messaging", () => {
+  return {
+    messaging: () => ({
+      subscribeToTopic: () => undefined,
+      unsubscribeFromTopic: () => undefined,
+      getToken: () => undefined,
+      setBackgroundMessageHandler: () => undefined,
+    })
+  };
+});

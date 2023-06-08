@@ -13,6 +13,7 @@ import { Order } from "../../logic/models";
 import LoadingOverlay from "../utils/LoadingOverlay";
 import DateHeader from "./DateHeader";
 import OrderDetailsLoader from "../orders/OrderDetailsLoader";
+import { Notifications } from "../../logic/notifications";
 
 const TabNav = createBottomTabNavigator();
 
@@ -30,6 +31,7 @@ const MainWrapper: React.FC<Props> = () => {
 
   useEffect(() => {
     isMounted.current = true;
+    Notifications.init();
 
     if (!isProcessing && fetchPage.current === 0) {
       setOrdersOutdated(true);

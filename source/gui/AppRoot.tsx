@@ -5,8 +5,7 @@ import MainWrapper from "./wrapper/MainWrapper";
 import LoginScreen from "./login/LoginScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { RecoilRoot } from "recoil";
-import { PermissionsAndroid, Platform } from "react-native";
-import { Permissions } from "../logic/permissions";
+import { Platform } from "react-native";
 
 const RootNav = createNativeStackNavigator();
 
@@ -19,8 +18,6 @@ const AppRoot: React.FC<Props> = () => {
     if (Platform.OS !== "android") {
       return;
     }
-
-    Permissions.askPermission(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
   });
 
   return <RecoilRoot>
