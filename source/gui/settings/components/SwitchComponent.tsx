@@ -15,9 +15,9 @@ const SwitchComponent: React.FC<Props> = ({
                                             title,
                                             description,
                                           }) => {
-  const [value, setValue] = useState<boolean>(settings[settingsKey]);
+  const [value, setValue] = useState<boolean>((settings as {[key: string]: any})[settingsKey]);
   useEffect(() => {
-    settings[settingsKey] = value;
+    (settings as {[key: string]: any})[settingsKey] = value;
     settings.store();
   }, [value]);
 
