@@ -95,6 +95,8 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
                  maxLength={255}
                  value={username}
                  onChangeText={setUserName}
+                 textContentType={"username"}
+                 autoCapitalize={"none"}
                  autoComplete={"username"}
                  returnKeyType={"next"}
                  onSubmitEditing={() => passwordInput?.focus()}
@@ -108,6 +110,7 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
                  value={password}
                  onChangeText={setPassword}
                  textContentType={"password"}
+                 autoCapitalize={"none"}
                  autoComplete={"password"}
                  secureTextEntry={true}
                  returnKeyType={"send"}
