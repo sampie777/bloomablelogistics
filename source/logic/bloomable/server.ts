@@ -22,7 +22,8 @@ class Server {
   }
 
   setUsername(value: string) {
-    this.username = value;
+    // Apparently Bloomable accepts extra whitespaces around its credentials and isn't case-sensitive. But we are!
+    this.username = value.trim().toLowerCase();
   }
 
   getCookie = () => this.cookie;
