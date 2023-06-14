@@ -7,18 +7,21 @@ import { componentStyles } from "./PressableComponent";
 interface Props {
   settingsKey: string,
   title: string,
-  description?: string
+  description?: string,
+  callback?: (value: boolean) => void,
 }
 
 const SwitchComponent: React.FC<Props> = ({
                                             settingsKey,
                                             title,
                                             description,
+                                            callback,
                                           }) => {
-  const [value, setValue] = useState<boolean>((settings as {[key: string]: any})[settingsKey]);
+  const [value, setValue] = useState<boolean>((settings as { [key: string]: any })[settingsKey]);
   useEffect(() => {
-    (settings as {[key: string]: any})[settingsKey] = value;
+    (settings as { [key: string]: any })[settingsKey] = value;
     settings.store();
+    callback?.(value);
   }, [value]);
 
   return <View

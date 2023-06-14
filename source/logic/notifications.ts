@@ -3,6 +3,7 @@ import Server from "./bloomable/server";
 import { Permissions } from "./permissions";
 import { PermissionsAndroid } from "react-native";
 import { rollbar } from "./rollbar";
+import { settings } from "./settings/settings";
 
 export namespace Notifications {
   let isInitialized = false;
@@ -14,7 +15,12 @@ export namespace Notifications {
     isInitialized = true;
 
     Permissions.askPermission(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
-    subscribe();
+
+    if (settings.notificationsShowForNewOrders) {
+      subscribe();
+    } else {
+      unsubscribe();
+    }
   };
 
   export const subscribe = () => {

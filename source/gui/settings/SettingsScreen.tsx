@@ -5,6 +5,8 @@ import PressableComponent from "./components/PressableComponent";
 import Server from "../../logic/bloomable/server";
 import { ParamList, routes } from "../../routes";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { settings } from "../../logic/settings/settings";
+import { Notifications } from "../../logic/notifications";
 
 const Header: React.FC<{ title: string, isVisible?: boolean }> = ({ title, isVisible = true }) => {
   return !isVisible ? null : <Text style={styles.settingHeader}>{title}</Text>;
@@ -18,7 +20,12 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
       <Header title={"Notifications"} />
       <SwitchComponent settingsKey={"notificationsShowForNewOrders"}
                        title={"New order"}
-                       description={"Show notifications when new orders have been received"} />
+                       description={"Show notifications when new orders have been received"}
+                       callback={() => {
+                         settings.notificationsShowForNewOrders
+                           ? Notifications.subscribe()
+                           : Notifications.unsubscribe();
+                       }} />
 
       <Header title={"Account"} />
       <PressableComponent title={"Log out"}
