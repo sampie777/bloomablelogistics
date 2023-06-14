@@ -85,6 +85,10 @@ case $command in
     releaseMinor
     setNextDevelopmentVersion
     ;;
+  pushAndRelease)
+    pushAndRelease
+    setNextDevelopmentVersion
+    ;;
   -h|--help)
     usage
     ;;
