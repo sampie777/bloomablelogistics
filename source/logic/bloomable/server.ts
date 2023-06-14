@@ -96,10 +96,10 @@ class Server {
   }
 
   logout() {
+    Notifications.unsubscribe();
     this.cookie = undefined;
     this.username = undefined;
     this.storeCredentials();
-    Notifications.unsubscribe();
   }
 
   isLoggedIn() {
