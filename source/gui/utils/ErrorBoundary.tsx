@@ -31,7 +31,11 @@ export default class ErrorBoundary extends Component<ComponentProps, ComponentSt
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    rollbar.critical(error, errorInfo);
+    rollbar.critical("ErrorBoundary caught an error", {
+      error: error,
+      errorInfo: errorInfo,
+      catchTimes: this.state.catchTimes,
+    });
     this.setState({
       error: error,
       errorInfo: errorInfo,

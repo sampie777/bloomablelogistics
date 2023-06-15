@@ -72,14 +72,20 @@ class Server {
 
         const message = ServerHtml.loginResponseToError(html);
         if (maxRetries > 0 && message.trim().length === 0) {
-          rollbar.warning(`Retrying login due to html response: '${html}'`);
+          rollbar.warning("Retrying login due to html response", {
+            html: html,
+            maxRetries: maxRetries,
+          });
           return this.login(username, password, maxRetries - 1);
         }
         throw new LoginError(message);
       })
       .catch(error => {
         if (!(error instanceof LoginError)) {
-          rollbar.error(`Error logging in on server: ${error}`, error);
+          rollbar.error("Error logging in on server", {
+            error: error,
+            maxRetries: maxRetries,
+          });
         }
         throw error;
       });
@@ -117,7 +123,10 @@ class Server {
         }
       })
       .catch(error => {
-        rollbar.critical(`Error getting EncryptedStorage 'cookie' item: ${error}`, error);
+        rollbar.critical("Error getting EncryptedStorage item", {
+          error: error,
+          key: "cookie",
+        });
       }).then(() =>
         EncryptedStorage.getItem("username")
           .then(value => {
@@ -127,7 +136,10 @@ class Server {
             }
           })
           .catch(error => {
-            rollbar.critical(`Error getting EncryptedStorage 'username' item: ${error}`, error);
+            rollbar.critical("Error getting EncryptedStorage item", {
+              error: error,
+              key: "username",
+            });
           }),
       );
   }
@@ -141,12 +153,18 @@ class Server {
     if (value !== undefined) {
       EncryptedStorage.setItem(key, value)
         .catch(error => {
-          rollbar.critical(`Error setting EncryptedStorage '${key}' item: ${error}`, error);
+          rollbar.critical("Error setting EncryptedStorage item", {
+            error: error,
+            key: key,
+          });
         });
     } else {
       EncryptedStorage.removeItem(key)
         .catch(error => {
-          rollbar.error(`Error clearing EncryptedStorage '${key}' item: ${error}`, error);
+          rollbar.error("Error clearing EncryptedStorage item", {
+            error: error,
+            key: key,
+          });
         });
     }
   }
@@ -156,7 +174,10 @@ class Server {
       .then(throwErrorsIfNotOk)
       .then(response => response.text())
       .catch(error => {
-        rollbar.error(`Error fetching orders data: ${error}`, error);
+        rollbar.error("Error fetching orders data", {
+          error: error,
+          page: page,
+        });
         throw error;
       });
   }
@@ -166,7 +187,10 @@ class Server {
       .then(throwErrorsIfNotOk)
       .then(response => response.text())
       .catch(error => {
-        rollbar.error(`Error fetching order details data: ${error}`, error);
+        rollbar.error("Error fetching order details data", {
+          error: error,
+          id: id,
+        });
         throw error;
       });
   }

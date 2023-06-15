@@ -14,11 +14,17 @@ export namespace Permissions {
           return promptPermission(permission);
         })
         .catch(e => {
-          rollbar.error("Failed to check for permission: " + e, e);
+          rollbar.error("Failed to check for permission", {
+            error: e,
+            permission: permission,
+          });
           return emptyPromiseWithValue(false);
         });
-    } catch (e) {
-      rollbar.error("Failed to ask for permission " + e, e as any);
+    } catch (e: any) {
+      rollbar.error("Failed to ask for permission", {
+        error: e,
+        permission: permission,
+      });
       return emptyPromiseWithValue(false);
     }
   };
@@ -27,7 +33,10 @@ export namespace Permissions {
     return PermissionsAndroid.request(permission)
       .then(status => status === "granted")
       .catch(e => {
-        rollbar.error("Failed to prompt for permission: " + e, e);
+        rollbar.error("Failed to prompt for permission", {
+          error: e,
+          permission: permission,
+        });
         return emptyPromiseWithValue(false);
       });
   };

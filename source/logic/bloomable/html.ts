@@ -137,7 +137,10 @@ export namespace ServerHtml {
 
     const table = extractTable(html);
     if (!table) {
-      rollbar.error("Could not find order details table in html for order: " + orderId, { html: html });
+      rollbar.error("Could not find order details table in html for order", {
+        html: html,
+        orderId: orderId,
+      });
       return {};
     }
 
@@ -239,7 +242,10 @@ export namespace ServerHtml {
 
     const table = extractTable(html);
     if (!table) {
-      rollbar.error("Could not find products table in html for order: " + orderId, { html: html });
+      rollbar.error("Could not find products table in html for order", {
+        html: html,
+        orderId: orderId,
+      });
       return [];
     }
 

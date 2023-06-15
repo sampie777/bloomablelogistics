@@ -5,7 +5,7 @@ import Geocoder from "react-native-geocoding";
 import Config from "react-native-config";
 import { locationCache } from "../cache";
 
-Geocoder.init(Config.GOOGLE_MAPS_API_KEY);
+Geocoder.init(Config.GOOGLE_MAPS_API_KEY ?? "");
 
 export interface Location {
   key: any,
@@ -88,7 +88,10 @@ export namespace Locations {
         return JSON.parse(result);
       })
       .catch(error => {
-        rollbar.error(`Failed to get results from location cache for address '${address}': ${error}`, error);
+        rollbar.error("Failed to get results from location cache for address", {
+          error: error,
+          address: address,
+        });
         return null;
       });
   };
@@ -100,7 +103,11 @@ export namespace Locations {
 
     locationCache.set(hashCyrb53(address), JSON.stringify(coordinates))
       .catch(error => {
-        rollbar.error(`Failed to store location in location cache for address '${address}': ${error}`, error);
+        rollbar.error("Failed to store location in location cache for address", {
+          error: error,
+          address: address,
+          coordinates: coordinates,
+        });
       });
   };
 
@@ -118,7 +125,10 @@ export namespace Locations {
         };
       })
       .catch(error => {
-        rollbar.error(`Failed to get results from Google geocoder for address '${address}': ${error}`, error);
+        rollbar.error("Failed to get results from Google geocoder for address", {
+          error: error,
+          address: address,
+        });
         return null;
       });
   };

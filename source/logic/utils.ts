@@ -15,7 +15,7 @@ export function format(date: Date | string | undefined, _format: string) {
 
   date = dateFrom(date);
 
-  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
   return _format
     .replace(/%dddd/g, days[date.getUTCDay()])
     .replace(/%dd/g, date.getUTCDate().toString().padStart(2, "0"))
@@ -114,9 +114,9 @@ export function openLink(url: string): Promise<any> {
     })
     .catch(error => {
       if (error !== undefined && error.message !== undefined && `${error.message}`.startsWith("Can't open Url '")) {
-        rollbar.info(error);
+        rollbar.info("Failed to open URL", { error: error, url: url });
       } else {
-        rollbar.warning(error);
+        rollbar.warning("Failed to open URL", { error: error, url: url });
       }
       throw error;
     });
