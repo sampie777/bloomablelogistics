@@ -1,9 +1,10 @@
 import { rollbar } from "../rollbar";
-import { api, throwErrorsIfNotOk } from "../api";
+import { api } from "../api";
 import { ServerHtml } from "./html";
 import EncryptedStorage from "react-native-encrypted-storage";
 import { emptyPromise } from "../utils";
 import { Notifications } from "../notifications";
+import { throwErrorsIfNotOk } from "../apiUtils";
 
 export class LoginError extends Error {
   constructor(message: string) {
