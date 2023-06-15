@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { getVersion } from "react-native-device-info";
 import { displayName } from "../../../app.json";
-import { lightColors } from "../theme";
+import { defaultFontFamilies, lightColors } from "../theme";
 
 interface Props {
 
@@ -26,12 +26,12 @@ const styles = StyleSheet.create({
   appName: {
     color: lightColors.primary,
     fontSize: 13,
-    fontFamily: "sans-serif-light",
+    fontFamily: defaultFontFamilies.sansSerifLight,
   },
   version: {
     color: lightColors.textLighter,
     fontSize: 10,
-    fontFamily: "sans-serif-light",
+    fontFamily: defaultFontFamilies.sansSerifLight,
   },
 });
 

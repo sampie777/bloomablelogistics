@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { rollbar } from "../../logic/rollbar";
-import { lightColors } from "../theme";
+import { defaultFontFamilies, lightColors } from "../theme";
 
 interface ComponentProps {
   children: React.ReactNode;
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     fontSize: 50,
     paddingVertical: 40,
     textAlign: "center",
-    fontFamily: "sans-serif-thin",
+    fontFamily: defaultFontFamilies.sansSerifThin,
     color: lightColors.text,
   },
   paragraph: {
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   errorName: {
     color: "firebrick",
     fontSize: 20,
-    fontFamily: "sans-serif-light",
+    fontFamily: defaultFontFamilies.sansSerifLight,
     marginBottom: 20,
     paddingHorizontal: 30,
   },
@@ -183,6 +183,6 @@ const styles = StyleSheet.create({
   },
   lineText: {
     color: "#eee",
-    fontFamily: "sans-serif-light",
+    fontFamily: defaultFontFamilies.sansSerifLight,
   },
 });

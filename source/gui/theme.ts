@@ -52,3 +52,15 @@ export const lightColors: ThemeColors = {
   switchComponentThumb: isIOS ? "#fff" : "dodgerblue",
   switchComponentBackground: isIOS ? "#eee" : undefined,
 };
+
+export interface ThemeFontFamilies {
+  // sansSerif: string,
+  sansSerifLight: string,
+  sansSerifThin: string,
+}
+
+export const defaultFontFamilies: ThemeFontFamilies = {
+  // sansSerif: "sans-serif",
+  sansSerifLight: "sans-serif-light",
+  sansSerifThin: "sans-serif-thin",
+};

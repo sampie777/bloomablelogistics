@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useRecoilValue } from "recoil";
 import { selectedDateOrdersState } from "../../logic/recoil";
-import { lightColors } from "../theme";
+import { defaultFontFamilies, lightColors } from "../theme";
 
 interface Props {
 
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: lightColors.textLighter,
-    fontFamily: "sans-serif-light",
+    fontFamily: defaultFontFamilies.sansSerifLight,
   },
   bar: {
     width: "100%",
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   },
   percentage: {
     paddingLeft: 20,
-    fontFamily: "sans-serif-light",
+    fontFamily: defaultFontFamilies.sansSerifLight,
     color: lightColors.text,
   },
 });

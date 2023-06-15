@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { useRecoilValue } from "recoil";
 import { selectedDateOrdersState } from "../../logic/recoil";
 import ProgressBar from "./ProgressBar";
-import { lightColors } from "../theme";
+import { defaultFontFamilies, lightColors } from "../theme";
 
 interface Props {
 
@@ -38,20 +38,20 @@ const styles = StyleSheet.create({
   fractionNumeratorText: {
     color: "#ec8700",
     fontSize: 70,
-    fontFamily: "sans-serif-light",
+    fontFamily: defaultFontFamilies.sansSerifLight,
     marginLeft: 40,
   },
   fractionDividerText: {
     fontSize: 30,
     paddingBottom: 11,
     paddingLeft: 10,
-    fontFamily: "sans-serif-thin",
+    fontFamily: defaultFontFamilies.sansSerifThin,
     color: lightColors.text,
   },
   description: {
     paddingBottom: 15,
     paddingLeft: 8,
-    fontFamily: "sans-serif-light",
+    fontFamily: defaultFontFamilies.sansSerifLight,
     color: lightColors.textLighter,
   },
   delivered: {

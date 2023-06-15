@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import server, { LoginError } from "../../logic/bloomable/server";
 import LoadingOverlay from "../utils/LoadingOverlay";
-import { lightColors } from "../theme";
+import { defaultFontFamilies, lightColors } from "../theme";
 import { displayName } from "../../../app.json";
 import { rollbar } from "../../logic/rollbar";
 
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
   appName: {
     color: lightColors.primary,
     fontSize: 28,
-    fontFamily: "sans-serif-light",
+    fontFamily: defaultFontFamilies.sansSerifLight,
   },
   form: {
     flex: 3,

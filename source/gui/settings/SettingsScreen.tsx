@@ -7,6 +7,8 @@ import { ParamList, routes } from "../../routes";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { settings } from "../../logic/settings/settings";
 import { Notifications } from "../../logic/notifications";
+import { getBuildNumber, getVersion } from "react-native-device-info";
+import { defaultFontFamilies, lightColors } from "../theme";
 
 const Header: React.FC<{ title: string, isVisible?: boolean }> = ({ title, isVisible = true }) => {
   return !isVisible ? null : <Text style={styles.settingHeader}>{title}</Text>;
@@ -39,6 +41,11 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
                             });
                           }} />
 
+      <View style={styles.versionContainer}>
+        <Text style={styles.versionText}>
+          version: {getVersion()} ({getBuildNumber()}) {process.env.NODE_ENV === "production" ? undefined : `(${process.env.NODE_ENV})`}
+        </Text>
+      </View>
     </ScrollView>
   </View>;
 };
@@ -59,6 +66,16 @@ const styles = StyleSheet.create({
     fontSize: 15,
     textTransform: "uppercase",
     color: "#999",
+  },
+
+  versionContainer: {
+    marginTop: 100,
+  },
+  versionText: {
+    textAlign: "center",
+    color: lightColors.textLighter,
+    fontSize: 12,
+    fontFamily: defaultFontFamilies.sansSerifLight,
   },
 });
 
