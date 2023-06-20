@@ -2,6 +2,7 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Order } from "../../../logic/models";
 import { lightColors } from "../../theme";
+import { settings } from "../../../logic/settings/settings";
 
 interface BooleanProps {
   positive: boolean,
@@ -42,7 +43,7 @@ const OrderStatus: React.FC<Props> = ({
                                         deliveredOrder,
                                       }) => {
   return <View style={styles.container}>
-    {order.accepted ?
+    {order.accepted || settings.disableOrderActions ?
       <StatusText positive={order.accepted}
                   positiveText={"Accepted"}
                   negativeText={"Not accepted"} />
@@ -51,7 +52,7 @@ const OrderStatus: React.FC<Props> = ({
                       negativeText={"Not accepted"}
                       onPress={() => acceptOrder?.(order)} />
     }
-    {order.delivered || !order.accepted || order.deleted ?
+    {order.delivered || !order.accepted || order.deleted || settings.disableOrderActions ?
       <StatusText positive={order.delivered}
                   positiveText={"Delivered"}
                   negativeText={"Not delivered"} />
@@ -60,10 +61,12 @@ const OrderStatus: React.FC<Props> = ({
                       negativeText={"Not delivered"}
                       onPress={() => deliveredOrder?.(order)} />
     }
-    {!order.deleted ? undefined : <Text
-      style={[styles.boolean, styles.booleanError]}>
-      Deleted
-    </Text>}
+    {!order.deleted || settings.disableOrderActions ? undefined :
+      <Text
+        style={[styles.boolean, styles.booleanError]}>
+        Deleted
+      </Text>
+    }
   </View>;
 };
 

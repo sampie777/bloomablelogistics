@@ -29,6 +29,7 @@ import {
 import { config } from "../../config";
 import { Orders } from "../../logic/orders";
 import { rollbar } from "../../logic/rollbar";
+import { settings } from "../../logic/settings/settings";
 
 interface Props {
   orders: Order[];
@@ -132,6 +133,8 @@ const OrdersList: React.FC<Props> = ({
     });
 
   function applyOrderAction(order: Order, action: (order: Order) => Promise<any>, errorTitle: string, errorMessage: string) {
+    if (settings.disableOrderActions) return;
+
     setOrderActionInProgress(true);
     action(order)
       .then(() => refreshOrders())

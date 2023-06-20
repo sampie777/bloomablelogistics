@@ -9,15 +9,29 @@ import { settings } from "../../logic/settings/settings";
 import { Notifications } from "../../logic/notifications";
 import { getBuildNumber, getVersion } from "react-native-device-info";
 import { defaultFontFamilies, lightColors } from "../theme";
+import { useRecoilState } from "recoil";
+import { orderActionInProgressState } from "../../logic/recoil";
 
 const Header: React.FC<{ title: string, isVisible?: boolean }> = ({ title, isVisible = true }) => {
   return !isVisible ? null : <Text style={styles.settingHeader}>{title}</Text>;
 };
 
 const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }) => {
+  const [orderActionInProgress, setOrderActionInProgress] = useRecoilState(orderActionInProgressState);
+
   return <View style={styles.container}>
     <ScrollView
       contentContainerStyle={styles.scrollContainer}>
+
+      <Header title={"Orders"} />
+      <SwitchComponent settingsKey={"disableOrderActions"}
+                       title={"Passive mode"}
+                       description={"Disable applying actions to orders to prevent oopsies"}
+                       callback={() => {
+                         // Just quickly refresh the GUI so the new setting is applied to the buttons.
+                         setOrderActionInProgress(true);
+                         setOrderActionInProgress(false);
+                       }} />
 
       <Header title={"Notifications"} />
       <SwitchComponent settingsKey={"notificationsShowForNewOrders"}

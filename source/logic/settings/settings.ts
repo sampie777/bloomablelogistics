@@ -5,6 +5,7 @@ export const settings = {
   store: () => console.debug("Method not implemented"),
 
   notificationsShowForNewOrders: true,
+  disableOrderActions: false,
 };
 
 settings.load = () => SettingsUtils.load(settings);
