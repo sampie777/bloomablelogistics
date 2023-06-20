@@ -13,6 +13,7 @@ import LoadingOverlay from "../utils/LoadingOverlay";
 import DateHeader from "./DateHeader";
 import OrderDetailsLoader from "../orders/OrderDetailsLoader";
 import { Notifications } from "../../logic/notifications";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const TabNav = createBottomTabNavigator();
 
@@ -86,41 +87,43 @@ const MainWrapper: React.FC<Props> = () => {
       });
   };
 
-  return <View style={styles.container}>
-    <LoadingOverlay isVisible={isProcessing || orderActionInProgress}
-                    text={isProcessing ? "Getting orders..." :
-                      (orderActionInProgress ? "Applying..." : undefined)} />
-    <OrderDetailsLoader />
-    <DateHeader />
+  return <GestureHandlerRootView style={{ flex: 1 }}>
+    <View style={styles.container}>
+      <LoadingOverlay isVisible={isProcessing || orderActionInProgress}
+                      text={isProcessing ? "Getting orders..." :
+                        (orderActionInProgress ? "Applying..." : undefined)} />
+      <OrderDetailsLoader />
+      <DateHeader />
 
-    <View>
-      {errorMessage === undefined ? undefined :
-        <View style={[styles.row, styles.errorView]}>
-          <FontAwesome5Icon name={"exclamation-circle"} solid style={[styles.icon, styles.error]} />
-          <Text style={styles.error}>{errorMessage}</Text>
-        </View>
-      }
+      <View>
+        {errorMessage === undefined ? undefined :
+          <View style={[styles.row, styles.errorView]}>
+            <FontAwesome5Icon name={"exclamation-circle"} solid style={[styles.icon, styles.error]} />
+            <Text style={styles.error}>{errorMessage}</Text>
+          </View>
+        }
+      </View>
+
+      <TabNav.Navigator initialRouteName={routes.Dashboard}
+                        screenOptions={{
+                          tabBarStyle: styles.tabBar,
+                          tabBarActiveTintColor: styles.tabBarActiveLabel.color as string,
+                        }}>
+        <TabNav.Screen name={routes.Dashboard} component={Dashboard}
+                       options={{
+                         headerShown: false,
+                         tabBarIcon: ({ focused, color, size }) =>
+                           <FontAwesome5Icon name="home" size={size} color={color} />,
+                       }} />
+        <TabNav.Screen name={routes.Map} component={MapOverview}
+                       options={{
+                         headerShown: false,
+                         tabBarIcon: ({ focused, color, size }) =>
+                           <FontAwesome5Icon name="map-marked-alt" size={size} color={color} />,
+                       }} />
+      </TabNav.Navigator>
     </View>
-
-    <TabNav.Navigator initialRouteName={routes.Dashboard}
-                      screenOptions={{
-                        tabBarStyle: styles.tabBar,
-                        tabBarActiveTintColor: styles.tabBarActiveLabel.color as string,
-                      }}>
-      <TabNav.Screen name={routes.Dashboard} component={Dashboard}
-                     options={{
-                       headerShown: false,
-                       tabBarIcon: ({ focused, color, size }) =>
-                         <FontAwesome5Icon name="home" size={size} color={color} />,
-                     }} />
-      <TabNav.Screen name={routes.Map} component={MapOverview}
-                     options={{
-                       headerShown: false,
-                       tabBarIcon: ({ focused, color, size }) =>
-                         <FontAwesome5Icon name="map-marked-alt" size={size} color={color} />,
-                     }} />
-    </TabNav.Navigator>
-  </View>;
+  </GestureHandlerRootView>;
 };
 
 const styles = StyleSheet.create({

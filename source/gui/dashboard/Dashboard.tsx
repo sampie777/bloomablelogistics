@@ -7,7 +7,6 @@ import { lightColors } from "../theme";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { ParamList, routes } from "../../routes";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Animated, {
   Extrapolation,
   interpolate,
@@ -47,18 +46,16 @@ const Dashboard: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }) 
 
   const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
-  return <GestureHandlerRootView style={{ flex: 1 }}>
-    <View style={styles.container}>
-      <AnimatedTouchableOpacity style={[styles.settingsButton, animatedContainerStyle]}
-                                onPress={openSettings}>
-        <FontAwesome5Icon name={"cog"} style={styles.settingsButtonIcon} />
-      </AnimatedTouchableOpacity>
+  return <View style={styles.container}>
+    <AnimatedTouchableOpacity style={[styles.settingsButton, animatedContainerStyle]}
+                              onPress={openSettings}>
+      <FontAwesome5Icon name={"cog"} style={styles.settingsButtonIcon} />
+    </AnimatedTouchableOpacity>
 
-      <OrdersList orders={orders}
-                  showHeader={true}
-                  onScrollViewScroll={onScrollViewScroll} />
-    </View>
-  </GestureHandlerRootView>;
+    <OrdersList orders={orders}
+                showHeader={true}
+                onScrollViewScroll={onScrollViewScroll} />
+  </View>;
 };
 
 const styles = StyleSheet.create({
