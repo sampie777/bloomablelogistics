@@ -6,10 +6,9 @@ import Dashboard from "../dashboard/Dashboard";
 import MapOverview from "../map/MapOverview";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../theme";
-import { useRecoilState } from "recoil";
-import { ordersOutdatedState, ordersState } from "../../logic/recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { orderActionInProgressState, ordersOutdatedState, ordersState } from "../../logic/recoil";
 import { Orders } from "../../logic/orders";
-import { Order } from "../../logic/models";
 import LoadingOverlay from "../utils/LoadingOverlay";
 import DateHeader from "./DateHeader";
 import OrderDetailsLoader from "../orders/OrderDetailsLoader";
@@ -28,6 +27,7 @@ const MainWrapper: React.FC<Props> = () => {
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const [orders, setOrders] = useRecoilState(ordersState);
   const [ordersOutdated, setOrdersOutdated] = useRecoilState(ordersOutdatedState);
+  const orderActionInProgress = useRecoilValue(orderActionInProgressState);
 
   useEffect(() => {
     isMounted.current = true;
@@ -70,7 +70,7 @@ const MainWrapper: React.FC<Props> = () => {
           _orders = orders.concat(_orders);
         }
 
-        setAndSortOrders(_orders);
+        setOrders(Orders.sort(_orders));
       })
       .catch(error => {
         if (!isMounted.current) {
@@ -86,12 +86,10 @@ const MainWrapper: React.FC<Props> = () => {
       });
   };
 
-  const setAndSortOrders = (_orders: Order[]) => {
-    setOrders(Orders.sort(_orders));
-  };
-
   return <View style={styles.container}>
-    <LoadingOverlay isVisible={isProcessing} />
+    <LoadingOverlay isVisible={isProcessing || orderActionInProgress}
+                    text={isProcessing ? "Getting orders..." :
+                      (orderActionInProgress ? "Applying..." : undefined)} />
     <OrderDetailsLoader />
     <DateHeader />
 

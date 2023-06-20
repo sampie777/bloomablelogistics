@@ -1,6 +1,6 @@
 import { SettingsUtils } from "./settingsUtils";
 
-export const settings ={
+export const settings = {
   load: () => console.debug("Method not implemented"),
   store: () => console.debug("Method not implemented"),
 

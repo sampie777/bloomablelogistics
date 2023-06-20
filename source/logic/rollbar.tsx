@@ -26,7 +26,7 @@ const configuration = new Configuration(
 export const rollbar = new Client(configuration);
 
 getUniqueId().then(value => rollbar.setPerson(value))
-  .catch(e => console.error(e));
+  .catch(e => rollbar.error("Could not get/set unique ID", { error: e }));
 
 if (!shouldRollbarBeEnabled) {
   const rollbarLogLocal = (logFunction: (...data: any[]) => void, obj: LogArgument, extra?: Extra, callback?: Callback): LogResult => {

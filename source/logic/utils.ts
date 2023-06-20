@@ -86,6 +86,8 @@ export const getNextDay = (ref: Date): Date => new Date(ref.getTime() + 24 * 60 
 
 export const emptyPromise = (): Promise<null> => new Promise((resolve => resolve(null)));
 export const emptyPromiseWithValue = <T>(v: T): Promise<T> => new Promise((resolve => resolve(v)));
+export const delayedPromiseWithValue = <T>(v: T, delay: number = 1000): Promise<T> =>
+  new Promise((resolve => setTimeout(() => resolve(v), delay)));
 
 export function capitalize(word: string) {
   if (word.length === 0) {

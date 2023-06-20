@@ -1,24 +1,67 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Order } from "../../../logic/models";
 import { lightColors } from "../../theme";
 
-interface Props {
-  order: Order;
+interface BooleanProps {
+  positive: boolean,
+  positiveText: string,
+  negativeText: string
 }
 
-const OrderStatus: React.FC<Props> = ({ order }) => {
+const StatusText: React.FC<BooleanProps> = ({ positive, positiveText, negativeText }) => {
+  return <Text
+    style={[styles.boolean, (positive ? styles.booleanPositive : styles.booleanNegative)]}>
+    {positive ? positiveText : negativeText}
+  </Text>;
+};
+
+const StatusButton: React.FC<BooleanProps & { onPress?: () => void }> = ({
+                                                                           positive,
+                                                                           positiveText,
+                                                                           negativeText,
+                                                                           onPress,
+                                                                         }) => {
+  return <TouchableOpacity onPress={onPress}
+                           style={[styles.boolean, (positive ? styles.booleanPositive : styles.booleanNegative), styles.button]}>
+    <Text style={[styles.booleanText]}>
+      {positive ? positiveText : negativeText}
+    </Text>
+  </TouchableOpacity>;
+};
+
+interface Props {
+  order: Order;
+  acceptOrder?: (order: Order) => void;
+  deliveredOrder?: (order: Order) => void;
+}
+
+const OrderStatus: React.FC<Props> = ({
+                                        order,
+                                        acceptOrder,
+                                        deliveredOrder,
+                                      }) => {
   return <View style={styles.container}>
-    <Text
-      style={[styles.accepted, styles.boolean, (order.accepted ? styles.booleanPositive : styles.booleanNegative)]}>
-      {order.accepted ? "Accepted" : "Not accepted"}
-    </Text>
-    <Text
-      style={[styles.delivered, styles.boolean, (order.delivered ? styles.booleanPositive : styles.booleanNegative)]}>
-      {order.delivered ? "Delivered" : "Not delivered"}
-    </Text>
+    {order.accepted ?
+      <StatusText positive={order.accepted}
+                  positiveText={"Accepted"}
+                  negativeText={"Not accepted"} />
+      : <StatusButton positive={order.accepted}
+                      positiveText={"Accepted"}
+                      negativeText={"Not accepted"}
+                      onPress={() => acceptOrder?.(order)} />
+    }
+    {order.delivered || !order.accepted || order.deleted ?
+      <StatusText positive={order.delivered}
+                  positiveText={"Delivered"}
+                  negativeText={"Not delivered"} />
+      : <StatusButton positive={order.delivered}
+                      positiveText={"Delivered"}
+                      negativeText={"Not delivered"}
+                      onPress={() => deliveredOrder?.(order)} />
+    }
     {!order.deleted ? undefined : <Text
-      style={[styles.deleted, styles.boolean, styles.booleanError]}>
+      style={[styles.boolean, styles.booleanError]}>
       Deleted
     </Text>}
   </View>;
@@ -27,17 +70,26 @@ const OrderStatus: React.FC<Props> = ({ order }) => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    marginVertical: 10,
+    marginVertical: 5,
+    alignItems: "center",
   },
-  accepted: {},
-  delivered: {},
-  deleted: {},
   boolean: {
     borderRadius: 30,
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 6,
     marginRight: 10,
     color: lightColors.text,
+  },
+  button: {
+    paddingVertical: 7,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.20,
+    shadowRadius: 1.41,
+    elevation: 2,
   },
   booleanPositive: {
     backgroundColor: "#00c900",
@@ -49,6 +101,9 @@ const styles = StyleSheet.create({
   },
   booleanError: {
     backgroundColor: "#ec0000",
+    color: "#fff",
+  },
+  booleanText: {
     color: "#fff",
   },
 });

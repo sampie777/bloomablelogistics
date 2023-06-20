@@ -1,16 +1,17 @@
 import server from "./bloomable/server";
 import { ServerHtml } from "./bloomable/html";
 import { config } from "../config";
-import { emptyPromiseWithValue } from "./utils";
+import { delayedPromiseWithValue, emptyPromiseWithValue } from "./utils";
 import { Order, Recipient } from "./models";
 import { demoOrders } from "./demoData";
+import Server from "./bloomable/server";
 
 export namespace Orders {
   let fetchedOrders: Order[] = [];
 
   export const fetchPage = (page: number = 1): Promise<Order[]> => {
     if (config.offlineData || server.isDemoUser()) {
-      return emptyPromiseWithValue([...demoOrders]);
+      return delayedPromiseWithValue([...demoOrders], 1000);
     }
 
     return server.getOrdersPage(page)
@@ -87,11 +88,13 @@ export namespace Orders {
       });
   };
 
+  // Sort by order of importance (the later the sort, the more important the sort)
   export const sort = (orders: Order[]): Order[] =>
     orders
       .sort((a, b) => (a.number || 0) - (b.number || 0))
       .sort((a, b) => (b.delivered ? 1 : -1) - (a.delivered ? 1 : -1))
       .sort((a, b) => (b.deleted ? 1 : -1) - (a.deleted ? 1 : -1))
+      .sort((a, b) => (b.accepted ? 1 : -1) - (a.accepted ? 1 : -1))
       .sort((a, b) => {
         if (a.deliverAtDate && b.deliverAtDate) {
           return a.deliverAtDate.getTime() - b.deliverAtDate.getTime();
@@ -104,4 +107,19 @@ export namespace Orders {
         }
       })
       .reverse();
+
+  export const accept = (order: Order): Promise<any> => {
+    if (!order.id) throw new Error("Order has no valid id");
+    return Server.acceptOrder(order.id);
+  };
+
+  export const reject = (order: Order): Promise<any> => {
+    if (!order.id) throw new Error("Order has no valid id");
+    return Server.rejectOrder(order.id);
+  };
+
+  export const deliver = (order: Order): Promise<any> => {
+    if (!order.id) throw new Error("Order has no valid id");
+    return Server.deliverOrder(order.id);
+  };
 }

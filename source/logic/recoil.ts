@@ -20,6 +20,11 @@ export const ordersOutdatedState = atom<boolean>({
   default: true,
 });
 
+export const orderActionInProgressState = atom<boolean>({
+  key: "orderActionInProgress",
+  default: false,
+});
+
 export const selectedDateOrdersState = selector<Order[]>({
   key: "selectedDateOrders",
   get: ({ get }) => {

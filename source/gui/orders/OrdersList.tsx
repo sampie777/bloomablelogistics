@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
+  Alert,
   Dimensions,
   ListRenderItemInfo,
   NativeScrollEvent,
@@ -12,7 +13,7 @@ import { Order } from "../../logic/models";
 import ProgressView from "../dashboard/ProgressView";
 import { getNextDay, getPreviousDay } from "../../logic/utils";
 import { useRecoilState } from "recoil";
-import { ordersOutdatedState, selectedDateState } from "../../logic/recoil";
+import { orderActionInProgressState, ordersOutdatedState, selectedDateState } from "../../logic/recoil";
 import Animated, {
   Easing,
   runOnJS,
@@ -26,6 +27,8 @@ import {
   GestureDetector,
 } from "react-native-gesture-handler";
 import { config } from "../../config";
+import { Orders } from "../../logic/orders";
+import { rollbar } from "../../logic/rollbar";
 
 interface Props {
   orders: Order[];
@@ -33,7 +36,11 @@ interface Props {
   onScrollViewScroll?: (e: NativeSyntheticEvent<NativeScrollEvent>) => void;
 }
 
-const OrdersList: React.FC<Props> = ({ orders, showHeader, onScrollViewScroll }) => {
+const OrdersList: React.FC<Props> = ({
+                                       orders,
+                                       showHeader,
+                                       onScrollViewScroll,
+                                     }) => {
   let startX = 0, startY = 0;
 
   const _newDateRef = useRef<Date | undefined>(undefined);
@@ -41,6 +48,7 @@ const OrdersList: React.FC<Props> = ({ orders, showHeader, onScrollViewScroll })
   const [screenWidth, setScreenWidth] = useState(0);
   const [selectedDate, setSelectedDate] = useRecoilState(selectedDateState);
   const [ordersOutdated, setOrdersOutdated] = useRecoilState(ordersOutdatedState);
+  const [orderActionInProgress, setOrderActionInProgress] = useRecoilState(orderActionInProgressState);
 
   const animatedHorizontalOffset = useSharedValue(0);
   const animatedContainerStyle = useAnimatedStyle(() => {
@@ -123,11 +131,80 @@ const OrdersList: React.FC<Props> = ({ orders, showHeader, onScrollViewScroll })
       }
     });
 
-  const renderOrderItem = ({ item }: ListRenderItemInfo<Order>) => {
-    return <OrderItem order={item} />;
+  function applyOrderAction(order: Order, action: (order: Order) => Promise<any>, errorTitle: string, errorMessage: string) {
+    setOrderActionInProgress(true);
+    action(order)
+      .then(() => refreshOrders())
+      .catch(e => {
+        rollbar.error(errorMessage, { error: e, order: order });
+        Alert.alert(errorTitle, `${errorMessage}\n\n${e}.`);
+      })
+      .finally(() => setOrderActionInProgress(false));
+  }
+
+  const promptAcceptOrder = (order: Order) => {
+    Alert.alert(
+      "Accept order",
+      "Do you want to accept this order?\n\n" +
+      `Nr. ${order.number} for ${order.recipient?.name}.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Reject",
+          onPress: () => applyOrderAction(
+            order,
+            Orders.reject,
+            "Accept order",
+            "Failed to mark order as rejected.",
+          ),
+          style: "default",
+        },
+        {
+          text: "Accept",
+          onPress: () => applyOrderAction(
+            order,
+            Orders.accept,
+            "Accept order",
+            "Failed to mark order as accepted.",
+          ),
+          style: "default",
+        },
+      ],
+      { cancelable: true },
+    );
   };
 
-  const refreshOrders = () => setOrdersOutdated(true);
+  const promptDeliveredOrder = (order: Order) => {
+    Alert.alert(
+      "Deliver order",
+      "Are you sure you want to mark this order as delivered?\n\n" +
+      `Nr. ${order.number} for ${order.recipient?.name}.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Deliver",
+          onPress: () => applyOrderAction(
+            order,
+            Orders.deliver,
+            "Deliver order",
+            "Failed to mark order as delivered.",
+          ),
+          style: "default",
+        },
+      ],
+      { cancelable: true },
+    );
+  };
+
+  const renderOrderItem = ({ item }: ListRenderItemInfo<Order>) => {
+    return <OrderItem order={item}
+                      acceptOrder={promptAcceptOrder}
+                      deliveredOrder={promptDeliveredOrder} />;
+  };
+
+  const refreshOrders = () => {
+    setOrdersOutdated(true);
+  };
 
   return <GestureDetector gesture={swipeGesture}>
     <Animated.View style={[styles.container, animatedContainerStyle]}
@@ -138,7 +215,7 @@ const OrdersList: React.FC<Props> = ({ orders, showHeader, onScrollViewScroll })
                          keyExtractor={order => order.id + ""}
                          onEndReachedThreshold={2}
                          onRefresh={refreshOrders}
-                         refreshing={ordersOutdated}
+                         refreshing={ordersOutdated && orderActionInProgress}
                          ListEmptyComponent={ListEmptyComponent}
                          ListHeaderComponent={showHeader ? ProgressView : undefined}
                          onScroll={onScrollViewScroll}

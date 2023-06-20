@@ -12,10 +12,15 @@ import UrlLink from "../../utils/UrlLink";
 
 interface Props {
   order: Order;
-  onOrderUpdated?: () => void;
+  acceptOrder?: (order: Order) => void;
+  deliveredOrder?: (order: Order) => void;
 }
 
-const OrderItem: React.FC<Props> = ({ order, onOrderUpdated }) => {
+const OrderItem: React.FC<Props> = ({
+                                      order,
+                                      acceptOrder,
+                                      deliveredOrder,
+                                    }) => {
   return <View style={[styles.container, (order.deleted ? styles.deleted : {})]}>
     <View style={styles.row}>
       <UrlLink url={`https://www.bloomable.co.za/Code/Orders/Summary?orderId=${order.id}`}>
@@ -28,10 +33,12 @@ const OrderItem: React.FC<Props> = ({ order, onOrderUpdated }) => {
       </View>
     </View>
 
-    <RecipientInfo order={order} onRecipientUpdated={onOrderUpdated} />
+    <RecipientInfo order={order} />
     <OrderCosts order={order} />
     <ClientInfo order={order} />
-    <OrderStatus order={order} />
+    <OrderStatus order={order}
+                 acceptOrder={acceptOrder}
+                 deliveredOrder={deliveredOrder} />
   </View>;
 };
 

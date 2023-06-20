@@ -18,10 +18,9 @@ import { isAndroid } from "../../../logic/utils";
 
 interface Props {
   order: Order;
-  onRecipientUpdated?: () => void;
 }
 
-const RecipientInfo: React.FC<Props> = ({ order, onRecipientUpdated }) => {
+const RecipientInfo: React.FC<Props> = ({ order }) => {
   const [collapsed, setCollapsed] = useState(true);
 
   if (!order.recipient) {

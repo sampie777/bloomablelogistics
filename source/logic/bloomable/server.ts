@@ -42,17 +42,7 @@ class Server {
       return emptyPromise();
     }
 
-    const formData = "Referrer=&ReturnUrl=&ShowCreateAccountButton=True&Username=" + username + "&Password=" + password + "&RememberMe=true&RememberMe=false&X-Requested-With=XMLHttpRequest";
-
-    return fetch(api.url.login(), {
-      "credentials": "include",
-      "headers": {
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-      },
-      "body": formData,
-      "method": "POST",
-      "mode": "no-cors",
-    })
+    return api.auth.login(username, password)
       .then(throwErrorsIfNotOk)
       .then(response => {
         const cookies = response.headers.get("set-cookie");
@@ -171,7 +161,7 @@ class Server {
   }
 
   getOrdersPage(page: number) {
-    return fetch(api.url.orders(page))
+    return api.orders.list(page)
       .then(throwErrorsIfNotOk)
       .then(response => response.text())
       .catch(error => {
@@ -184,11 +174,47 @@ class Server {
   }
 
   getOrderDetailsPage(id: string) {
-    return fetch(api.url.orderDetail(id))
+    return api.orders.details(id)
       .then(throwErrorsIfNotOk)
       .then(response => response.text())
       .catch(error => {
         rollbar.error("Error fetching order details data", {
+          error: error,
+          id: id,
+        });
+        throw error;
+      });
+  }
+
+  acceptOrder(id: string) {
+    return api.orders.action.accept(id)
+      .then(throwErrorsIfNotOk)
+      .catch(error => {
+        rollbar.error("Error accepting order", {
+          error: error,
+          id: id,
+        });
+        throw error;
+      });
+  }
+
+  rejectOrder(id: string) {
+    return api.orders.action.reject(id)
+      .then(throwErrorsIfNotOk)
+      .catch(error => {
+        rollbar.error("Error rejecting order", {
+          error: error,
+          id: id,
+        });
+        throw error;
+      });
+  }
+
+  deliverOrder(id: string) {
+    return api.orders.action.deliver(id)
+      .then(throwErrorsIfNotOk)
+      .catch(error => {
+        rollbar.error("Error delivering order", {
           error: error,
           id: id,
         });

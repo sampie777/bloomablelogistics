@@ -3,6 +3,7 @@ import { rollbar } from "./rollbar";
 export const HttpCode = {
   OK: 200,
   Created: 201,
+  Found: 302,
   NotFound: 404,
   Unauthorized: 401,
   Forbidden: 403,
