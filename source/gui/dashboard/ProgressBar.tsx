@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useRecoilValue } from "recoil";
 import { selectedDateOrdersState } from "../../logic/recoil";
 import { defaultFontFamilies, lightColors } from "../theme";
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 
 interface Props {
 
@@ -11,13 +12,26 @@ interface Props {
 const ProgressBar: React.FC<Props> = () => {
   const orders = useRecoilValue(selectedDateOrdersState)
     .filter(it => !it.deleted && it.accepted);
+  const animatedValue = useSharedValue(0);
+  const animatedStyle = useAnimatedStyle(() => ({
+    width: animatedValue.value + "%",
+  }));
+
+  const delivered = orders.filter(it => it.delivered).length;
+  const percentageDelivered = Math.round(delivered / orders.length * 100);
+
+  useEffect(() => {
+    if (isNaN(percentageDelivered)) return;
+
+    animatedValue.value = withTiming(percentageDelivered, {
+      duration: 500,
+      easing: Easing.inOut(Easing.ease),
+    });
+  }, [percentageDelivered]);
 
   if (orders.length === 0) {
     return null;
   }
-
-  const delivered = orders.filter(it => it.delivered).length;
-  const percentageDelivered = Math.round(delivered / orders.length * 100);
 
   return <View style={styles.container}>
     <Text style={styles.title}>Delivered:</Text>
@@ -25,10 +39,10 @@ const ProgressBar: React.FC<Props> = () => {
     <View style={styles.bar}>
       <View style={styles.total}>
         <View style={styles.totalBackground} />
-        <View style={[styles.delivered, {
-          width: percentageDelivered + "%",
-          minWidth: percentageDelivered > 0 ? 20 : 0,
-        }]} />
+        <Animated.View style={[styles.delivered,
+          { minWidth: percentageDelivered > 0 ? 20 : 0 },
+          animatedStyle,
+        ]} />
       </View>
       <Text style={styles.percentage}>
         {percentageDelivered} %
