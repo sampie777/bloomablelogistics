@@ -13,6 +13,7 @@ export const api = {
   orders: {
     list: (page: number) => fetch(`https://www.bloomable.co.za/Code/Orders/Dashboard?SortByField=DeliveryDate&SortByDirection=DESC&page=${page}`),
     details: (id: string) => fetch(`https://www.bloomable.co.za/Code/Orders/Summary?orderId=${id}`),
+    manage: (number: number) => fetch(`https://www.bloomable.co.za/code/orders/orderactions/${number}`),
     action: {
       accept: (id: string) => fetch(`https://www.bloomable.co.za/AutoProcess/SaveOrderAsAccepted?encryptedOrderId=${id}`),
       reject: (id: string) => fetch(`https://www.bloomable.co.za/AutoProcess/SaveOrderAsAccepted?encryptedOrderId=${id}&rejected=True`),

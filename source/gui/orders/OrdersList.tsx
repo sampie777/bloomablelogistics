@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Alert,
   Dimensions,
   ListRenderItemInfo,
   NativeScrollEvent,
@@ -27,9 +26,6 @@ import {
   GestureDetector,
 } from "react-native-gesture-handler";
 import { config } from "../../config";
-import { Orders } from "../../logic/orders";
-import { rollbar } from "../../logic/rollbar";
-import { settings } from "../../logic/settings/settings";
 
 interface Props {
   orders: Order[];
@@ -132,77 +128,8 @@ const OrdersList: React.FC<Props> = ({
       }
     });
 
-  function applyOrderAction(order: Order, action: (order: Order) => Promise<any>, errorTitle: string, errorMessage: string) {
-    if (settings.disableOrderActions) return;
-
-    setOrderActionInProgress(true);
-    action(order)
-      .then(() => refreshOrders())
-      .catch(e => {
-        rollbar.error(errorMessage, { error: e, order: order });
-        Alert.alert(errorTitle, `${errorMessage}\n\n${e}.`);
-      })
-      .finally(() => setOrderActionInProgress(false));
-  }
-
-  const promptAcceptOrder = (order: Order) => {
-    Alert.alert(
-      "Accept order",
-      "Do you want to accept this order?\n\n" +
-      `Nr. ${order.number} for ${order.recipient?.name}.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Reject",
-          onPress: () => applyOrderAction(
-            order,
-            Orders.reject,
-            "Accept order",
-            "Failed to mark order as rejected.",
-          ),
-          style: "default",
-        },
-        {
-          text: "Accept",
-          onPress: () => applyOrderAction(
-            order,
-            Orders.accept,
-            "Accept order",
-            "Failed to mark order as accepted.",
-          ),
-          style: "default",
-        },
-      ],
-      { cancelable: true },
-    );
-  };
-
-  const promptDeliveredOrder = (order: Order) => {
-    Alert.alert(
-      "Deliver order",
-      "Are you sure you want to mark this order as delivered?\n\n" +
-      `Nr. ${order.number} for ${order.recipient?.name}.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Deliver",
-          onPress: () => applyOrderAction(
-            order,
-            Orders.deliver,
-            "Deliver order",
-            "Failed to mark order as delivered.",
-          ),
-          style: "default",
-        },
-      ],
-      { cancelable: true },
-    );
-  };
-
   const renderOrderItem = ({ item }: ListRenderItemInfo<Order>) => {
-    return <OrderItem order={item}
-                      acceptOrder={promptAcceptOrder}
-                      deliveredOrder={promptDeliveredOrder} />;
+    return <OrderItem order={item} />;
   };
 
   const refreshOrders = () => {

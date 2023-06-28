@@ -16,11 +16,7 @@ interface Props {
   deliveredOrder?: (order: Order) => void;
 }
 
-const OrderItem: React.FC<Props> = ({
-                                      order,
-                                      acceptOrder,
-                                      deliveredOrder,
-                                    }) => {
+const OrderItem: React.FC<Props> = ({ order }) => {
   return <View style={[styles.container, (order.deleted ? styles.deleted : {})]}>
     <View style={styles.row}>
       <UrlLink url={`https://www.bloomable.co.za/Code/Orders/Summary?orderId=${order.id}`}>
@@ -36,9 +32,7 @@ const OrderItem: React.FC<Props> = ({
     <RecipientInfo order={order} />
     <OrderCosts order={order} />
     <ClientInfo order={order} />
-    <OrderStatus order={order}
-                 acceptOrder={acceptOrder}
-                 deliveredOrder={deliveredOrder} />
+    <OrderStatus order={order} />
   </View>;
 };
 

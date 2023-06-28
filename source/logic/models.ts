@@ -17,6 +17,11 @@ export class Order {
   recipient: Recipient | null | undefined;  // null when recipient not available, undefined when recipient not yet fetched
   products: Product[] | undefined;
 
+  // Local state of the order whether it is currently being processed.
+  isAccepting: boolean = false;
+  isRejecting: boolean = false;
+  isDelivering: boolean = false;
+
   static clone(from: Order): Order {
     const to = new Order();
     to.id = from.id;
@@ -36,6 +41,10 @@ export class Order {
     to.deleted = from.deleted;
     to.recipient = from.recipient ? Recipient.clone(from.recipient) : from.recipient;
     to.products = from.products?.map(it => Product.clone(it));
+
+    to.isAccepting = from.isAccepting ?? false;
+    to.isRejecting = from.isRejecting ?? false;
+    to.isDelivering = from.isDelivering ?? false;
     return to;
   }
 }

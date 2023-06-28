@@ -16,7 +16,6 @@ const OrderDetailsLoader: React.FC<Props> = () => {
   }, [selectedOrders]);
 
   const loadDetails = () => {
-
     if (!selectedOrders.some(it => it.recipient === undefined)) {
       return;
     }

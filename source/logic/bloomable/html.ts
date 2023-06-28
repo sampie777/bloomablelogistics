@@ -27,6 +27,20 @@ export namespace ServerHtml {
     return match[1];
   };
 
+  export const orderManageResponseToOrderStatus = (html: string): {
+    isAccepted: boolean,
+    isDelivered: boolean
+  } => {
+    html = HtmlUtils.cleanUp(html);
+    const isAccepted = html.match(/<h4>You have accepted this order<\/h4>/gi) != null;
+    const isDelivered = html.match(/<h4>You have marked this order as dispatched<\/h4>/gi) != null;
+
+    return {
+      isAccepted: isAccepted || isDelivered,
+      isDelivered: isDelivered,
+    };
+  };
+
   export const ordersResponseToOrders = (html: string): Order[] => {
     const extractTable = (_html: string) => _html
       .match(new RegExp("<table class=\"table table-bordered table-striped table-small orders-dashboard\">(.*?)</table>", "i"))?.[1];

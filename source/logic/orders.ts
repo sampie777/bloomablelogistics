@@ -11,7 +11,9 @@ export namespace Orders {
 
   export const fetchPage = (page: number = 1): Promise<Order[]> => {
     if (config.offlineData || server.isDemoUser()) {
-      return delayedPromiseWithValue([...demoOrders], 1000);
+      const orders = [...demoOrders]
+        .map(it => Order.clone(it));  // Convert the dumb object to an Order class
+      return delayedPromiseWithValue(orders, 1000);
     }
 
     return server.getOrdersPage(page)
@@ -72,7 +74,7 @@ export namespace Orders {
       updatedOrder.recipient.phones = ["+27 128011234", "+27 128011234"];
       updatedOrder.recipient.company = "Crown Auto Parts";
       updatedOrder.recipient.address = "Crown Auto Parts, Broadway Street, Mamelodi Gardens, Pretoria, Gauteng, 0122";
-      return emptyPromiseWithValue(updatedOrder);
+      return delayedPromiseWithValue(updatedOrder, 100);
     }
 
     return server.getOrderDetailsPage(order.id)
@@ -84,6 +86,31 @@ export namespace Orders {
         if (updatedOrder.orderValue === undefined) {
           updatedOrder.orderValue = orderValue;
         }
+        return updatedOrder;
+      });
+  };
+
+  export const fetchStatusForOrder = (order: Order): Promise<Order> => {
+    if (!order.number) {
+      return emptyPromiseWithValue(order);
+    }
+
+    if (config.offlineData || server.isDemoUser()) {
+      const updatedOrder = Order.clone(order);
+      if (!updatedOrder.accepted) {
+        updatedOrder.accepted = true;
+      } else {
+        updatedOrder.delivered = true;
+      }
+      return delayedPromiseWithValue(updatedOrder, 500);
+    }
+
+    return server.getOrderManagePage(order.number)
+      .then((html: string) => {
+        const { isAccepted, isDelivered } = ServerHtml.orderManageResponseToOrderStatus(html);
+        const updatedOrder = Order.clone(order);
+        updatedOrder.accepted = isAccepted;
+        updatedOrder.delivered = isDelivered;
         return updatedOrder;
       });
   };
@@ -110,16 +137,28 @@ export namespace Orders {
 
   export const accept = (order: Order): Promise<any> => {
     if (!order.id) throw new Error("Order has no valid id");
+
+    order.isAccepting = true;
+
+    if (config.offlineData || server.isDemoUser()) return delayedPromiseWithValue(undefined, 500);
     return Server.acceptOrder(order.id);
   };
 
   export const reject = (order: Order): Promise<any> => {
     if (!order.id) throw new Error("Order has no valid id");
+
+    order.isRejecting = true;
+
+    if (config.offlineData || server.isDemoUser()) return delayedPromiseWithValue(undefined, 500);
     return Server.rejectOrder(order.id);
   };
 
   export const deliver = (order: Order): Promise<any> => {
     if (!order.id) throw new Error("Order has no valid id");
+
+    order.isDelivering = true;
+
+    if (config.offlineData || server.isDemoUser()) return delayedPromiseWithValue(undefined, 500);
     return Server.deliverOrder(order.id);
   };
 }

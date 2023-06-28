@@ -2,6 +2,8 @@ import { ordersDashboardResponse } from "../../resources/BloomableOrdersDashboar
 import { orderDetails1Response } from "../../resources/BloomableOrderDetailsResponse1";
 import { ServerHtml } from "../../../source/logic/bloomable/html";
 import { orderDetailsWithSundryValueResponse } from "../../resources/BloomableOrderDetailsWithSundryValue";
+import * as fs from "fs";
+import * as path from "path";
 
 describe("ServerHtml", () => {
   it("Parses HTML page with orders correctly", () => {
@@ -95,7 +97,11 @@ describe("ServerHtml", () => {
   });
 
   it("Parses order details with a sundry value correctly", () => {
-    const { recipient, orderValue, products } = ServerHtml.orderDetailsResponseToOrderDetails(orderDetailsWithSundryValueResponse);
+    const {
+      recipient,
+      orderValue,
+      products,
+    } = ServerHtml.orderDetailsResponseToOrderDetails(orderDetailsWithSundryValueResponse);
 
     expect(recipient).not.toBeUndefined();
     expect(recipient!.name).toBe("Maria Madelein");
@@ -140,5 +146,27 @@ describe("ServerHtml", () => {
     expect(products![1].guidelines).toBe("1 x Lindor Cornet Milk 200g [ 200 g/ml]");
     expect(products![1].description).toBe("");
     expect(products![1].image).toBe("https://www.bloomable.co.za/Uploads/Images/8fee7dae-d14a-4ba1-980a-427e60ba7ab5.jpg");
+  });
+
+  it("Parses order manage page to order status correctly for accepted but not delivered order", () => {
+    const html = fs.readFileSync(path.join(__dirname, "../../resources/BloomableOrderActionsResponse1547309.html"), "utf-8");
+    const {
+      isAccepted,
+      isDelivered,
+    } = ServerHtml.orderManageResponseToOrderStatus(html);
+
+    expect(isAccepted).toBe(true);
+    expect(isDelivered).toBe(false);
+  });
+
+  it("Parses order manage page to order status correctly for accepted and delivered order", () => {
+    const html = fs.readFileSync(path.join(__dirname, "../../resources/BloomableOrderActionsResponse1547321.html"), "utf-8");
+    const {
+      isAccepted,
+      isDelivered,
+    } = ServerHtml.orderManageResponseToOrderStatus(html);
+
+    expect(isAccepted).toBe(true);
+    expect(isDelivered).toBe(true);
   });
 });

@@ -186,6 +186,19 @@ class Server {
       });
   }
 
+  getOrderManagePage(number: number) {
+    return api.orders.manage(number)
+      .then(throwErrorsIfNotOk)
+      .then(response => response.text())
+      .catch(error => {
+        rollbar.error("Error fetching order manage data", {
+          error: error,
+          number: number,
+        });
+        throw error;
+      });
+  }
+
   acceptOrder(id: string) {
     return api.orders.action.accept(id)
       .then(throwErrorsIfNotOk)
