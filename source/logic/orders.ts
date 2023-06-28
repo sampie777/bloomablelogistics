@@ -4,7 +4,6 @@ import { config } from "../config";
 import { delayedPromiseWithValue, emptyPromiseWithValue } from "./utils";
 import { Order, Recipient } from "./models";
 import { demoOrders } from "./demoData";
-import Server from "./bloomable/server";
 
 export namespace Orders {
   let fetchedOrders: Order[] = [];
@@ -141,7 +140,7 @@ export namespace Orders {
     order.isAccepting = true;
 
     if (config.offlineData || server.isDemoUser()) return delayedPromiseWithValue(undefined, 500);
-    return Server.acceptOrder(order.id);
+    return server.acceptOrder(order.id);
   };
 
   export const reject = (order: Order): Promise<any> => {
@@ -150,7 +149,7 @@ export namespace Orders {
     order.isRejecting = true;
 
     if (config.offlineData || server.isDemoUser()) return delayedPromiseWithValue(undefined, 500);
-    return Server.rejectOrder(order.id);
+    return server.rejectOrder(order.id);
   };
 
   export const deliver = (order: Order): Promise<any> => {
@@ -159,6 +158,6 @@ export namespace Orders {
     order.isDelivering = true;
 
     if (config.offlineData || server.isDemoUser()) return delayedPromiseWithValue(undefined, 500);
-    return Server.deliverOrder(order.id);
+    return server.deliverOrder(order.id);
   };
 }

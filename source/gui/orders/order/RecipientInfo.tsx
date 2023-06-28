@@ -1,13 +1,5 @@
 import React, { useState } from "react";
-import {
-  ActivityIndicator,
-  Platform,
-  StyleSheet,
-  Text,
-  ToastAndroid,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Platform, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from "react-native";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../../theme";
 import UrlLink from "../../utils/UrlLink";

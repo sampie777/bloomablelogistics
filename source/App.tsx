@@ -1,8 +1,5 @@
 import React from "react";
-import {
-  SafeAreaView, StatusBar,
-  StyleSheet,
-} from "react-native";
+import { SafeAreaView, StatusBar, StyleSheet } from "react-native";
 import ErrorBoundary from "./gui/utils/ErrorBoundary";
 import { lightColors } from "./gui/theme";
 import AppRoot from "./gui/AppRoot";

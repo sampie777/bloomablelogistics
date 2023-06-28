@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Location } from "../../logic/location/Locations";
 import OrdersList from "../orders/OrdersList";

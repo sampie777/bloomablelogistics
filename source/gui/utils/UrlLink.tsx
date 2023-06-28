@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, View, TouchableOpacity } from "react-native";
+import { Alert, TouchableOpacity, View } from "react-native";
 import { openLink } from "../../logic/utils";
 
 const UrlLink: React.FC<{

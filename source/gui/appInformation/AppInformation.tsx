@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { getVersion } from "react-native-device-info";
 import { displayName } from "../../../app.json";
 import { defaultFontFamilies, lightColors } from "../theme";
