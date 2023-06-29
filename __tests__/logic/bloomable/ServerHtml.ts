@@ -169,4 +169,15 @@ describe("ServerHtml", () => {
     expect(isAccepted).toBe(true);
     expect(isDelivered).toBe(true);
   });
+
+  it("Parses order manage page to order status correctly for not accepted", () => {
+    const html = fs.readFileSync(path.join(__dirname, "../../resources/BloomableOrderActionsResponse1547543.html"), "utf-8");
+    const {
+      isAccepted,
+      isDelivered,
+    } = ServerHtml.orderManageResponseToOrderStatus(html);
+
+    expect(isAccepted).toBe(false);
+    expect(isDelivered).toBe(false);
+  });
 });
