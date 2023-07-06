@@ -58,6 +58,7 @@ export namespace Server {
   export const logout = () => {
     Notifications.unsubscribe();
     clearCredentials();
+    BloomableAuth.logout();
   };
 
   export const isLoggedIn = () => {
@@ -133,7 +134,6 @@ export namespace Server {
 
   export const acceptOrder = (id: string) => {
     return BloomableApi.acceptOrder({ id: id })
-      .then(throwErrorsIfNotOk)
       .catch(error => {
         rollbar.error("Error accepting order", {
           error: error,
@@ -145,7 +145,6 @@ export namespace Server {
 
   export const rejectOrder = (id: string) => {
     return BloomableApi.rejectOrder({ id: id })
-      .then(throwErrorsIfNotOk)
       .catch(error => {
         rollbar.error("Error rejecting order", {
           error: error,
@@ -157,7 +156,6 @@ export namespace Server {
 
   export const deliverOrder = (id: string) => {
     return BloomableApi.deliverOrder({ id: id })
-      .then(throwErrorsIfNotOk)
       .catch(error => {
         rollbar.error("Error delivering order", {
           error: error,
