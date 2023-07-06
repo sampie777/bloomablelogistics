@@ -8,7 +8,7 @@ import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../theme";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { orderActionInProgressState, ordersOutdatedState, ordersState } from "../../logic/recoil";
-import { Orders } from "../../logic/orders";
+import { Orders } from "../../logic/orders/orders";
 import LoadingOverlay from "../utils/LoadingOverlay";
 import DateHeader from "./DateHeader";
 import OrderDetailsLoader from "../orders/OrderDetailsLoader";
@@ -61,7 +61,7 @@ const MainWrapper: React.FC<Props> = () => {
     setErrorMessage(undefined);
 
     fetchPage.current++;
-    Orders.fetchPage(fetchPage.current)
+    Orders.list(fetchPage.current)
       .then(_orders => {
         if (!isMounted.current) {
           return;
@@ -71,7 +71,7 @@ const MainWrapper: React.FC<Props> = () => {
           _orders = orders.concat(_orders);
         }
 
-        setOrders(Orders.sort(_orders));
+        setOrders(_orders);
       })
       .catch(error => {
         if (!isMounted.current) {

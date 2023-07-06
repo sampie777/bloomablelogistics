@@ -2,7 +2,6 @@ import React from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import SwitchComponent from "./components/SwitchComponent";
 import PressableComponent from "./components/PressableComponent";
-import Server from "../../logic/bloomable/server";
 import { ParamList, routes } from "../../routes";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { settings } from "../../logic/settings/settings";
@@ -10,7 +9,9 @@ import { Notifications } from "../../logic/notifications";
 import { getBuildNumber, getVersion } from "react-native-device-info";
 import { defaultFontFamilies, lightColors } from "../theme";
 import { useRecoilState } from "recoil";
-import { orderActionInProgressState } from "../../logic/recoil";
+import { orderActionInProgressState, selectedDateState } from "../../logic/recoil";
+import { Server } from "../../logic/bloomable/server";
+import { getNextDay } from "../../logic/utils";
 
 const Header: React.FC<{ title: string, isVisible?: boolean }> = ({ title, isVisible = true }) => {
   return !isVisible ? null : <Text style={styles.settingHeader}>{title}</Text>;
@@ -18,6 +19,7 @@ const Header: React.FC<{ title: string, isVisible?: boolean }> = ({ title, isVis
 
 const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }) => {
   const [orderActionInProgress, setOrderActionInProgress] = useRecoilState(orderActionInProgressState);
+  const [selectedDate, setSelectedDate] = useRecoilState(selectedDateState);
 
   return <View style={styles.container}>
     <ScrollView
@@ -32,6 +34,15 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
                          setOrderActionInProgress(true);
                          setOrderActionInProgress(false);
                        }} />
+      <SwitchComponent settingsKey={"useInitialCoordinatesForOrders"}
+                       title={"Recipient coordinates from Bloomable"}
+                       description={"Use the coordinates from Bloomable for orders. Turn this off to use Google's API for calculating order coordinates."}
+                       callback={() => {
+                         // Just quickly refresh the GUI so the new setting is applied to the map.
+                         const currentDate = selectedDate;
+                         setSelectedDate(getNextDay(selectedDate));
+                         setSelectedDate(currentDate);
+                       }} />
 
       <Header title={"Notifications"} />
       <SwitchComponent settingsKey={"notificationsShowForNewOrders"}
@@ -45,7 +56,7 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
 
       <Header title={"Account"} />
       <PressableComponent title={"Log out"}
-                          description={`Currently logged in as '${Server.getUsername()}'`}
+                          description={`Currently logged in as '${Server.getCredentials().username}'`}
                           onPress={() => {
                             Server.logout();
                             navigation.navigate(routes.Login);

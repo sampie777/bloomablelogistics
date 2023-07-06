@@ -1,5 +1,5 @@
 import { dateFrom } from "./utils";
-import { Order } from "./models";
+import { Order } from "./orders/models";
 
 const today = new Date();
 export const demoOrders = [

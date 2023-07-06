@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
-import { Order } from "../../../logic/models";
+import { Order } from "../../../logic/orders/models";
 import { lightColors } from "../../theme";
 
 interface Props {

@@ -1,21 +1,15 @@
 export class Order {
-  id: string | undefined;
-  number: number | undefined;
-  createdAt: Date | undefined;
-  partner: string = "";
-  clientName: string = "";
-  clientEmail: string | undefined;
-  clientPhones: string[] = [];
-  deliverAtDate: Date | undefined;
-  paymentType: string | undefined;
-  florist: string | undefined;
-  orderValue: number | undefined;
-  orderCosts: number | undefined;
+  id?: string = undefined;
+  number?: number = undefined;
+  createdAt?: Date = undefined;
+  deliverAtDate?: Date = undefined;
+  orderValue?: number = undefined;
+  orderCosts?: number = undefined;
   accepted: boolean = false;
   delivered: boolean = false;
   deleted: boolean = false;
-  recipient: Recipient | null | undefined;  // null when recipient not available, undefined when recipient not yet fetched
-  products: Product[] | undefined;
+  recipient?: Recipient = undefined;
+  products: Product[] = [];
 
   // Local state of the order whether it is currently being processed.
   isAccepting: boolean = false;
@@ -27,20 +21,14 @@ export class Order {
     to.id = from.id;
     to.number = from.number;
     to.createdAt = from.createdAt;
-    to.partner = from.partner;
-    to.clientName = from.clientName;
-    to.clientEmail = from.clientEmail;
-    to.clientPhones = from.clientPhones;
     to.deliverAtDate = from.deliverAtDate;
-    to.paymentType = from.paymentType;
-    to.florist = from.florist;
     to.orderValue = from.orderValue;
     to.orderCosts = from.orderCosts;
     to.accepted = from.accepted;
     to.delivered = from.delivered;
     to.deleted = from.deleted;
     to.recipient = from.recipient ? Recipient.clone(from.recipient) : from.recipient;
-    to.products = from.products?.map(it => Product.clone(it));
+    to.products = from.products.map(it => Product.clone(it));
 
     to.isAccepting = from.isAccepting ?? false;
     to.isRejecting = from.isRejecting ?? false;
@@ -55,8 +43,12 @@ export class Recipient {
   company: string = "";
   unit: string = "";
   address: string = "";
-  message: string | undefined;
-  specialInstructions: string | undefined;
+  coordinates?: {
+    latitude: number,
+    longitude: number,
+  } = undefined;
+  message?: string = undefined;
+  specialInstructions?: string = undefined;
 
   static clone(from: Recipient): Recipient {
     const to = new Recipient();
@@ -72,9 +64,9 @@ export class Recipient {
 }
 
 export class ProductExtra {
-  name: string | undefined;
-  description: string | undefined;
-  image: string | undefined;
+  name?: string = undefined;
+  description?: string = undefined;
+  image?: string = undefined;
 
   static clone(from: ProductExtra): ProductExtra {
     const to = new ProductExtra();
@@ -86,17 +78,21 @@ export class ProductExtra {
 }
 
 export class Product {
-  name: string | undefined;
-  size: string | undefined;
-  quantity: string | undefined;
-  retailPrice: number | undefined;
-  guidelines: string | undefined;
-  description: string | undefined;
-  image: string | undefined;
-  extras: ProductExtra[] | undefined;
+  id: number = -1;
+  name?: string = undefined;
+  size?: string = undefined;
+  quantity?: number = undefined;
+  retailPrice?: number = undefined;
+  guidelines?: string = undefined;
+  description?: string = undefined;
+  image?: string = undefined;
+  extras?: ProductExtra[] = undefined;
+
+  _detailsLoaded: boolean = false;
 
   static clone(from: Product): Product {
     const to = new Product();
+    to.id = from.id;
     to.name = from.name;
     to.size = from.size;
     to.quantity = from.quantity;
@@ -105,6 +101,8 @@ export class Product {
     to.description = from.description;
     to.image = from.image;
     to.extras = from.extras?.map(it => ProductExtra.clone(it));
+
+    to._detailsLoaded = from._detailsLoaded;
     return to;
   }
 }

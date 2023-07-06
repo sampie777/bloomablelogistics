@@ -1,9 +1,10 @@
-import { Order, Recipient } from "../models";
+import { Order, Recipient } from "../orders/models";
 import { rollbar } from "../rollbar";
 import { emptyPromise, emptyPromiseWithValue, hashCyrb53 } from "../utils";
 import Geocoder from "react-native-geocoding";
 import Config from "react-native-config";
 import { locationCache } from "../cache";
+import { settings } from "../settings/settings";
 
 Geocoder.init(Config.GOOGLE_MAPS_API_KEY ?? "");
 
@@ -21,7 +22,11 @@ interface Coordinate {
 
 export namespace Locations {
   export const locationsForOrders = (orders: Order[], useSmartAddress = false): Promise<Location[]> => {
-    return getLocationsForOrders(orders.filter(it => it.recipient?.address && !it.deleted), [], useSmartAddress)
+    return getLocationsForOrders(
+      orders.filter(it => it.recipient && (it.recipient.address || it.recipient.coordinates) && !it.deleted),
+      [],
+      useSmartAddress,
+    )
       .then(locations => mergeOrdersByLocation(locations));
   };
 
@@ -41,6 +46,15 @@ export namespace Locations {
   };
 
   export const getLocationForOrder = (order: Order, useSmartAddress = false): Promise<Location | null> => {
+    if (settings.useInitialCoordinatesForOrders && order.recipient && order.recipient.coordinates) {
+      return emptyPromiseWithValue({
+        key: order.id || (Math.random() * 1000).toString(),
+        latitude: order.recipient.coordinates.latitude,
+        longitude: order.recipient.coordinates.longitude,
+        orders: [order],
+      } as Location);
+    }
+
     const address = useSmartAddress
       ? fixWrongAddressWithoutHouseNumber(order.recipient)
       : order.recipient?.address;

@@ -1,11 +1,11 @@
-import { Order } from "../../../../logic/models";
+import { Order } from "../../../../logic/orders/models";
 import { useRecoilState } from "recoil";
 import { orderActionInProgressState } from "../../../../logic/recoil";
 import { useState } from "react";
 import { settings } from "../../../../logic/settings/settings";
 import { rollbar } from "../../../../logic/rollbar";
 import { Alert } from "react-native";
-import { Orders } from "../../../../logic/orders";
+import { Orders } from "../../../../logic/orders/orders";
 
 type ApplyOrderActionProps = (action: (order: Order) => Promise<any>,
                               errorTitle: string,

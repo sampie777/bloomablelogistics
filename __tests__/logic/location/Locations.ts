@@ -1,5 +1,5 @@
 import { Locations } from "../../../source/logic/location/Locations";
-import { Recipient } from "../../../source/logic/models";
+import { Recipient } from "../../../source/logic/orders/models";
 
 describe("Location", () => {
   it("Converts wrongly written addresses to addresses with house numbers", () => {

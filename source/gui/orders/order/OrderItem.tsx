@@ -2,12 +2,11 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { format } from "../../../logic/utils";
 import { lightColors } from "../../theme";
-import ClientInfo from "./ClientInfo";
 import OrderStatus from "./OrderStatus";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import OrderCosts from "./OrderCosts";
 import RecipientInfo from "./RecipientInfo";
-import { Order } from "../../../logic/models";
+import { Order } from "../../../logic/orders/models";
 import UrlLink from "../../utils/UrlLink";
 
 interface Props {
@@ -31,7 +30,6 @@ const OrderItem: React.FC<Props> = ({ order }) => {
 
     <RecipientInfo order={order} />
     <OrderCosts order={order} />
-    <ClientInfo order={order} />
     <OrderStatus order={order} />
   </View>;
 };

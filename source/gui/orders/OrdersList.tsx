@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Dimensions, ListRenderItemInfo, NativeScrollEvent, NativeSyntheticEvent, StyleSheet } from "react-native";
 import OrderItem from "./order/OrderItem";
 import ListEmptyComponent from "./ListEmptyComponent";
-import { Order } from "../../logic/models";
+import { Order } from "../../logic/orders/models";
 import ProgressView from "../dashboard/ProgressView";
 import { getNextDay, getPreviousDay } from "../../logic/utils";
 import { useRecoilState } from "recoil";

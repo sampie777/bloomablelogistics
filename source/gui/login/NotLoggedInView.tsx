@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import server, { LoginError } from "../../logic/bloomable/server";
 import LoadingOverlay from "../utils/LoadingOverlay";
 import { defaultFontFamilies, lightColors } from "../theme";
 import { displayName } from "../../../app.json";
 import { rollbar } from "../../logic/rollbar";
+import { BloomableAuth } from "../../logic/bloomable/auth";
+import { Server } from "../../logic/bloomable/server";
 
 interface Props {
   onLoggedIn?: () => void;
@@ -45,24 +46,15 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
     setErrorMessage(undefined);
     setIsProcessing(true);
 
-    server.login(username, password)
+    Server.login({ username: username, password: password })
       .then(() => {
-        if (!isMounted.current) {
-          return;
-        }
-
-        if (!server.isLoggedIn()) {
-          return setErrorMessage("Failed to log in. Are your credentials correct?");
-        }
-
+        if (!isMounted.current) return;
         onLoggedIn?.();
       })
       .catch(error => {
-        if (!isMounted.current) {
-          return;
-        }
+        if (!isMounted.current) return;
 
-        if (error instanceof LoginError) {
+        if (error instanceof BloomableAuth.LoginError) {
           setErrorMessage(error.message || "Undefined login error occurred. Try again.");
         } else {
           rollbar.error("Error for login credentials respond", { error: error });
@@ -70,10 +62,7 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
         }
       })
       .finally(() => {
-        if (!isMounted.current) {
-          return;
-        }
-
+        if (!isMounted.current) return;
         setIsProcessing(false);
       });
   };

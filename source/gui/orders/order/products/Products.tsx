@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { Product } from "../../../../logic/models";
+import { Product } from "../../../../logic/orders/models";
 import ProductComponent from "./ProductComponent";
 
 interface Props {
