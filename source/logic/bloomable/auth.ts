@@ -18,11 +18,11 @@ export namespace BloomableAuth {
   }
 
   export const getXSRFCookies = (): Promise<Session> => {
-    rollbar.log("Getting XSRF cookies");
     return fetch("https://dashboard.bloomable.com/sanctum/csrf-cookie")
       .then(response => {
         const session = getNewSession(response);
         verifySession(session);
+        storeSession(session);
         return session;
       })
       .catch(e => {
@@ -31,15 +31,35 @@ export namespace BloomableAuth {
       });
   };
 
+  export const logout = (): Promise<unknown> => {
+    return fetch("https://dashboard.bloomable.com/api/logout", {
+      headers: {
+        "Accept": "application/json",
+        ...sessionToHeader(getSession()),
+      },
+      method: "POST",
+    })
+      .then(response => {
+        storeSession(getNewSession(response));
+
+        if (response.status !== HttpCode.NoContent) {
+          rollbar.warning(`Failed to log out: ${response.status}`);
+        }
+      })
+      .catch(e => {
+        rollbar.error("Failed to log out", { error: e });
+      });
+  };
+
   export const login = (credentials: Credentials): Promise<Session> =>
     getXSRFCookies()
-      .then(session => {
-        rollbar.debug(`Logging in for ${credentials.username}`);
+      .then(logout)
+      .then(() => {
         return fetch("https://dashboard.bloomable.com/api/login", {
           headers: {
             "Accept": "application/json",
             "Content-Type": "application/json",
-            ...sessionToHeader(session),
+            ...sessionToHeader(getSession()),
           },
           body: `{"email":"${credentials.username}","password":"${credentials.password}"}`,
           method: "POST",
@@ -49,20 +69,20 @@ export namespace BloomableAuth {
         if (response.status === HttpCode.OK) {
           const session = getNewSession(response);
           verifySession(session);
-
-          rollbar.log("Logging in successful");
+          storeSession(session);
           return session;
         }
 
         return obtainResponseContent(response).then(content => {
+          const stringifiedContent = JSON.stringify(content);
           if (response.status === HttpCode.NoContent) {
-            throw new Error(`Logged in with no content. Payload: ${content}`);
+            throw new Error(`Logged in with no content. Payload: ${stringifiedContent}`);
           } else if (response.status === HttpCode.UnprocessableContent) {
-            throw new LoginError(`Auth error. Payload: ${JSON.stringify(content)}`);
+            throw new LoginError(`Auth error. Payload: ${stringifiedContent}`);
           } else if (response.status === HttpCode.PageExpired) {
-            throw new Error(`XSRF failed. Payload: ${content}`);
+            throw new Error(`XSRF failed. Payload: ${stringifiedContent}`);
           }
-          throw new Error(`No idea whats going on (status=${response.status}). Payload: ${content}`);
+          throw new Error(`No idea whats going on (status=${response.status}). Payload: ${stringifiedContent}`);
         });
       })
       .catch(e => {
@@ -72,10 +92,9 @@ export namespace BloomableAuth {
 
   export const authenticatedFetch = (credentials: Credentials, url: RequestInfo, init: RequestInit = {}): Promise<Response> => {
     const call = () => {
-      const session: Session = getSession(credentials);
       init.headers = {
         ...init.headers,
-        ...sessionToHeader(session),
+        ...sessionToHeader(getSession()),
       };
       return fetch(url, init);
     };
@@ -83,15 +102,14 @@ export namespace BloomableAuth {
     return call()
       .then(response => {
         if (response.status === HttpCode.Unauthorized) {
-          rollbar.log("Not logged in. Retrying call with logging in.");
           return login(credentials)
-            .then(session => storeSession(credentials, session))
+            .then(session => storeSession(session))
             .then(call);
         }
         return response;
       })
       .then(response => {
-        storeSession(credentials, getNewSession(response));
+        storeSession(getNewSession(response));
         return response;
       });
   };

@@ -26,10 +26,6 @@ export const convertToLocalOrder = (onlineOrder: BloomableOrder) => {
     .filter(it => it)
     .join("\n\n   ---\n\n");
 
-  if (onlineOrder.adjustments && onlineOrder.adjustments.length > 0) {
-    console.warn("I don't know what to do with this field: BloomableOrder.adjustments", onlineOrder.adjustments);
-  }
-
   order.products = onlineOrder.lines.map(p => {
     const product = new Product();
     product.id = p.productVariantId;

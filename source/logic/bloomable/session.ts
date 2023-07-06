@@ -6,18 +6,17 @@ export interface Session {
   sessionToken?: string;
 }
 
-const activeSessions: Map<string, Session> = new Map();
+let activeSession: Session = {};
 
-export const getSession = (credentials: BloomableAuth.Credentials): Session => {
-  const session = activeSessions.get(credentials.username);
+export const getSession = (): Session => {
   return {
-    xsrfToken: session?.xsrfToken,
-    sessionToken: session?.sessionToken,
+    xsrfToken: activeSession?.xsrfToken,
+    sessionToken: activeSession?.sessionToken,
   };
 };
 
-export const storeSession = (credentials: BloomableAuth.Credentials, session: Session) => {
-  activeSessions.set(credentials.username, session);
+export const storeSession = (session: Session) => {
+  activeSession = session;
 };
 
 export const getNewSession = (response: Response) => {
