@@ -150,3 +150,14 @@ export const hashCyrb53 = (input: string, seed = 0): string => {
   const output = 4294967296 * (2097151 & h2) + (h1 >>> 0);
   return output.toString();
 };
+
+export const htmlToString = (html: string): string => {
+  return html
+    .replace(/\n/gi, "")
+    .replace(/<(p|div|h1|h2|h3|h4|h5).*?>/gi, "\n")
+    .replace(/<br*?>/gi, "\n")
+    .replace(/<.*?>/gi, "")
+    .replace(/ /gi, " ")
+    .replace(/[ \t]+/gi, " ")
+    .trim();
+};

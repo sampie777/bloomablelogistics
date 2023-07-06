@@ -1,19 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import server from "../../logic/bloomable/server";
 import LoggedInView from "./LoggedInView";
 import NotLoggedInView from "./NotLoggedInView";
 import LoadingOverlay from "../utils/LoadingOverlay";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ParamList, routes } from "../../routes";
+import { Server } from "../../logic/bloomable/server";
 
 const LoginScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }) => {
   const isMounted = useRef(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(server.isLoggedIn());
+  const [isLoggedIn, setIsLoggedIn] = useState(Server.isLoggedIn());
   const [isProcessing, setIsProcessing] = useState(true);
 
   const onLoggedInChange = () => {
-    if (!server.isLoggedIn()) {
+    if (!Server.isLoggedIn()) {
       return;
     }
 
@@ -27,8 +27,9 @@ const LoginScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }
   useEffect(() => {
     isMounted.current = true;
 
-    if (!server.isCredentialsRecalled()) {
-      server.recallCredentials()
+    if (!Server.isCredentialsRecalled()) {
+      Server.recallCredentials()
+        .catch(() => null)
         .then(() => {
           if (!isMounted.current) {
             return;

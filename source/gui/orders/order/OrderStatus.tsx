@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { Order } from "../../../logic/models";
+import { Order } from "../../../logic/orders/models";
 import OrderAcceptStatus from "./status/OrderAcceptStatus";
 import OrderDeliverStatus from "./status/OrderDeliverStatus";
 import OrderDeleteStatus from "./status/OrderDeleteStatus";

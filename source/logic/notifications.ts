@@ -1,9 +1,9 @@
 import messaging from "@react-native-firebase/messaging";
-import Server from "./bloomable/server";
 import { Permissions } from "./permissions";
 import { PermissionsAndroid } from "react-native";
 import { rollbar } from "./rollbar";
 import { settings } from "./settings/settings";
+import { Server } from "./bloomable/server";
 
 export namespace Notifications {
   let isInitialized = false;
@@ -23,11 +23,27 @@ export namespace Notifications {
     }
   };
 
+  // See https://firebase.google.com/docs/cloud-messaging/send-message#send-messages-to-topics-legacy
+  export const convertUsernameToTopicName = (value: string): string => {
+    return value
+      .replace(/[\s\n\r]*/g, "")
+      .replace(/[^a-zA-Z0-9-_.~%]+/g, "-")
+      .toLowerCase();
+  };
+
+  const getUserTopic = () => convertUsernameToTopicName(Server.getCredentials().username ?? defaultTopic);
+
   export const subscribe = () => {
     if (isSubscribed) return;
     if (!Server.isLoggedIn()) return;
 
-    const topic = Server.getUsername() ?? defaultTopic;
+    const topic = getUserTopic();
+    if (topic.length === 0) {
+      return rollbar.error("Invalid topic name", {
+        topic: topic,
+        username: Server.getCredentials().username,
+      });
+    }
     messaging().subscribeToTopic(topic)
       .then(() => isSubscribed = true)
       .catch(e => rollbar.error("Failed to subscribe to topic", {
@@ -37,7 +53,9 @@ export namespace Notifications {
   };
 
   export const unsubscribe = () => {
-    const topic = Server.getUsername() ?? defaultTopic;
+    const topic = getUserTopic();
+    if (topic.length === 0) return;
+
     messaging().unsubscribeFromTopic(topic)
       .then(() => isSubscribed = false)
       .catch(e => rollbar.error("Failed to unsubscribe from topic", {

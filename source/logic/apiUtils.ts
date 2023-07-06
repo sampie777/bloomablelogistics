@@ -1,27 +1,5 @@
 import { rollbar } from "./rollbar";
-
-export const HttpCode = {
-  OK: 200,
-  Created: 201,
-  Found: 302,
-  NotFound: 404,
-  Unauthorized: 401,
-  Forbidden: 403,
-  Gone: 410,
-  FailedDependency: 424,
-  TooManyRequests: 429,
-  InternalServerError: 500,
-};
-
-export class HttpError extends Error {
-  name = "HttpError";
-  response?: Response;
-
-  constructor(message?: string, response?: Response) {
-    super(message);
-    this.response = response;
-  }
-}
+import { HttpCode, HttpError } from "./utils/http";
 
 export const throwErrorsIfNotOk = (response: Response) => {
   if (response.ok) {

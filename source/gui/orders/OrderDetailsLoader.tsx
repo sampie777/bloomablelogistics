@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Orders } from "../../logic/orders";
+import { Orders } from "../../logic/orders/orders";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { ordersState, selectedDateOrdersState } from "../../logic/recoil";
 
@@ -16,14 +16,14 @@ const OrderDetailsLoader: React.FC<Props> = () => {
   }, [selectedOrders]);
 
   const loadDetails = () => {
-    if (!selectedOrders.some(it => it.recipient === undefined)) {
+    if (!selectedOrders.some(order => order.products.some(it => !it._detailsLoaded))) {
       return;
     }
 
     Orders.fetchDetailsForOrders(selectedOrders)
       .then((updatedOrders) => {
         const newOrders = allOrders.map(it => {
-          const updatedOrder = updatedOrders.find(order => order.id === it.id && order.number === it.number);
+          const updatedOrder = updatedOrders.find(order => order.id === it.id);
           if (updatedOrder !== undefined) {
             return updatedOrder;
           }

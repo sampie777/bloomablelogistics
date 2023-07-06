@@ -1,7 +1,7 @@
 import React from "react";
-import { Order } from "../../../../logic/models";
+import { Order } from "../../../../logic/orders/models";
 import { settings } from "../../../../logic/settings/settings";
-import { Orders } from "../../../../logic/orders";
+import { Orders } from "../../../../logic/orders/orders";
 import { useOrderAction } from "./utils";
 import { Alert } from "react-native";
 import { StatusButton, StatusLoading, StatusText } from "./common";

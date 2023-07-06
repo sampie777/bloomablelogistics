@@ -1,76 +1,39 @@
 import { rollbar } from "../rollbar";
-import { api } from "../api";
-import { ServerHtml } from "./html";
 import EncryptedStorage from "react-native-encrypted-storage";
 import { emptyPromise } from "../utils";
 import { Notifications } from "../notifications";
 import { throwErrorsIfNotOk } from "../apiUtils";
+import { BloomableAuth } from "./auth";
+import LoginError = BloomableAuth.LoginError;
+import { Validation } from "../utils/validation";
+import { BloomableApi } from "./api";
 
-export class LoginError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "LoginError";
-  }
-}
+export namespace Server {
+  const emptyCredentials = { username: "", password: "" };
+  let _credentials: BloomableAuth.Credentials = emptyCredentials;
+  let credentialsRecalled: boolean = false;
 
-class Server {
-  private cookie: string | undefined = undefined;
-  private username: string | undefined = undefined;
-  private credentialsRecalled: boolean = false;
+  const setCredentials = (value: BloomableAuth.Credentials) => {
+    _credentials = value;
+  };
 
-  setCookie(value: string) {
-    this.cookie = value;
-  }
+  export const getCredentials = () => _credentials;
+  export const isDemoUser = () => _credentials?.username === "demo";
 
-  setUsername(value: string) {
-    // Apparently Bloomable accepts extra whitespaces around its credentials and isn't case-sensitive. But we are!
-    this.username = value.trim().toLowerCase();
-  }
+  export const login = (credentials: BloomableAuth.Credentials, maxRetries: number = 1): Promise<any> => {
+    logout();
 
-  getCookie = () => this.cookie;
-  getUsername = () => this.username;
-  isDemoUser = () => this.username === "demo";
+    verifyUsername(credentials.username);
+    verifyPassword(credentials.password);
 
-  login(username: string, password: string, maxRetries: number = 1): Promise<any> {
-    this.logout();
-
-    if (username === "demo" && password === "demo") {
+    if (credentials.username === "demo" && credentials.password === "demo") {
       rollbar.info("Demo account logged in");
-      this.setCookie("demo");
-      this.setUsername("demo");
-      this.storeCredentials();
+      storeCredentials(credentials);
       return emptyPromise();
     }
 
-    return api.auth.login(username, password)
-      .then(throwErrorsIfNotOk)
-      .then(response => {
-        const cookies = response.headers.get("set-cookie");
-
-        if (cookies) {
-          this.processCookie(cookies);
-        }
-
-        this.setUsername(username);
-        this.storeCredentials();
-
-        return response.text();
-      })
-      .then(html => {
-        if (this.isLoggedIn()) {
-          return;
-        }
-
-        const message = ServerHtml.loginResponseToError(html);
-        if (maxRetries > 0 && message.trim().length === 0) {
-          rollbar.warning("Retrying login due to html response", {
-            html: html,
-            maxRetries: maxRetries,
-          });
-          return this.login(username, password, maxRetries - 1);
-        }
-        throw new LoginError(message);
-      })
+    return BloomableAuth.login(credentials)
+      .then(() => storeCredentials(credentials))
       .catch(error => {
         if (!(error instanceof LoginError)) {
           rollbar.error("Error logging in on server", {
@@ -80,67 +43,75 @@ class Server {
         }
         throw error;
       });
-  }
+  };
 
-  processCookie(cookies: string) {
-    cookies.split(",")
-      .forEach(cookie => cookie.split(";")
-        .filter(it => it.trim().startsWith("SAFlorist="))
-        .forEach(it => {
-          const part = it.trim();
-          this.cookie = part.substring("SAFlorist=".length, part.length);
-        }),
-      );
-  }
+  const verifyUsername = (value: string) => {
+    Validation.validate(value != null, "Username cannot be null");
+    Validation.validate(value.length > 0, "Username cannot be empty");
+  };
 
-  logout() {
+  const verifyPassword = (value: string) => {
+    Validation.validate(value != null, "Password cannot be null");
+    Validation.validate(value.length > 0, "Password cannot be empty");
+  };
+
+  export const logout = () => {
     Notifications.unsubscribe();
-    this.cookie = undefined;
-    this.username = undefined;
-    this.storeCredentials();
-  }
+    clearCredentials();
+  };
 
-  isLoggedIn() {
-    return this.cookie !== undefined && this.username !== undefined;
-  }
+  export const isLoggedIn = () => {
+    return _credentials.username.length > 0;
+  };
 
-  isCredentialsRecalled = () => this.credentialsRecalled;
+  export const isCredentialsRecalled = () => credentialsRecalled;
 
-  recallCredentials() {
-    return EncryptedStorage.getItem("cookie")
-      .then(value => {
-        if (value) {
-          this.setCookie(value);
-        }
-      })
+  export const recallCredentials = (): Promise<BloomableAuth.Credentials> => {
+    return EncryptedStorage.getItem("username")
       .catch(error => {
         rollbar.critical("Error getting EncryptedStorage item", {
           error: error,
-          key: "cookie",
+          key: "username",
         });
-      }).then(() =>
-        EncryptedStorage.getItem("username")
-          .then(value => {
-            this.credentialsRecalled = true;
-            if (value) {
-              this.setUsername(value);
-            }
-          })
-          .catch(error => {
-            rollbar.critical("Error getting EncryptedStorage item", {
-              error: error,
-              key: "username",
-            });
-          }),
+        throw error;
+      })
+      .then(username => EncryptedStorage.getItem("password")
+        .catch(error => {
+          rollbar.critical("Error getting EncryptedStorage item", {
+            error: error,
+            key: "password",
+          });
+          throw error;
+        })
+        .then(password => {
+          credentialsRecalled = true;
+
+          if (username == null) throw Error("Username not found in EncryptedStorage");
+          if (password == null) throw Error("Password not found in EncryptedStorage");
+
+          const credentials = {
+            username: username,
+            password: password,
+          };
+          setCredentials(credentials);
+          return credentials;
+        }),
       );
-  }
+  };
 
-  storeCredentials() {
-    this.storageUpdateOrRemove("cookie", this.cookie);
-    this.storageUpdateOrRemove("username", this.username);
-  }
+  const clearCredentials = () => {
+    setCredentials(emptyCredentials);
+    storageUpdateOrRemove("username", undefined);
+    storageUpdateOrRemove("password", undefined);
+  };
 
-  private storageUpdateOrRemove(key: string, value: string | undefined) {
+  const storeCredentials = (credentials: BloomableAuth.Credentials) => {
+    setCredentials(credentials);
+    storageUpdateOrRemove("username", credentials.username);
+    storageUpdateOrRemove("password", credentials.password);
+  };
+
+  const storageUpdateOrRemove = (key: string, value: string | undefined) => {
     if (value !== undefined) {
       EncryptedStorage.setItem(key, value)
         .catch(error => {
@@ -158,49 +129,10 @@ class Server {
           });
         });
     }
-  }
+  };
 
-  getOrdersPage(page: number) {
-    return api.orders.list(page)
-      .then(throwErrorsIfNotOk)
-      .then(response => response.text())
-      .catch(error => {
-        rollbar.error("Error fetching orders data", {
-          error: error,
-          page: page,
-        });
-        throw error;
-      });
-  }
-
-  getOrderDetailsPage(id: string) {
-    return api.orders.details(id)
-      .then(throwErrorsIfNotOk)
-      .then(response => response.text())
-      .catch(error => {
-        rollbar.error("Error fetching order details data", {
-          error: error,
-          id: id,
-        });
-        throw error;
-      });
-  }
-
-  getOrderManagePage(number: number) {
-    return api.orders.manage(number)
-      .then(throwErrorsIfNotOk)
-      .then(response => response.text())
-      .catch(error => {
-        rollbar.error("Error fetching order manage data", {
-          error: error,
-          number: number,
-        });
-        throw error;
-      });
-  }
-
-  acceptOrder(id: string) {
-    return api.orders.action.accept(id)
+  export const acceptOrder = (id: string) => {
+    return BloomableApi.acceptOrder({ id: id })
       .then(throwErrorsIfNotOk)
       .catch(error => {
         rollbar.error("Error accepting order", {
@@ -209,10 +141,10 @@ class Server {
         });
         throw error;
       });
-  }
+  };
 
-  rejectOrder(id: string) {
-    return api.orders.action.reject(id)
+  export const rejectOrder = (id: string) => {
+    return BloomableApi.rejectOrder({ id: id })
       .then(throwErrorsIfNotOk)
       .catch(error => {
         rollbar.error("Error rejecting order", {
@@ -221,10 +153,10 @@ class Server {
         });
         throw error;
       });
-  }
+  };
 
-  deliverOrder(id: string) {
-    return api.orders.action.deliver(id)
+  export const deliverOrder = (id: string) => {
+    return BloomableApi.deliverOrder({ id: id })
       .then(throwErrorsIfNotOk)
       .catch(error => {
         rollbar.error("Error delivering order", {
@@ -233,8 +165,5 @@ class Server {
         });
         throw error;
       });
-  }
+  };
 }
-
-const server = new Server();
-export default server;

@@ -1,4 +1,11 @@
-import { format, formatDateToWords, getNextDay, getPreviousDay, hashCyrb53 } from "../../source/logic/utils";
+import {
+  format,
+  formatDateToWords,
+  getNextDay,
+  getPreviousDay,
+  hashCyrb53,
+  htmlToString,
+} from "../../source/logic/utils";
 
 describe("utils", () => {
   it("hashes with cyrb53 should give constant unique outputs", () => {
@@ -20,5 +27,10 @@ describe("utils", () => {
   it("converts date to format", () => {
     expect(format(new Date(Date.UTC(2017, 0, 2)), "%dd-%mm-%YYYY")).toBe("02-01-2017");
     expect(format(new Date(Date.UTC(2017, 0, 2)), "%dddd")).toBe("monday");
+  });
+
+  it("htmlToString", () => {
+    expect(htmlToString("<meta charset=\"utf-8\">\n<p><strong>A pure white and green bouquet perfect for sympathy occasions or for someone in your life that loves classic white flowers.  </strong></p>\n<p>Flowers included in this beautiful creation may differ subject to seasonal and flower market availability. Our team will inform you if there are any major changes but we will do our best to ensure that it looks like what you see on our website.</p>\n<p><span>Thank you for supporting local South African florists. #SupportLocal</span></p>"))
+      .toBe("A pure white and green bouquet perfect for sympathy occasions or for someone in your life that loves classic white flowers. \nFlowers included in this beautiful creation may differ subject to seasonal and flower market availability. Our team will inform you if there are any major changes but we will do our best to ensure that it looks like what you see on our website.\nThank you for supporting local South African florists. #SupportLocal");
   });
 });

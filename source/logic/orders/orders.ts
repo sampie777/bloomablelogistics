@@ -1,43 +1,22 @@
-import server from "./bloomable/server";
-import { ServerHtml } from "./bloomable/html";
-import { config } from "../config";
-import { delayedPromiseWithValue, emptyPromiseWithValue } from "./utils";
+import { config } from "../../config";
+import { delayedPromiseWithValue, emptyPromiseWithValue } from "../utils";
 import { Order, Recipient } from "./models";
-import { demoOrders } from "./demoData";
+import { demoOrders } from "../demoData";
+import { BloomableApi } from "../bloomable/api";
+import { Server } from "../bloomable/server";
 
 export namespace Orders {
   let fetchedOrders: Order[] = [];
 
-  export const fetchPage = (page: number = 1): Promise<Order[]> => {
-    if (config.offlineData || server.isDemoUser()) {
+  export const list = (page: number = 1): Promise<Order[]> => {
+    if (config.offlineData || Server.isDemoUser()) {
       const orders = [...demoOrders]
         .map(it => Order.clone(it));  // Convert the dumb object to an Order class
       return delayedPromiseWithValue(orders, 1000);
     }
 
-    return server.getOrdersPage(page)
-      .then((html: string) => {
-        return ServerHtml.ordersResponseToOrders(html);
-      });
-  };
-
-  export const fetchAll = (): Promise<Order[]> => {
-    fetchedOrders = [];
-    return sequentiallyFetchAll();
-  };
-
-  const sequentiallyFetchAll = (page: number = 1): Promise<Order[]> => {
-    return fetchPage(page)
-      .then((orders: Order[]) => {
-        fetchedOrders = fetchedOrders.concat(orders);
-
-        const hasNext = page < config.maxOrderPagesToFetch;
-        if (hasNext) {
-          return sequentiallyFetchAll(page + 1);
-        }
-
-        return fetchedOrders;
-      });
+    return BloomableApi.getOrders()
+      .then(orders => sort(orders));
   };
 
   export const fetchDetailsForOrders = (orders: Order[]): Promise<Order[]> => {
@@ -45,7 +24,7 @@ export namespace Orders {
       return emptyPromiseWithValue(orders);
     }
 
-    const nextOrder = orders.find(it => it.recipient === undefined);
+    const nextOrder = orders.find(order => order.products.some(it => !it._detailsLoaded));
     if (nextOrder === undefined) {
       return emptyPromiseWithValue(orders);
     }
@@ -59,14 +38,11 @@ export namespace Orders {
   };
 
   export const fetchDetailsForOrder = (order: Order): Promise<Order> => {
-    if (!order.id) {
-      return emptyPromiseWithValue(order);
-    }
-    if (order.recipient !== undefined) {
+    if (order.products.every(it => it._detailsLoaded)) {
       return emptyPromiseWithValue(order);
     }
 
-    if (config.offlineData || server.isDemoUser()) {
+    if (config.offlineData || Server.isDemoUser()) {
       const updatedOrder = Order.clone(order);
       updatedOrder.recipient = new Recipient();
       updatedOrder.recipient.name = "Danjella Meesters";
@@ -76,25 +52,16 @@ export namespace Orders {
       return delayedPromiseWithValue(updatedOrder, 100);
     }
 
-    return server.getOrderDetailsPage(order.id)
-      .then((html: string) => {
-        const { recipient, orderValue, products } = ServerHtml.orderDetailsResponseToOrderDetails(html, order.id);
-        const updatedOrder = Order.clone(order);
-        updatedOrder.recipient = recipient;
-        updatedOrder.products = products;
-        if (updatedOrder.orderValue === undefined) {
-          updatedOrder.orderValue = orderValue;
-        }
-        return updatedOrder;
-      });
+    return BloomableApi.loadOrderProducts(order)
+      .then(() => order);
   };
 
   export const fetchStatusForOrder = (order: Order): Promise<Order> => {
-    if (!order.number) {
+    if (order.id == null) {
       return emptyPromiseWithValue(order);
     }
 
-    if (config.offlineData || server.isDemoUser()) {
+    if (config.offlineData || Server.isDemoUser()) {
       const updatedOrder = Order.clone(order);
       if (!updatedOrder.accepted) {
         updatedOrder.accepted = true;
@@ -104,13 +71,10 @@ export namespace Orders {
       return delayedPromiseWithValue(updatedOrder, 500);
     }
 
-    return server.getOrderManagePage(order.number)
-      .then((html: string) => {
-        const { isAccepted, isDelivered } = ServerHtml.orderManageResponseToOrderStatus(html);
-        const updatedOrder = Order.clone(order);
-        updatedOrder.accepted = isAccepted;
-        updatedOrder.delivered = isDelivered;
-        return updatedOrder;
+    return BloomableApi.getOrder({ id: order.id })
+      .then(onlineOrder => {
+        onlineOrder.products = order.products;
+        return onlineOrder;
       });
   };
 
@@ -139,8 +103,8 @@ export namespace Orders {
 
     order.isAccepting = true;
 
-    if (config.offlineData || server.isDemoUser()) return delayedPromiseWithValue(undefined, 500);
-    return server.acceptOrder(order.id);
+    if (config.offlineData || Server.isDemoUser()) return delayedPromiseWithValue(undefined, 500);
+    return Server.acceptOrder(order.id);
   };
 
   export const reject = (order: Order): Promise<any> => {
@@ -148,8 +112,8 @@ export namespace Orders {
 
     order.isRejecting = true;
 
-    if (config.offlineData || server.isDemoUser()) return delayedPromiseWithValue(undefined, 500);
-    return server.rejectOrder(order.id);
+    if (config.offlineData || Server.isDemoUser()) return delayedPromiseWithValue(undefined, 500);
+    return Server.rejectOrder(order.id);
   };
 
   export const deliver = (order: Order): Promise<any> => {
@@ -157,7 +121,7 @@ export namespace Orders {
 
     order.isDelivering = true;
 
-    if (config.offlineData || server.isDemoUser()) return delayedPromiseWithValue(undefined, 500);
-    return server.deliverOrder(order.id);
+    if (config.offlineData || Server.isDemoUser()) return delayedPromiseWithValue(undefined, 500);
+    return Server.deliverOrder(order.id);
   };
 }

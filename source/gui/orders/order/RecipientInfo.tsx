@@ -3,7 +3,7 @@ import { ActivityIndicator, Platform, StyleSheet, Text, ToastAndroid, TouchableO
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../../theme";
 import UrlLink from "../../utils/UrlLink";
-import { Order } from "../../../logic/models";
+import { Order } from "../../../logic/orders/models";
 import Products from "./products/Products";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { isAndroid } from "../../../logic/utils";
@@ -83,7 +83,9 @@ const RecipientInfo: React.FC<Props> = ({ order }) => {
             }
             {!order.recipient.address ? undefined :
               <View style={styles.row}>
-                <Text style={styles.addressLabel}>Address:</Text>
+                {!order.recipient.company && !order.recipient.unit ? undefined :
+                  <Text style={styles.addressLabel}>Address:</Text>
+                }
                 <UrlLink url={Platform.select({ ios: "maps:0,0?q=", android: "geo:0,0?q=" }) + order.recipient.address}
                          style={{ flex: 1 }}
                          onLongPress={copyAddress}>

@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import server from "../../logic/bloomable/server";
 import { lightColors } from "../theme";
+import { Server } from "../../logic/bloomable/server";
 
 interface Props {
   onLoggedOut?: () => void;
@@ -10,7 +10,7 @@ interface Props {
 const LoggedInView: React.FC<Props> = ({ onLoggedOut }) => {
 
   const logout = () => {
-    server.logout();
+    Server.logout();
     onLoggedOut?.();
   };
 

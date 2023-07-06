@@ -6,6 +6,7 @@ export const settings = {
 
   notificationsShowForNewOrders: true,
   disableOrderActions: false,
+  useInitialCoordinatesForOrders: true,
 };
 
 settings.load = () => SettingsUtils.load(settings);

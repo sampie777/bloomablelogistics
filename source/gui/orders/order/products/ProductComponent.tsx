@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Product } from "../../../../logic/models";
+import { Product } from "../../../../logic/orders/models";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../../../theme";
 import ProductExtraComponent from "./ProductExtraComponent";
+import { htmlToString } from "../../../../logic/utils";
 
 interface Props {
   product: Product;
@@ -44,7 +45,7 @@ const ProductComponent: React.FC<Props> = ({ product }) => {
 
     {!product.description ? undefined : <View style={styles.row}>
       <FontAwesome5Icon name={"comment"} style={styles.icon} />
-      <Text style={styles.description}>{product.description}</Text>
+      <Text style={styles.description}>{htmlToString(product.description)}</Text>
     </View>}
 
     {product.extras?.map((it, index) =>

@@ -9,6 +9,7 @@ import LoadingOverlay from "../utils/LoadingOverlay";
 import SelectedLocationOverlay from "./SelectedLocationOverlay";
 import { lightColors } from "../theme";
 import SmartAddressButton from "./SmartAddressButton";
+import { settings } from "../../logic/settings/settings";
 
 interface Props {
 
@@ -40,7 +41,7 @@ const MapOverview: React.FC<Props> = () => {
       return;
     }
     loadLocations();
-  }, [orders, useSmartAddress]);
+  }, [orders, useSmartAddress, settings.useInitialCoordinatesForOrders]);
 
   useFocusEffect(
     React.useCallback(() => {

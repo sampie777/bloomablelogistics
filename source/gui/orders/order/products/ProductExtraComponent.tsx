@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { ProductExtra } from "../../../../logic/models";
+import { ProductExtra } from "../../../../logic/orders/models";
 import { lightColors } from "../../../theme";
 
 interface Props {
