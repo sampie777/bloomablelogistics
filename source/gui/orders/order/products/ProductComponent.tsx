@@ -12,17 +12,22 @@ interface Props {
 
 const ProductComponent: React.FC<Props> = ({ product }) => {
   const [enlargeImage, setEnlargeImage] = useState(false);
+  const [imageAvailable, setImageAvailable] = useState(true);
 
   const toggleImage = () => {
     setEnlargeImage(!enlargeImage);
   };
 
+  const description = htmlToString(product.description ?? "");
   return <View style={styles.container}>
     {product.image === undefined ? undefined :
       <TouchableOpacity onPress={toggleImage}>
         <Image source={{ uri: product.image }}
                resizeMode={"contain"}
-               style={[styles.image, (!enlargeImage ? {} : styles.imageEnlarged)]} />
+               onError={() => setImageAvailable(false)}
+               onLoad={() => setImageAvailable(true)}
+               style={[styles.image, (!enlargeImage ? {} : styles.imageEnlarged), (imageAvailable ? {} : styles.unavailableImage)]} />
+        {imageAvailable ? undefined : <Text style={styles.imageErrorText}>Image not available</Text>}
       </TouchableOpacity>
     }
 
@@ -43,9 +48,9 @@ const ProductComponent: React.FC<Props> = ({ product }) => {
       <Text style={styles.guidelines}>{product.guidelines}</Text>
     </View>}
 
-    {!product.description ? undefined : <View style={styles.row}>
+    {description.length === 0 ? undefined : <View style={styles.row}>
       <FontAwesome5Icon name={"comment"} style={styles.icon} />
-      <Text style={styles.description}>{htmlToString(product.description)}</Text>
+      <Text style={styles.description}>{description}</Text>
     </View>}
 
     {product.extras?.map((it, index) =>
@@ -69,6 +74,7 @@ const styles = StyleSheet.create({
     minWidth: 16,
     color: lightColors.text,
   },
+
   image: {
     resizeMode: "contain",
     height: 200,
@@ -77,6 +83,17 @@ const styles = StyleSheet.create({
   imageEnlarged: {
     height: 400,
   },
+  unavailableImage: {
+    height: 0,
+    marginBottom: 0,
+  },
+  imageErrorText: {
+    fontSize: 12,
+    color: lightColors.textLighter,
+    textAlign: "center",
+    marginBottom: 15,
+  },
+
   name: {
     fontWeight: "bold",
     flex: 1,
