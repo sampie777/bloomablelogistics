@@ -6,6 +6,7 @@ import { lightColors } from "../../../theme";
 import ProductExtraComponent from "./ProductExtraComponent";
 import { htmlToString } from "../../../../logic/utils";
 import ZoomableImage from "../../../utils/ZoomableImage";
+import ShowWhenLoaded from "./ShowWhenLoaded";
 
 interface Props {
   product: Product;
@@ -14,32 +15,39 @@ interface Props {
 const ProductComponent: React.FC<Props> = ({ product }) => {
   const description = htmlToString(product.description ?? "");
   return <View style={styles.container}>
-    {product.image === undefined ? undefined : <ZoomableImage url={product.image} />}
+    {product.image === undefined || !product._detailsLoaded ? undefined : <ZoomableImage url={product.image} />}
 
     <View style={styles.row}>
       <Text style={styles.name}>{product.name}</Text>
-      {product.quantity === undefined ? undefined : <Text style={styles.quantity}> {product.quantity}</Text>}
+      {product.quantity === undefined ? undefined : <Text style={styles.quantity}> x {product.quantity}</Text>}
     </View>
 
     <View style={styles.row}>
-      <FontAwesome5Icon name={"expand"} style={styles.icon} />
-      <Text style={styles.size}>{product.size}</Text>
+      {!product._detailsLoaded ? <Text style={styles.size} /> :
+        <>
+          <FontAwesome5Icon name={"expand"} style={styles.icon} />
+          <Text style={styles.size}>{product.size}</Text>
+        </>
+      }
+
       {product.retailPrice === undefined ? undefined :
         <Text style={styles.retailPrice}>R {product.retailPrice.toFixed(2)}</Text>}
     </View>
 
-    {!product.guidelines ? undefined : <View style={styles.row}>
-      <FontAwesome5Icon name={"comment-alt"} style={styles.icon} />
-      <Text style={styles.guidelines}>{product.guidelines}</Text>
-    </View>}
+    <ShowWhenLoaded product={product}>
+      {!product.guidelines ? undefined : <View style={styles.row}>
+        <FontAwesome5Icon name={"comment-alt"} style={styles.icon} />
+        <Text style={styles.guidelines}>{product.guidelines}</Text>
+      </View>}
 
-    {description.length === 0 ? undefined : <View style={styles.row}>
-      <FontAwesome5Icon name={"comment"} style={styles.icon} />
-      <Text style={styles.description}>{description}</Text>
-    </View>}
+      {description.length === 0 ? undefined : <View style={styles.row}>
+        <FontAwesome5Icon name={"comment"} style={styles.icon} />
+        <Text style={styles.description}>{description}</Text>
+      </View>}
 
-    {product.extras?.map((it, index) =>
-      <ProductExtraComponent item={it} key={index + (it.name || "")} />)}
+      {product.extras?.map((it, index) =>
+        <ProductExtraComponent item={it} key={index + (it.name || "")} />)}
+    </ShowWhenLoaded>
   </View>;
 };
 
@@ -50,6 +58,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     marginTop: 10,
   },
+
   row: {
     flexDirection: "row",
     alignItems: "center",

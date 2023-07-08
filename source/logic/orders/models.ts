@@ -8,7 +8,7 @@ export class Order {
   accepted: boolean = false;
   delivered: boolean = false;
   deleted: boolean = false;
-  recipient?: Recipient = undefined;
+  recipient: Recipient = new Recipient();
   products: Product[] = [];
 
   // Local state of the order whether it is currently being processed.

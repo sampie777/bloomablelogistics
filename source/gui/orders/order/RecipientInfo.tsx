@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ActivityIndicator, Platform, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from "react-native";
+import { Platform, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from "react-native";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../../theme";
 import UrlLink from "../../utils/UrlLink";
@@ -15,23 +15,8 @@ interface Props {
 const RecipientInfo: React.FC<Props> = ({ order }) => {
   const [collapsed, setCollapsed] = useState(true);
 
-  if (!order.recipient) {
-    return <View style={[styles.container, styles.loadingContainer]}>
-      {order.recipient !== undefined ? undefined :
-        <ActivityIndicator style={styles.loading} color={styles.loading.color} />
-      }
-
-      {order.recipient !== null ? undefined :
-        <View style={styles.row}>
-          <FontAwesome5Icon name={"exclamation-circle"} solid style={[styles.icon, styles.error]} />
-          <Text style={styles.error}>Failed to load recipient</Text>
-        </View>
-      }
-    </View>;
-  }
-
   const copyAddress = () => {
-    if (!order.recipient?.address) {
+    if (!order.recipient.address) {
       return;
     }
     Clipboard.setString(order.recipient.address);
@@ -121,16 +106,6 @@ const RecipientInfo: React.FC<Props> = ({ order }) => {
 
 const styles = StyleSheet.create({
   container: {},
-  loadingContainer: {
-    flexDirection: "column",
-    justifyContent: "center",
-    paddingVertical: 5,
-  },
-  loading: {
-    alignSelf: "center",
-    color: lightColors.text,
-    paddingVertical: 4,
-  },
   error: {
     color: "#800",
   },
