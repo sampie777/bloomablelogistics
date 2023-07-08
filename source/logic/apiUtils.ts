@@ -6,7 +6,7 @@ export const throwErrorsIfNotOk = (response: Response) => {
     return response;
   }
 
-  rollbar.error("API request to failed", {
+  rollbar.error("API request failed", {
     url: response.url,
     status: response.status,
     statusText: response.statusText,

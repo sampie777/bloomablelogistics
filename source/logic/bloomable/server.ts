@@ -1,8 +1,6 @@
 import { rollbar } from "../rollbar";
 import EncryptedStorage from "react-native-encrypted-storage";
-import { emptyPromise } from "../utils";
 import { Notifications } from "../notifications";
-import { throwErrorsIfNotOk } from "../apiUtils";
 import { BloomableAuth } from "./auth";
 import LoginError = BloomableAuth.LoginError;
 import { Validation } from "../utils/validation";
@@ -25,12 +23,6 @@ export namespace Server {
       .then(() => {
         verifyUsername(credentials.username);
         verifyPassword(credentials.password);
-
-        if (credentials.username === "demo" && credentials.password === "demo") {
-          rollbar.info("Demo account logged in");
-          storeCredentials(credentials);
-          return emptyPromise();
-        }
 
         return BloomableAuth.login(credentials)
           .then(() => storeCredentials(credentials))

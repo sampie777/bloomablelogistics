@@ -1,20 +1,11 @@
 import { config } from "../../config";
-import { delayedPromiseWithValue, emptyPromiseWithValue } from "../utils";
-import { Order, Recipient } from "./models";
-import { demoOrders } from "../demoData";
+import { emptyPromiseWithValue } from "../utils";
+import { Order } from "./models";
 import { BloomableApi } from "../bloomable/api";
 import { Server } from "../bloomable/server";
 
 export namespace Orders {
-  let fetchedOrders: Order[] = [];
-
   export const list = (page: number = 1): Promise<Order[]> => {
-    if (config.offlineData || Server.isDemoUser()) {
-      const orders = [...demoOrders]
-        .map(it => Order.clone(it));  // Convert the dumb object to an Order class
-      return delayedPromiseWithValue(orders, 1000);
-    }
-
     return BloomableApi.getOrders()
       .then(orders => sort(orders));
   };
@@ -42,16 +33,6 @@ export namespace Orders {
       return emptyPromiseWithValue(order);
     }
 
-    if (config.offlineData || Server.isDemoUser()) {
-      const updatedOrder = Order.clone(order);
-      updatedOrder.recipient = new Recipient();
-      updatedOrder.recipient.name = "Danjella Meesters";
-      updatedOrder.recipient.phones = ["+27 128011234", "+27 128011234"];
-      updatedOrder.recipient.company = "Crown Auto Parts";
-      updatedOrder.recipient.address = "Crown Auto Parts, Broadway Street, Mamelodi Gardens, Pretoria, Gauteng, 0122";
-      return delayedPromiseWithValue(updatedOrder, 100);
-    }
-
     return BloomableApi.loadOrderProducts(order)
       .then(() => order);
   };
@@ -61,18 +42,16 @@ export namespace Orders {
       return emptyPromiseWithValue(order);
     }
 
-    if (config.offlineData || Server.isDemoUser()) {
-      const updatedOrder = Order.clone(order);
-      if (!updatedOrder.accepted) {
-        updatedOrder.accepted = true;
-      } else {
-        updatedOrder.delivered = true;
-      }
-      return delayedPromiseWithValue(updatedOrder, 500);
-    }
-
     return BloomableApi.getOrder({ id: order.id })
       .then(onlineOrder => {
+        if (config.offlineData || Server.isDemoUser()) {
+          if (!onlineOrder.accepted) {
+            onlineOrder.accepted = true;
+          } else {
+            onlineOrder.delivered = true;
+          }
+        }
+
         onlineOrder.products = order.products;
         return onlineOrder;
       });
@@ -102,8 +81,6 @@ export namespace Orders {
     if (!order.id) throw new Error("Order has no valid id");
 
     order.isAccepting = true;
-
-    if (config.offlineData || Server.isDemoUser()) return delayedPromiseWithValue(undefined, 500);
     return Server.acceptOrder(order.id);
   };
 
@@ -111,8 +88,6 @@ export namespace Orders {
     if (!order.id) throw new Error("Order has no valid id");
 
     order.isRejecting = true;
-
-    if (config.offlineData || Server.isDemoUser()) return delayedPromiseWithValue(undefined, 500);
     return Server.rejectOrder(order.id);
   };
 
@@ -120,8 +95,6 @@ export namespace Orders {
     if (!order.id) throw new Error("Order has no valid id");
 
     order.isDelivering = true;
-
-    if (config.offlineData || Server.isDemoUser()) return delayedPromiseWithValue(undefined, 500);
     return Server.deliverOrder(order.id);
   };
 }

@@ -2,6 +2,7 @@ import { getNewSession, getSession, Session, sessionToHeader, storeSession, veri
 import { obtainResponseContent } from "./utils";
 import { HttpCode } from "../utils/http";
 import { rollbar } from "../rollbar";
+import { delayedPromiseWithValue } from "../utils";
 
 export namespace BloomableAuth {
 
@@ -68,8 +69,13 @@ export namespace BloomableAuth {
         rollbar.error("Failed to log out", { error: e });
       });
 
-  export const login = (credentials: Credentials): Promise<Session> =>
-    getXSRFCookies()
+  export const login = (credentials: Credentials): Promise<Session> => {
+    if (credentials.username === "demo" && credentials.password === "demo") {
+      rollbar.info("Demo account logged in");
+      return delayedPromiseWithValue({}, 1000);
+    }
+
+    return getXSRFCookies()
       .then(() => fetch("https://dashboard.bloomable.com/api/login", {
         headers: {
           "Accept": "application/json",
@@ -104,6 +110,7 @@ export namespace BloomableAuth {
         rollbar.error("Could not log in", { error: e });
         throw e;
       });
+  }
 
   export const authenticatedFetch = (credentials: Credentials, url: RequestInfo, init: RequestInit = {}): Promise<Response> => {
     const call = () => {
