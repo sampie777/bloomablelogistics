@@ -17,9 +17,20 @@ export namespace BloomableAuth {
     password: string;
   }
 
-  export const getXSRFCookies = (): Promise<Session> => {
-    return fetch("https://dashboard.bloomable.com/sanctum/csrf-cookie")
+  export const getXSRFCookies = (): Promise<Session> =>
+    fetch("https://dashboard.bloomable.com/sanctum/csrf-cookie")
       .then(response => {
+        if (response.status !== HttpCode.NoContent) {
+          obtainResponseContent(response)
+            .then(content => JSON.stringify(content))
+            .catch(e => e)
+            .then(content =>
+              rollbar.info("Received unexpected status code from XSRF cookie request", {
+                statusCode: response.status,
+                content: content,
+              }));
+        }
+
         const session = getNewSession(response);
         verifySession(session);
         storeSession(session);
@@ -29,47 +40,51 @@ export namespace BloomableAuth {
         rollbar.error("Could not get XSRF tokens", { error: e });
         throw e;
       });
-  };
 
-  export const logout = (): Promise<unknown> => {
-    return fetch("https://dashboard.bloomable.com/api/logout", {
-      headers: {
-        "Accept": "application/json",
-        ...sessionToHeader(getSession()),
-      },
-      method: "POST",
-    })
+  export const logout = (): Promise<unknown> =>
+    getXSRFCookies()
+      .then(() => fetch("https://dashboard.bloomable.com/api/logout", {
+        headers: {
+          "Accept": "application/json",
+          ...sessionToHeader(getSession()),
+        },
+        method: "POST",
+      }))
       .then(response => {
         storeSession(getNewSession(response));
 
         if (response.status !== HttpCode.NoContent) {
-          rollbar.warning(`Failed to log out: ${response.status}`);
+          obtainResponseContent(response)
+            .then(content => JSON.stringify(content))
+            .catch(e => e)
+            .then(content =>
+              rollbar.warning("Failed to log out", {
+                statusCode: response.status,
+                content: content,
+              }));
         }
       })
       .catch(e => {
         rollbar.error("Failed to log out", { error: e });
       });
-  };
 
   export const login = (credentials: Credentials): Promise<Session> =>
     getXSRFCookies()
-      .then(logout)
-      .then(() => {
-        return fetch("https://dashboard.bloomable.com/api/login", {
-          headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            ...sessionToHeader(getSession()),
-          },
-          body: `{"email":"${credentials.username}","password":"${credentials.password}"}`,
-          method: "POST",
-        });
-      })
+      .then(() => fetch("https://dashboard.bloomable.com/api/login", {
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          ...sessionToHeader(getSession()),
+        },
+        body: `{"email":"${credentials.username}","password":"${credentials.password}"}`,
+        method: "POST",
+      }))
       .then(response => {
+        const session = getNewSession(response);
+        storeSession(session);
+
         if (response.status === HttpCode.OK) {
-          const session = getNewSession(response);
           verifySession(session);
-          storeSession(session);
           return session;
         }
 
@@ -103,7 +118,6 @@ export namespace BloomableAuth {
       .then(response => {
         if (response.status === HttpCode.Unauthorized) {
           return login(credentials)
-            .then(session => storeSession(session))
             .then(call);
         }
         return response;

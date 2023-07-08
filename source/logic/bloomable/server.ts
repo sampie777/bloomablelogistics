@@ -21,27 +21,28 @@ export namespace Server {
   export const isDemoUser = () => _credentials?.username === "demo";
 
   export const login = (credentials: BloomableAuth.Credentials, maxRetries: number = 1): Promise<any> => {
-    logout();
+    return logout()
+      .then(() => {
+        verifyUsername(credentials.username);
+        verifyPassword(credentials.password);
 
-    verifyUsername(credentials.username);
-    verifyPassword(credentials.password);
-
-    if (credentials.username === "demo" && credentials.password === "demo") {
-      rollbar.info("Demo account logged in");
-      storeCredentials(credentials);
-      return emptyPromise();
-    }
-
-    return BloomableAuth.login(credentials)
-      .then(() => storeCredentials(credentials))
-      .catch(error => {
-        if (!(error instanceof LoginError)) {
-          rollbar.error("Error logging in on server", {
-            error: error,
-            maxRetries: maxRetries,
-          });
+        if (credentials.username === "demo" && credentials.password === "demo") {
+          rollbar.info("Demo account logged in");
+          storeCredentials(credentials);
+          return emptyPromise();
         }
-        throw error;
+
+        return BloomableAuth.login(credentials)
+          .then(() => storeCredentials(credentials))
+          .catch(error => {
+            if (!(error instanceof LoginError)) {
+              rollbar.error("Error logging in on server", {
+                error: error,
+                maxRetries: maxRetries,
+              });
+            }
+            throw error;
+          });
       });
   };
 
@@ -55,10 +56,10 @@ export namespace Server {
     Validation.validate(value.length > 0, "Password cannot be empty");
   };
 
-  export const logout = () => {
+  export const logout = (): Promise<unknown> => {
     Notifications.unsubscribe();
     clearCredentials();
-    BloomableAuth.logout();
+    return BloomableAuth.logout();
   };
 
   export const isLoggedIn = () => {
