@@ -1,35 +1,20 @@
-import React, { useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 import { Product } from "../../../../logic/orders/models";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../../../theme";
 import ProductExtraComponent from "./ProductExtraComponent";
 import { htmlToString } from "../../../../logic/utils";
+import ZoomableImage from "../../../utils/ZoomableImage";
 
 interface Props {
   product: Product;
 }
 
 const ProductComponent: React.FC<Props> = ({ product }) => {
-  const [enlargeImage, setEnlargeImage] = useState(false);
-  const [imageAvailable, setImageAvailable] = useState(true);
-
-  const toggleImage = () => {
-    setEnlargeImage(!enlargeImage);
-  };
-
   const description = htmlToString(product.description ?? "");
   return <View style={styles.container}>
-    {product.image === undefined ? undefined :
-      <TouchableOpacity onPress={toggleImage}>
-        <Image source={{ uri: product.image }}
-               resizeMode={"contain"}
-               onError={() => setImageAvailable(false)}
-               onLoad={() => setImageAvailable(true)}
-               style={[styles.image, (!enlargeImage ? {} : styles.imageEnlarged), (imageAvailable ? {} : styles.unavailableImage)]} />
-        {imageAvailable ? undefined : <Text style={styles.imageErrorText}>Image not available</Text>}
-      </TouchableOpacity>
-    }
+    {product.image === undefined ? undefined : <ZoomableImage url={product.image} />}
 
     <View style={styles.row}>
       <Text style={styles.name}>{product.name}</Text>
@@ -73,25 +58,6 @@ const styles = StyleSheet.create({
     marginRight: 10,
     minWidth: 16,
     color: lightColors.text,
-  },
-
-  image: {
-    resizeMode: "contain",
-    height: 200,
-    marginBottom: 15,
-  },
-  imageEnlarged: {
-    height: 400,
-  },
-  unavailableImage: {
-    height: 0,
-    marginBottom: 0,
-  },
-  imageErrorText: {
-    fontSize: 12,
-    color: lightColors.textLighter,
-    textAlign: "center",
-    marginBottom: 15,
   },
 
   name: {

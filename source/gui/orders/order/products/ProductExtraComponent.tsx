@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { ProductExtra } from "../../../../logic/orders/models";
 import { lightColors } from "../../../theme";
+import ZoomableImage from "../../../utils/ZoomableImage";
 
 interface Props {
   item: ProductExtra;
@@ -10,18 +11,12 @@ interface Props {
 const ProductExtraComponent: React.FC<Props> = ({ item }) => {
   const [enlargeImage, setEnlargeImage] = useState(false);
 
-  const toggleImage = () => {
-    setEnlargeImage(!enlargeImage);
-  };
-
   return <View style={[styles.container, (!enlargeImage ? {} : styles.containerImageEnlarged)]}>
     <View style={styles.left}>
       {item.image === undefined ? undefined :
-        <TouchableOpacity onPress={toggleImage}>
-          <Image source={{ uri: item.image }}
-                 resizeMode={"contain"}
-                 style={[styles.image, (!enlargeImage ? {} : styles.imageEnlarged)]} />
-        </TouchableOpacity>}
+        <ZoomableImage url={item.image}
+                       minHeight={150}
+                       onSizeChange={setEnlargeImage} />}
     </View>
 
     <View style={styles.right}>
@@ -49,14 +44,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
 
-  image: {
-    resizeMode: "contain",
-    height: 150,
-    marginBottom: 15,
-  },
-  imageEnlarged: {
-    height: 400,
-  },
   name: {
     fontWeight: "bold",
     color: lightColors.text,

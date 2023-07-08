@@ -200,6 +200,7 @@ export namespace BloomableApi {
           product.description = it.description;
           product.guidelines = it.guidelines;
           product.image = it.image;
+          product.extras = it.extras;
           product._detailsLoaded = true;
         }),
     ));
