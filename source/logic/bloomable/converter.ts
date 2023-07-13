@@ -15,8 +15,9 @@ export const convertToLocalOrder = (onlineOrder: BloomableOrder) => {
 
   order.recipient = new Recipient();
   order.recipient.name = (onlineOrder.firstName + " " + onlineOrder.lastName).trim();
-  order.recipient.phones = [onlineOrder.phone];
-  order.recipient.address = [onlineOrder.address1, onlineOrder.address2, onlineOrder.city].filter(it => it).join(", ");
+  order.recipient.company = onlineOrder.company ?? "";
+  order.recipient.phones = onlineOrder.phone ? [onlineOrder.phone] : [];
+  order.recipient.address = [onlineOrder.address1, onlineOrder.address2, onlineOrder.postalCode, onlineOrder.city].filter(it => it).join(", ");
   order.recipient.coordinates = {
     latitude: onlineOrder.latitude,
     longitude: onlineOrder.longitude,

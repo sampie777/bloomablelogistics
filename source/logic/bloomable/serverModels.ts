@@ -56,9 +56,11 @@ export interface BloomableOrder {
   name: string,
   firstName: string,
   lastName: string,
-  phone: string,
+  company: string | null,
+  phone: string | null,
   address1: string,
   address2: string | null,
+  postalCode: string | null,
   city: string,
   country: string,
   latitude: number,
@@ -77,10 +79,10 @@ export interface BloomableOrder {
   }>,
   adjustments: [],
   status: OrderStatus,
-  totalValue: number,
-  deliveryFee: string,
   notes: string | null,
+  totalValue: number,
   onPay: number,
+  deliveryFee: string,
 }
 
 export interface OrdersResponse {

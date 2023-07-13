@@ -26,11 +26,13 @@ const RecipientInfo: React.FC<Props> = ({ order }) => {
     }
   };
 
+  const recipientName = order.recipient.name.length > 0 ? order.recipient.name : order.recipient.company;
+
   return <View style={styles.container}>
     <TouchableOpacity onPress={() => setCollapsed(!collapsed)}>
       <View style={styles.row}>
         <FontAwesome5Icon name={"user"} solid style={styles.icon} />
-        <Text style={styles.name} selectable={true}>{order.recipient.name}</Text>
+        <Text style={styles.name} selectable={true}>{recipientName}</Text>
 
         {!order.recipient.specialInstructions ? undefined :
           <FontAwesome5Icon name={"exclamation-triangle"} solid style={[styles.icon, { color: "#f38300" }]} />}
