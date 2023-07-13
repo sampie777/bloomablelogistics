@@ -18,7 +18,7 @@ interface Props {
 const OrderItem: React.FC<Props> = ({ order }) => {
   return <View style={[styles.container, (order.deleted ? styles.deleted : {})]}>
     <View style={styles.row}>
-      <UrlLink url={`https://www.bloomable.co.za/Code/Orders/Summary?orderId=${order.id}`}>
+      <UrlLink url={`https://dashboard.bloomable.com/order/${order.id}`}>
         <Text style={styles.number} selectable={true}>{order.number}</Text>
       </UrlLink>
 
