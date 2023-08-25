@@ -85,7 +85,8 @@ const MapOverview: React.FC<Props> = () => {
 
   return <View style={styles.container}>
     <Map locations={locations} onMarkerPress={onMarkerPress} />
-    <SmartAddressButton enabled={useSmartAddress} onPress={toggleSmartAddress} />
+    {settings.useInitialCoordinatesForOrders ? undefined :
+      <SmartAddressButton enabled={useSmartAddress} onPress={toggleSmartAddress} />}
     {selectedLocation === undefined ? undefined :
       <SelectedLocationOverlay location={selectedLocation}
                                unselectLocation={() => onMarkerPress(undefined)} />}

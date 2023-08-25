@@ -107,10 +107,13 @@ export namespace BloomableAuth {
         });
       })
       .catch(e => {
-        rollbar.error("Could not log in", { error: e });
+        rollbar.error("Could not log in", {
+          error: e,
+          errorMessage: e ? e.message : undefined,
+        });
         throw e;
       });
-  }
+  };
 
   export const authenticatedFetch = (credentials: Credentials, url: RequestInfo, init: RequestInit = {}): Promise<Response> => {
     const call = () => {
