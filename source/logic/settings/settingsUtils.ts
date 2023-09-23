@@ -1,5 +1,5 @@
 import { settings } from "./settings";
-import { rollbar } from "../rollbar";
+import { rollbar, sanitizeErrorForRollbar } from "../rollbar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { emptyPromiseWithValue } from "../utils";
 
@@ -20,9 +20,10 @@ export namespace SettingsUtils {
                 (obj as { [key: string]: any })[key] = dbValue;
               }
             })
-            .catch(e => rollbar.error("Failed to get settings value from storage", { error: e, key: key }));
+            .catch(error => rollbar.error("Failed to get settings value from storage",
+              { ...sanitizeErrorForRollbar(error), key: key }));
         }))
-      .catch(e => rollbar.error("Failed to load settings from storage", { error: e }))
+      .catch(error => rollbar.error("Failed to load settings from storage", sanitizeErrorForRollbar(error)))
       .finally(() => {
         _isLoaded = true;
       });
@@ -47,12 +48,13 @@ export namespace SettingsUtils {
           case "boolean":
             return setBoolean(key, value);
           default:
-            rollbar.error("No matching set function found for storing type of key.", { key: key, type: typeof value });
+            rollbar.error("No matching set function found for storing type of key.",
+              { key: key, type: typeof value });
         }
       });
     } catch (error: any) {
       rollbar.error("Failed to store settings", {
-        error: error,
+        ...sanitizeErrorForRollbar(error),
         errorType: error.constructor.name,
         settings: obj,
       });
@@ -62,7 +64,8 @@ export namespace SettingsUtils {
 
   function set(key: string, value: string) {
     return AsyncStorage.setItem(key, value)
-      .catch(e => rollbar.error("Failed to store settings value into storage", { error: e, key: key, value: value }));
+      .catch(error => rollbar.error("Failed to store settings value into storage",
+        { ...sanitizeErrorForRollbar(error), key: key, value: value }));
   }
 
   function setNumber(key: string, value: number) {
@@ -85,7 +88,8 @@ export namespace SettingsUtils {
       case "boolean":
         return getBoolean(key);
       default:
-        rollbar.error("No matching set function found for loading type of key.", { key: key, type: typeof value });
+        rollbar.error("No matching set function found for loading type of key.",
+          { key: key, type: typeof value });
     }
     return emptyPromiseWithValue(undefined);
   }

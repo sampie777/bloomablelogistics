@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     flex: 2,
   },
   errorName: {
-    color: "firebrick",
+    color: lightColors.textError,
     fontSize: 20,
     fontFamily: defaultFontFamilies.sansSerifLight,
     marginBottom: 20,
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   },
   lineIndex: {
     width: 30,
-    color: "dodgerblue",
+    color: lightColors.primary,
     borderRightWidth: 1,
     borderRightColor: "#ccc",
     marginRight: 10,

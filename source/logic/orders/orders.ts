@@ -87,11 +87,11 @@ export namespace Orders {
     return Server.acceptOrder(order.id);
   };
 
-  export const reject = (order: Order): Promise<any> => {
-    if (!order.id) throw new Error("Order has no valid id");
+  export const reject = (order: Order, reason: string): Promise<any> => {
+    if (!order.id) return Promise.reject(new Error("Order has no valid id"));
 
     order.isProcessing = true;
-    return Server.rejectOrder(order.id);
+    return Server.rejectOrder(order.id, reason);
   };
 
   export const fulfill = (order: Order): Promise<any> => {
@@ -107,4 +107,6 @@ export namespace Orders {
     order.isProcessing = true;
     return Server.deliverOrder(order.id);
   };
+
+  export const recipientName = (order: Order) => order.recipient.name.length > 0 ? order.recipient.name : order.recipient.company;
 }

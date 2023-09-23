@@ -1,5 +1,5 @@
 import { Linking, Platform, ScaledSize } from "react-native";
-import { rollbar } from "./rollbar";
+import { rollbar, sanitizeErrorForRollbar } from "./rollbar";
 
 export function dateFrom(date: Date | string): Date {
   if (typeof date === "string") {
@@ -116,9 +116,9 @@ export function openLink(url: string): Promise<any> {
     })
     .catch(error => {
       if (error !== undefined && error.message !== undefined && `${error.message}`.startsWith("Can't open Url '")) {
-        rollbar.info("Failed to open URL", { error: error, url: url });
+        rollbar.info("Failed to open URL", { ...sanitizeErrorForRollbar(error), url: url });
       } else {
-        rollbar.warning("Failed to open URL", { error: error, url: url });
+        rollbar.warning("Failed to open URL", { ...sanitizeErrorForRollbar(error), url: url });
       }
       throw error;
     });

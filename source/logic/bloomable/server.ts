@@ -1,4 +1,4 @@
-import { rollbar } from "../rollbar";
+import { rollbar, sanitizeErrorForRollbar } from "../rollbar";
 import EncryptedStorage from "react-native-encrypted-storage";
 import { Notifications } from "../notifications";
 import { BloomableAuth } from "./auth";
@@ -28,7 +28,7 @@ export namespace Server {
           .catch(error => {
             if (!(error instanceof LoginError)) {
               rollbar.error("Error logging in on server", {
-                error: error,
+                ...sanitizeErrorForRollbar(error),
                 maxRetries: maxRetries,
               });
             }
@@ -63,7 +63,7 @@ export namespace Server {
     return EncryptedStorage.getItem("username")
       .catch(error => {
         rollbar.critical("Error getting EncryptedStorage item", {
-          error: error,
+          ...sanitizeErrorForRollbar(error),
           key: "username",
         });
         throw error;
@@ -71,7 +71,7 @@ export namespace Server {
       .then(username => EncryptedStorage.getItem("password")
         .catch(error => {
           rollbar.critical("Error getting EncryptedStorage item", {
-            error: error,
+            ...sanitizeErrorForRollbar(error),
             key: "password",
           });
           throw error;
@@ -109,7 +109,7 @@ export namespace Server {
       EncryptedStorage.setItem(key, value)
         .catch(error => {
           rollbar.critical("Error setting EncryptedStorage item", {
-            error: error,
+            ...sanitizeErrorForRollbar(error),
             key: key,
           });
         });
@@ -117,7 +117,7 @@ export namespace Server {
       EncryptedStorage.removeItem(key)
         .catch(error => {
           rollbar.error("Error clearing EncryptedStorage item", {
-            error: error,
+            ...sanitizeErrorForRollbar(error),
             key: key,
           });
         });
@@ -129,19 +129,19 @@ export namespace Server {
     return BloomableApi.acceptOrder({ id: id })
       .catch((error: any) => {
         rollbar.error("Error accepting order", {
-          error: error,
+          ...sanitizeErrorForRollbar(error),
           id: id,
         });
         throw error;
       });
   };
 
-  export const rejectOrder = (id: string) => {
+  export const rejectOrder = (id: string, reason: string) => {
     const { BloomableApi } = require("./api");
-    return BloomableApi.rejectOrder({ id: id })
+    return BloomableApi.rejectOrder({ id: id }, reason)
       .catch((error: any) => {
         rollbar.error("Error rejecting order", {
-          error: error,
+          ...sanitizeErrorForRollbar(error),
           id: id,
         });
         throw error;
@@ -153,7 +153,7 @@ export namespace Server {
     return BloomableApi.fulfillOrder({ id: id })
       .catch((error: any) => {
         rollbar.error("Error fulfilling order", {
-          error: error,
+          ...sanitizeErrorForRollbar(error),
           id: id,
         });
         throw error;
@@ -165,7 +165,7 @@ export namespace Server {
     return BloomableApi.deliverOrder({ id: id })
       .catch((error: any) => {
         rollbar.error("Error delivering order", {
-          error: error,
+          ...sanitizeErrorForRollbar(error),
           id: id,
         });
         throw error;

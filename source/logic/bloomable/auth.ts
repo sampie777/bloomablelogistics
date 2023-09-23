@@ -1,7 +1,7 @@
 import { getNewSession, getSession, Session, sessionToHeader, storeSession, verifySession } from "./session";
 import { obtainResponseContent } from "./utils";
 import { HttpCode } from "../utils/http";
-import { rollbar } from "../rollbar";
+import { rollbar, sanitizeErrorForRollbar } from "../rollbar";
 import { delayedPromiseWithValue } from "../utils";
 
 export namespace BloomableAuth {
@@ -24,7 +24,7 @@ export namespace BloomableAuth {
         if (response.status !== HttpCode.NoContent) {
           obtainResponseContent(response)
             .then(content => JSON.stringify(content))
-            .catch(e => e)
+            .catch(error => error)
             .then(content =>
               rollbar.info("Received unexpected status code from XSRF cookie request", {
                 statusCode: response.status,
@@ -37,9 +37,9 @@ export namespace BloomableAuth {
         storeSession(session);
         return session;
       })
-      .catch(e => {
-        rollbar.error("Could not get XSRF tokens", { error: e });
-        throw e;
+      .catch(error => {
+        rollbar.error("Could not get XSRF tokens", sanitizeErrorForRollbar(error));
+        throw error;
       });
 
   export const logout = (): Promise<unknown> =>
@@ -57,7 +57,7 @@ export namespace BloomableAuth {
         if (response.status !== HttpCode.NoContent) {
           obtainResponseContent(response)
             .then(content => JSON.stringify(content))
-            .catch(e => e)
+            .catch(error => error)
             .then(content =>
               rollbar.warning("Failed to log out", {
                 statusCode: response.status,
@@ -65,8 +65,8 @@ export namespace BloomableAuth {
               }));
         }
       })
-      .catch(e => {
-        rollbar.error("Failed to log out", { error: e });
+      .catch(error => {
+        rollbar.error("Failed to log out", sanitizeErrorForRollbar(error));
       });
 
   export const login = (credentials: Credentials): Promise<Session> => {
@@ -106,12 +106,12 @@ export namespace BloomableAuth {
           throw new Error(`No idea whats going on (status=${response.status}). Payload: ${stringifiedContent}`);
         });
       })
-      .catch(e => {
+      .catch(error => {
         rollbar.error("Could not log in", {
-          error: e,
-          errorMessage: e ? e.message : undefined,
+          ...sanitizeErrorForRollbar(error),
+          errorMessage: error ? error.message : undefined,
         });
-        throw e;
+        throw error;
       });
   };
 

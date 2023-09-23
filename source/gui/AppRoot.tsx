@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { routes } from "../routes";
+import { Routes } from "../routes";
 import MainWrapper from "./wrapper/MainWrapper";
 import LoginScreen from "./login/LoginScreen";
 import SettingsScreen from "./settings/SettingsScreen";
@@ -8,6 +8,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { RecoilRoot } from "recoil";
 import { settings } from "../logic/settings/settings";
 import { Mocks } from "../logic/demoData/mocks";
+import RejectOrderScreen from "./orders/order/status/RejectOrderScreen";
 
 const RootNav = createNativeStackNavigator();
 
@@ -23,13 +24,15 @@ const AppRoot: React.FC<Props> = () => {
 
   return <RecoilRoot>
     <NavigationContainer>
-      <RootNav.Navigator initialRouteName={routes.Login}
+      <RootNav.Navigator initialRouteName={Routes.Login}
                          screenOptions={{}}>
-        <RootNav.Screen name={routes.Main} component={MainWrapper}
+        <RootNav.Screen name={Routes.Main} component={MainWrapper}
                         options={{ headerShown: false }} />
-        <RootNav.Screen name={routes.Login} component={LoginScreen}
+        <RootNav.Screen name={Routes.Login} component={LoginScreen}
                         options={{ headerShown: false }} />
-        <RootNav.Screen name={routes.Settings} component={SettingsScreen}
+        <RootNav.Screen name={Routes.Settings} component={SettingsScreen}
+                        options={{ headerShown: true }} />
+        <RootNav.Screen name={Routes.RejectOrder} component={RejectOrderScreen as any}
                         options={{ headerShown: true }} />
       </RootNav.Navigator>
     </NavigationContainer>

@@ -1,4 +1,4 @@
-import { rollbar } from "../rollbar";
+import { rollbar, sanitizeErrorForRollbar } from "../rollbar";
 
 export const getCookieValue = (cookies: string, key: string): string | undefined => {
   const cookie = cookies.split(",")
@@ -13,12 +13,12 @@ export const getCookieValue = (cookies: string, key: string): string | undefined
 
 export const obtainResponseContent = (response: Response): Promise<string> => {
   const contentType = response.headers.get("content-type");
-  if (contentType === "application/json") return response.json().catch(e => {
-    rollbar.error("Could not convert response to json", e);
+  if (contentType === "application/json") return response.json().catch(error => {
+    rollbar.error("Could not convert response to json", sanitizeErrorForRollbar(error));
     return "";
   });
-  return response.text().catch(e => {
-    rollbar.error("Could not convert response to text", e);
+  return response.text().catch(error => {
+    rollbar.error("Could not convert response to text", sanitizeErrorForRollbar(error));
     return "";
   });
 };

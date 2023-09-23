@@ -5,7 +5,7 @@ import { useRecoilValue } from "recoil";
 import { selectedDateOrdersState } from "../../logic/recoil";
 import { lightColors } from "../theme";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
-import { ParamList, routes } from "../../routes";
+import { ParamList, Routes } from "../../routes";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Animated, {
   Extrapolation,
@@ -35,7 +35,7 @@ const Dashboard: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }) 
   });
 
   const openSettings = () => {
-    navigation.navigate(routes.Settings);
+    navigation.navigate(Routes.Settings);
   };
 
   const onScrollViewScroll = useAnimatedScrollHandler({

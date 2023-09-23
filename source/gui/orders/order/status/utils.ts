@@ -3,13 +3,14 @@ import { useRecoilState } from "recoil";
 import { orderActionInProgressState } from "../../../../logic/recoil";
 import { useState } from "react";
 import { settings } from "../../../../logic/settings/settings";
-import { rollbar } from "../../../../logic/rollbar";
+import { rollbar, sanitizeErrorForRollbar } from "../../../../logic/rollbar";
 import { Alert } from "react-native";
 import { Orders } from "../../../../logic/orders/orders";
 
-type ApplyOrderActionProps = (action: (order: Order) => Promise<any>,
+type ApplyOrderActionProps = (action: (order: Order, args?: any) => Promise<any>,
                               errorTitle: string,
-                              errorMessage: string) => void
+                              errorMessage: string,
+                              args?: any) => Promise<boolean>
 
 export const useOrderAction = (order: Order): [
   isProcessing: boolean,
@@ -18,15 +19,17 @@ export const useOrderAction = (order: Order): [
   const [orderActionInProgress, setOrderActionInProgress] = useRecoilState(orderActionInProgressState);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const applyOrderAction: ApplyOrderActionProps = (action, errorTitle, errorMessage) => {
-    if (settings.disableOrderActions) return;
+  const applyOrderAction: ApplyOrderActionProps = (action, errorTitle, errorMessage, args = undefined): Promise<boolean> => {
+    if (settings.disableOrderActions) return Promise.resolve(false);
     setIsProcessing(true);
 
-    action(order)
+    return action(order, args)
       .then(loadOrder)
-      .catch(e => {
-        rollbar.error(errorMessage, { error: e, order: order });
-        Alert.alert(errorTitle, `${errorMessage}\n\n${e}.`);
+      .then(() => true)
+      .catch(error => {
+        rollbar.error(errorMessage, { ...sanitizeErrorForRollbar(error), order: order });
+        Alert.alert(errorTitle, `${errorMessage}\n\n${error}.`);
+        return false;
       })
       .finally(() => {
         setIsProcessing(false);

@@ -2,7 +2,7 @@ import { Order, Product } from "../orders/models";
 import { MeResponse, OrderResponse, OrdersResponse, OrderStatus, ProductResponse } from "./serverModels";
 import { convertToLocalOrder, convertToLocalOrders, convertToLocalProduct } from "./converter";
 import { BloomableAuth } from "./auth";
-import { rollbar } from "../rollbar";
+import { rollbar, sanitizeErrorForRollbar } from "../rollbar";
 import { Server } from "./server";
 
 export namespace BloomableApi {
@@ -23,9 +23,9 @@ export namespace BloomableApi {
         }
         return convertToLocalOrders(json.data);
       })
-      .catch(e => {
-        rollbar.error("Could not get orders", { error: e });
-        throw e;
+      .catch(error => {
+        rollbar.error("Could not get orders", sanitizeErrorForRollbar(error));
+        throw error;
       });
 
   export const getOrder = (order: { id: string },
@@ -34,12 +34,12 @@ export namespace BloomableApi {
       `https://dashboard.bloomable.com/api/orders/${order.id}`, { headers: jsonHeaders })
       .then(response => response.json() as Promise<OrderResponse>)
       .then(json => convertToLocalOrder(json.data))
-      .catch(e => {
+      .catch(error => {
         rollbar.error("Could not get order", {
-          error: e,
+          ...sanitizeErrorForRollbar(error),
           order: order,
         });
-        throw e;
+        throw error;
       });
 
   export const getProduct = (product: { id: number },
@@ -48,9 +48,12 @@ export namespace BloomableApi {
       `https://dashboard.bloomable.com/api/product-variants/${product.id}`, { headers: jsonHeaders })
       .then(response => response.json() as Promise<ProductResponse>)
       .then(json => convertToLocalProduct(json.data))
-      .catch(e => {
-        rollbar.error("Could not get product", { error: e, product: product });
-        throw e;
+      .catch(error => {
+        rollbar.error("Could not get product", {
+          ...sanitizeErrorForRollbar(error),
+          product: product,
+        });
+        throw error;
       });
 
   const callApiWithAction = (credentials: BloomableAuth.Credentials,
@@ -67,9 +70,12 @@ export namespace BloomableApi {
           throw new Error(`Failed to ${action} order (status=${response.status})`);
         }
       })
-      .catch(e => {
-        rollbar.error(`Could not ${action} order`, { error: e, order: order });
-        throw e;
+      .catch(error => {
+        rollbar.error(`Could not ${action} order`, {
+          ...sanitizeErrorForRollbar(error),
+          order: order,
+        });
+        throw error;
       });
 
   export const acceptOrder = (order: { id: string },
@@ -78,8 +84,28 @@ export namespace BloomableApi {
 
   // Not tested
   export const rejectOrder = (order: { id: string },
+                              reason: string,
                               credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<any> =>
-    callApiWithAction(credentials, order, "reject");
+    BloomableAuth.authenticatedFetch(credentials,
+      `https://dashboard.bloomable.com/api/orders/${order.id}/reject`,
+      {
+        headers: jsonHeaders,
+        method: "POST",
+        body: reason,
+      })
+      .then(response => {
+        if (response.status !== 200) {
+          throw new Error(`Failed to reject order (status=${response.status})`);
+        }
+      })
+      .catch(error => {
+        rollbar.error(`Could not reject order`, {
+          ...sanitizeErrorForRollbar(error),
+          order: order,
+          reason: reason,
+        });
+        throw error;
+      });
 
   // Not tested
   export const fulfillOrder = (order: { id: string },
@@ -95,9 +121,9 @@ export namespace BloomableApi {
     BloomableAuth.authenticatedFetch(credentials,
       "https://dashboard.bloomable.com/api/me", { headers: jsonHeaders })
       .then(response => response.json())
-      .catch(e => {
-        rollbar.error("Could not get me details", { error: e });
-        throw e;
+      .catch(error => {
+        rollbar.error("Could not get me details", sanitizeErrorForRollbar(error));
+        throw error;
       });
 
   export const loadOrderProducts = (order: Order,

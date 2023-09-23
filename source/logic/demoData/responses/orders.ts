@@ -20,7 +20,7 @@ export const demoResponseOrders = {
         {
           "id": 5373,
           "title": "Biltong and Nuts Snack Box - As Shown",
-          "status": "accepted",
+          "status": "open",
           "quantity": 1,
           "giftMessage": "Dear Dad\/Grampa Have a wonderful birthday! Lots of love, Simon, Sarah, Kai, Benaiah, & Isaiah ",
           "productVariantId": 822,
@@ -31,7 +31,7 @@ export const demoResponseOrders = {
       "postalCode": "0216",
       "company": null,
       "adjustments": [],
-      "status": "accepted",
+      "status": "open",
       "totalValue": 1034.95,
       "notes": null,
       "onPay": 59.95,

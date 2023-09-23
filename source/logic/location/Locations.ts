@@ -1,5 +1,5 @@
 import { Order, Recipient } from "../orders/models";
-import { rollbar } from "../rollbar";
+import { rollbar, sanitizeErrorForRollbar } from "../rollbar";
 import { emptyPromise, emptyPromiseWithValue, hashCyrb53 } from "../utils";
 import Geocoder from "react-native-geocoding";
 import Config from "react-native-config";
@@ -103,7 +103,7 @@ export namespace Locations {
       })
       .catch(error => {
         rollbar.error("Failed to get results from location cache for address", {
-          error: error,
+          ...sanitizeErrorForRollbar(error),
           address: address,
         });
         return null;
@@ -118,7 +118,7 @@ export namespace Locations {
     locationCache.set(hashCyrb53(address), JSON.stringify(coordinates))
       .catch(error => {
         rollbar.error("Failed to store location in location cache for address", {
-          error: error,
+          ...sanitizeErrorForRollbar(error),
           address: address,
           coordinates: coordinates,
         });
@@ -140,7 +140,7 @@ export namespace Locations {
       })
       .catch(error => {
         rollbar.error("Failed to get results from Google geocoder for address", {
-          error: error,
+          ...sanitizeErrorForRollbar(error),
           address: address,
         });
         return null;

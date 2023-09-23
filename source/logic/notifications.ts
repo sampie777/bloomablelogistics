@@ -1,7 +1,7 @@
 import messaging from "@react-native-firebase/messaging";
 import { Permissions } from "./permissions";
 import { PermissionsAndroid } from "react-native";
-import { rollbar } from "./rollbar";
+import { rollbar, sanitizeErrorForRollbar } from "./rollbar";
 import { settings } from "./settings/settings";
 
 export namespace Notifications {
@@ -49,8 +49,8 @@ export namespace Notifications {
     }
     messaging().subscribeToTopic(topic)
       .then(() => isSubscribed = true)
-      .catch(e => rollbar.error("Failed to subscribe to topic", {
-        error: e,
+      .catch(error => rollbar.error("Failed to subscribe to topic", {
+        ...sanitizeErrorForRollbar(error),
         topic: topic,
       }));
   };
@@ -61,8 +61,8 @@ export namespace Notifications {
 
     messaging().unsubscribeFromTopic(topic)
       .then(() => isSubscribed = false)
-      .catch(e => rollbar.error("Failed to unsubscribe from topic", {
-        error: e,
+      .catch(error => rollbar.error("Failed to unsubscribe from topic", {
+        ...sanitizeErrorForRollbar(error),
         topic: topic,
       }));
   };

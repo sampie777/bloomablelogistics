@@ -4,7 +4,7 @@ import LoggedInView from "./LoggedInView";
 import NotLoggedInView from "./NotLoggedInView";
 import LoadingOverlay from "../utils/LoadingOverlay";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ParamList, routes } from "../../routes";
+import { ParamList, Routes } from "../../routes";
 import { Server } from "../../logic/bloomable/server";
 
 const LoginScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }) => {
@@ -17,10 +17,10 @@ const LoginScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }
       return;
     }
 
-    navigation.navigate(routes.Main);
+    navigation.navigate(Routes.Main);
     navigation.reset({
       index: 0,
-      routes: [{ name: routes.Main }],
+      routes: [{ name: Routes.Main }],
     });
   };
 

@@ -26,7 +26,7 @@ const configuration = new Configuration(
 export const rollbar = new Client(configuration);
 
 getUniqueId().then(value => rollbar.setPerson(value))
-  .catch(e => rollbar.error("Could not get/set unique ID", { error: e }));
+  .catch(error => rollbar.error("Could not get/set unique ID", { error: sanitizeErrorForRollbar(error)}));
 
 if (!shouldRollbarBeEnabled) {
   const rollbarLogLocal = (logFunction: (...data: any[]) => void, obj: LogArgument, extra?: Extra, callback?: Callback): LogResult => {
@@ -44,3 +44,35 @@ if (!shouldRollbarBeEnabled) {
   rollbar.error = (obj: LogArgument, extra?: Extra, callback?: Callback): LogResult => rollbarLogLocal(console.error, obj, extra, callback);
   rollbar.critical = (obj: LogArgument, extra?: Extra, callback?: Callback): LogResult => rollbarLogLocal(console.error, obj, extra, callback);
 }
+
+
+export const sanitizeErrorForRollbar = <T>(error: T): {
+  error: {
+    original: T,
+    json: string,
+    name?: string | null,
+    type?: string | null,
+    message?: string | null,
+    stack?: string | null
+  }
+} => {
+  if (!(error instanceof Error)) {
+    return {
+      error: {
+        original: error,
+        json: JSON.stringify(error),
+      },
+    };
+  }
+
+  return {
+    error: {
+      original: error,
+      name: error.name,
+      type: error.constructor.name,
+      message: error.message,
+      stack: error.stack,
+      json: JSON.stringify(error),
+    },
+  };
+};

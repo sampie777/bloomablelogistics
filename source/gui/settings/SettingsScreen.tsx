@@ -2,7 +2,7 @@ import React from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import SwitchComponent from "./components/SwitchComponent";
 import PressableComponent from "./components/PressableComponent";
-import { ParamList, routes } from "../../routes";
+import { ParamList, Routes } from "../../routes";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { settings } from "../../logic/settings/settings";
 import { Notifications } from "../../logic/notifications";
@@ -59,10 +59,10 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
                           description={`Currently logged in as '${Server.getCredentials().username}'`}
                           onPress={() => {
                             Server.logout();
-                            navigation.navigate(routes.Login);
+                            navigation.navigate(Routes.Login);
                             navigation.reset({
                               index: 0,
-                              routes: [{ name: routes.Login }],
+                              routes: [{ name: Routes.Login }],
                             });
                           }} />
 

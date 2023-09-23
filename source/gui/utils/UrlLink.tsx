@@ -18,7 +18,7 @@ const UrlLink: React.FC<{
     const open = () => {
       openLink(url)
         .then(onOpened)
-        .catch(e => Alert.alert("Error opening link", e.message));
+        .catch(error => Alert.alert("Error opening link", error.message));
     };
 
     return (

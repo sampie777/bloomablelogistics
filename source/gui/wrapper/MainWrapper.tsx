@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { routes } from "../../routes";
+import { Routes } from "../../routes";
 import Dashboard from "../dashboard/Dashboard";
 import MapOverview from "../map/MapOverview";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
@@ -104,18 +104,18 @@ const MainWrapper: React.FC<Props> = () => {
         }
       </View>
 
-      <TabNav.Navigator initialRouteName={routes.Dashboard}
+      <TabNav.Navigator initialRouteName={Routes.Dashboard}
                         screenOptions={{
                           tabBarStyle: styles.tabBar,
                           tabBarActiveTintColor: styles.tabBarActiveLabel.color as string,
                         }}>
-        <TabNav.Screen name={routes.Dashboard} component={Dashboard}
+        <TabNav.Screen name={Routes.Dashboard} component={Dashboard}
                        options={{
                          headerShown: false,
                          tabBarIcon: ({ focused, color, size }) =>
                            <FontAwesome5Icon name="home" size={size} color={color} />,
                        }} />
-        <TabNav.Screen name={routes.Map} component={MapOverview}
+        <TabNav.Screen name={Routes.Map} component={MapOverview}
                        options={{
                          headerShown: false,
                          tabBarIcon: ({ focused, color, size }) =>

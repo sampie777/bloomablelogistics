@@ -1,10 +1,13 @@
 import React from "react";
 import { Alert, StyleSheet, View } from "react-native";
 import { Order } from "../../../../logic/orders/models";
-import { StatusButton, StatusLoading } from "./common";
 import { settings } from "../../../../logic/settings/settings";
 import { Orders } from "../../../../logic/orders/orders";
 import { useOrderAction } from "./utils";
+import { ParamList, Routes } from "../../../../routes";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { StatusButton, StatusLoading } from "./StatusButton";
 
 interface Props {
   order: Order;
@@ -12,6 +15,7 @@ interface Props {
 
 const OrderStatus: React.FC<Props> = ({ order }) => {
   const [isProcessing, applyOrderAction] = useOrderAction(order);
+  const navigation = useNavigation<NativeStackNavigationProp<ParamList, any>>();
 
   const getStatusAction = (): (() => void) | null => {
     if (settings.disableOrderActions) return null;
@@ -37,11 +41,7 @@ const OrderStatus: React.FC<Props> = ({ order }) => {
         { text: "Cancel", style: "cancel" },
         {
           text: "Reject",
-          onPress: () => applyOrderAction(
-            Orders.reject,
-            "Accept order",
-            "Failed to mark order as rejected.",
-          ),
+          onPress: () => navigation.navigate(Routes.RejectOrder, { orderId: order.id }),
           style: "default",
         },
         {
@@ -103,7 +103,7 @@ const OrderStatus: React.FC<Props> = ({ order }) => {
   const reacceptOrder = () => {
     Alert.alert(
       "Re-accept order",
-      "This is not implemented",
+      "This action is not implemented.",
       [
         {
           text: "Close",
