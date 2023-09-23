@@ -88,8 +88,8 @@ export namespace Mocks {
 
       } else if (typeof (input) === "string" && RegExp("https://dashboard.bloomable.com/api/orders/\\d+/(accept|reject|fulfill|deliver)$", "gi").test(input)) {
         return delayedPromiseWithValue(defaultResponse(), 500);
-        
-      } else if (typeof (input) === "string" && RegExp("https://maps.google.com/.*$").test(input)) {
+
+      } else if (typeof (input) === "string" && !RegExp("https://dashboard.bloomable.com.*$").test(input)) {
         return originalFetch(input, init);
       }
 
