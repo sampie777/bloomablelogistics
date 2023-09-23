@@ -4,6 +4,7 @@ import { Notifications } from "../notifications";
 import { BloomableAuth } from "./auth";
 import LoginError = BloomableAuth.LoginError;
 import { Validation } from "../utils/validation";
+import { Mocks } from "../demoData/mocks";
 
 export namespace Server {
   const emptyCredentials = { username: "", password: "" };
@@ -50,7 +51,8 @@ export namespace Server {
   export const logout = (): Promise<unknown> => {
     Notifications.unsubscribe();
     clearCredentials();
-    return BloomableAuth.logout();
+    return BloomableAuth.logout()
+      .then(Mocks.tearDownDemoData);
   };
 
   export const isLoggedIn = () => {

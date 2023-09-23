@@ -60,6 +60,11 @@ export namespace Mocks {
 
   const originalFetch = fetch;
 
+  export const tearDownDemoData = () => {
+    // @ts-ignore
+    fetch = originalFetch;
+  };
+
   export const setupDemoData = () => {
     console.debug("Using demo data");
 

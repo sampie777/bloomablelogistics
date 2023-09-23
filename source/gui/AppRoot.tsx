@@ -7,7 +7,6 @@ import SettingsScreen from "./settings/SettingsScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { RecoilRoot } from "recoil";
 import { settings } from "../logic/settings/settings";
-import { Mocks } from "../logic/demoData/mocks";
 import RejectOrderScreen from "./orders/order/status/RejectOrderScreen";
 
 const RootNav = createNativeStackNavigator();
@@ -18,7 +17,6 @@ interface Props {
 
 const AppRoot: React.FC<Props> = () => {
   useEffect(() => {
-    Mocks.setupDemoData();
     settings.load();
   });
 

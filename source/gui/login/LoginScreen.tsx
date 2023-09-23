@@ -6,6 +6,7 @@ import LoadingOverlay from "../utils/LoadingOverlay";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ParamList, Routes } from "../../routes";
 import { Server } from "../../logic/bloomable/server";
+import { Mocks } from "../../logic/demoData/mocks";
 
 const LoginScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }) => {
   const isMounted = useRef(false);
@@ -17,6 +18,12 @@ const LoginScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }
       return;
     }
 
+    if (Server.isDemoUser()) {
+      Mocks.setupDemoData();
+    } else {
+      Mocks.tearDownDemoData();
+    }
+
     navigation.navigate(Routes.Main);
     navigation.reset({
       index: 0,
@@ -26,6 +33,7 @@ const LoginScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }
 
   useEffect(() => {
     isMounted.current = true;
+    setIsProcessing(true);
 
     if (!Server.isCredentialsRecalled()) {
       Server.recallCredentials()

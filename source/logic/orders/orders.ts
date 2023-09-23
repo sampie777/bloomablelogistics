@@ -45,7 +45,7 @@ export namespace Orders {
 
     return BloomableApi.getOrder({ id: order.id })
       .then(onlineOrder => {
-        if (config.offlineData || Server.isDemoUser()) {
+        if (Server.isDemoUser()) {
           if (order.status === "open") {
             onlineOrder.status = "accepted";
           } else if (order.status === "accepted") {
