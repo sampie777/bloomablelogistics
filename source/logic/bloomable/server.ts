@@ -4,7 +4,6 @@ import { Notifications } from "../notifications";
 import { BloomableAuth } from "./auth";
 import LoginError = BloomableAuth.LoginError;
 import { Validation } from "../utils/validation";
-import { BloomableApi } from "./api";
 
 export namespace Server {
   const emptyCredentials = { username: "", password: "" };
@@ -126,8 +125,9 @@ export namespace Server {
   };
 
   export const acceptOrder = (id: string) => {
+    const { BloomableApi } = require("./api");
     return BloomableApi.acceptOrder({ id: id })
-      .catch(error => {
+      .catch((error: any) => {
         rollbar.error("Error accepting order", {
           error: error,
           id: id,
@@ -137,8 +137,9 @@ export namespace Server {
   };
 
   export const rejectOrder = (id: string) => {
+    const { BloomableApi } = require("./api");
     return BloomableApi.rejectOrder({ id: id })
-      .catch(error => {
+      .catch((error: any) => {
         rollbar.error("Error rejecting order", {
           error: error,
           id: id,
@@ -148,8 +149,9 @@ export namespace Server {
   };
 
   export const deliverOrder = (id: string) => {
+    const { BloomableApi } = require("./api");
     return BloomableApi.deliverOrder({ id: id })
-      .catch(error => {
+      .catch((error: any) => {
         rollbar.error("Error delivering order", {
           error: error,
           id: id,

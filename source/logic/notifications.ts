@@ -3,7 +3,6 @@ import { Permissions } from "./permissions";
 import { PermissionsAndroid } from "react-native";
 import { rollbar } from "./rollbar";
 import { settings } from "./settings/settings";
-import { Server } from "./bloomable/server";
 
 export namespace Notifications {
   let isInitialized = false;
@@ -31,9 +30,13 @@ export namespace Notifications {
       .toLowerCase();
   };
 
-  const getUserTopic = () => convertUsernameToTopicName(Server.getCredentials().username ?? defaultTopic);
+  const getUserTopic = () => {
+    const { Server } = require("./bloomable/server");
+    return convertUsernameToTopicName(Server.getCredentials().username ?? defaultTopic);
+  };
 
   export const subscribe = () => {
+    const { Server } = require("./bloomable/server");
     if (isSubscribed) return;
     if (!Server.isLoggedIn()) return;
 
