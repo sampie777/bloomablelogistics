@@ -1,3 +1,5 @@
+export type OrderStatus = "open" | "cancelled" | "cancel-confirmed" | "accepted" | "fulfilled" | "delivered";
+
 export class Order {
   id?: string = undefined;
   number?: number = undefined;
@@ -5,16 +7,12 @@ export class Order {
   deliverAtDate?: Date = undefined;
   orderValue?: number = undefined;
   orderCosts?: number = undefined;
-  accepted: boolean = false;
-  delivered: boolean = false;
-  deleted: boolean = false;
+  status: OrderStatus = "open";
   recipient: Recipient = new Recipient();
   products: Product[] = [];
 
   // Local state of the order whether it is currently being processed.
-  isAccepting: boolean = false;
-  isRejecting: boolean = false;
-  isDelivering: boolean = false;
+  isProcessing: boolean = false;
 
   static clone(from: Order): Order {
     const to = new Order();
@@ -24,15 +22,11 @@ export class Order {
     to.deliverAtDate = from.deliverAtDate;
     to.orderValue = from.orderValue;
     to.orderCosts = from.orderCosts;
-    to.accepted = from.accepted;
-    to.delivered = from.delivered;
-    to.deleted = from.deleted;
+    to.status = from.status;
     to.recipient = from.recipient ? Recipient.clone(from.recipient) : from.recipient;
     to.products = from.products.map(it => Product.clone(it));
 
-    to.isAccepting = from.isAccepting ?? false;
-    to.isRejecting = from.isRejecting ?? false;
-    to.isDelivering = from.isDelivering ?? false;
+    to.isProcessing = from.isProcessing ?? false;
     return to;
   }
 }

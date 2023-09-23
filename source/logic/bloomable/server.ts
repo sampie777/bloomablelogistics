@@ -148,6 +148,18 @@ export namespace Server {
       });
   };
 
+  export const fulfillOrder = (id: string) => {
+    const { BloomableApi } = require("./api");
+    return BloomableApi.fulfillOrder({ id: id })
+      .catch((error: any) => {
+        rollbar.error("Error fulfilling order", {
+          error: error,
+          id: id,
+        });
+        throw error;
+      });
+  };
+
   export const deliverOrder = (id: string) => {
     const { BloomableApi } = require("./api");
     return BloomableApi.deliverOrder({ id: id })

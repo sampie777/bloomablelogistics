@@ -2,12 +2,12 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { format } from "../../../logic/utils";
 import { lightColors } from "../../theme";
-import OrderStatus from "./OrderStatus";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import OrderCosts from "./OrderCosts";
 import RecipientInfo from "./RecipientInfo";
 import { Order } from "../../../logic/orders/models";
 import UrlLink from "../../utils/UrlLink";
+import OrderStatus from "./status/OrderStatus";
 
 interface Props {
   order: Order;
@@ -16,7 +16,7 @@ interface Props {
 }
 
 const OrderItem: React.FC<Props> = ({ order }) => {
-  return <View style={[styles.container, (order.deleted ? styles.deleted : {})]}>
+  return <View style={[styles.container, ((order.status === "cancelled" || order.status === "cancel-confirmed") ? styles.deleted : {})]}>
     <View style={styles.row}>
       <UrlLink url={`https://dashboard.bloomable.com/order/${order.id}`}>
         <Text style={styles.number} selectable={true}>{order.number}</Text>

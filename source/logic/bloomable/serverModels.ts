@@ -1,4 +1,4 @@
-export type OrderStatus = "open" | "accepted" | "fulfilled" | "delivered" | "cancelled";
+export type OrderStatus = "open" | "cancelled" | "cancel-confirmed" | "accepted" | "fulfilled" | "delivered";
 
 export interface BloomableProduct {
   id: number,

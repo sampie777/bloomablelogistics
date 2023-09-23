@@ -35,17 +35,12 @@ export const useOrderAction = (order: Order): [
 
   const loadOrder = () => Orders.fetchStatusForOrder(order)
     .then(updatedOrder => {
-      updatedOrder.isAccepting = false;
-      updatedOrder.isRejecting = false;
-      updatedOrder.isDelivering = false;
+      updatedOrder.isProcessing = false;
       return updatedOrder;
     })
     .then(updatedOrder => {
-      order.isAccepting = updatedOrder.isAccepting;
-      order.isRejecting = updatedOrder.isRejecting;
-      order.isDelivering = updatedOrder.isDelivering;
-      order.accepted = updatedOrder.accepted;
-      order.delivered = updatedOrder.delivered;
+      order.isProcessing = updatedOrder.isProcessing;
+      order.status = updatedOrder.status;
 
       // Trigger GUI update
       setOrderActionInProgress(true);

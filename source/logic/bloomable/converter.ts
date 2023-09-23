@@ -9,9 +9,7 @@ export const convertToLocalOrder = (onlineOrder: BloomableOrder) => {
   order.deliverAtDate = new Date(onlineOrder.deliveryDate);
   order.orderValue = onlineOrder.totalValue;
   order.orderCosts = onlineOrder.onPay;
-  order.accepted = onlineOrder.status !== "open" && onlineOrder.status !== "cancelled";
-  order.delivered = onlineOrder.status === "fulfilled" || onlineOrder.status === "delivered";
-  order.deleted = onlineOrder.status === "cancelled";
+  order.status = onlineOrder.status;
 
   order.recipient = new Recipient();
   order.recipient.name = (onlineOrder.firstName + " " + onlineOrder.lastName).trim();

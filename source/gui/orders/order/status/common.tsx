@@ -1,36 +1,43 @@
 import React from "react";
 import { lightColors } from "../../../theme";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { OrderStatus } from "../../../../logic/orders/models";
+import { Status } from "../../../../logic/orders/status";
 
-interface BooleanProps {
-  positive: boolean,
-  positiveText: string,
-  negativeText: string
+interface StatusProps {
+  status: OrderStatus;
+  onPress?: () => void;
 }
 
-export const StatusText: React.FC<BooleanProps> = ({ positive, positiveText, negativeText }) => {
-  return <Text
-    style={[styles.boolean, (positive ? styles.booleanPositive : styles.booleanNegative)]}>
-    {positive ? positiveText : negativeText}
-  </Text>;
+const getStyleForStatus = (status: OrderStatus) => {
+  switch (status) {
+    case "open":
+      return styles.statusOpen;
+    case "cancelled":
+    case "cancel-confirmed":
+      return styles.statusCancelled;
+    case "accepted":
+      return styles.statusAccepted;
+    case "fulfilled":
+      return styles.statusFulfilled;
+    case "delivered":
+      return styles.statusDelivered;
+  }
 };
 
-export const StatusButton: React.FC<BooleanProps & { onPress?: () => void }> = ({
-                                                                                  positive,
-                                                                                  positiveText,
-                                                                                  negativeText,
-                                                                                  onPress,
-                                                                                }) => {
+
+export const StatusButton: React.FC<StatusProps> = ({ status, onPress }) => {
   return <TouchableOpacity onPress={onPress}
-                           style={[styles.boolean, (positive ? styles.booleanPositive : styles.booleanNegative), styles.button]}>
+                           disabled={onPress === undefined}
+                           style={[styles.boolean, (onPress === undefined ? {} : styles.button), getStyleForStatus(status)]}>
     <Text style={[styles.booleanText]}>
-      {positive ? positiveText : negativeText}
+      {Status.toReadableActionText(status)}
     </Text>
   </TouchableOpacity>;
 };
 
 export const StatusLoading: React.FC<{ text: string }> = ({ text }) => {
-  return <View style={[styles.boolean, styles.booleanUnknown]}>
+  return <View style={[styles.boolean, styles.loading]}>
     <ActivityIndicator style={styles.icon}
                        size={styles.icon.fontSize}
                        color={styles.icon.color} />
@@ -60,20 +67,28 @@ export const styles = StyleSheet.create({
     shadowRadius: 1.41,
     elevation: 2,
   },
-  booleanPositive: {
-    backgroundColor: "#00c900",
-    color: "#fff",
-  },
-  booleanNegative: {
+  statusOpen: {
     backgroundColor: "#ec8700",
     color: "#fff",
   },
-  booleanError: {
+  statusAccepted: {
+    backgroundColor: "#6ea4e0",
+    color: "#fff",
+  },
+  statusFulfilled: {
+    backgroundColor: "#12d57f",
+    color: "#fff",
+  },
+  statusDelivered: {
+    backgroundColor: "#00c900",
+    color: "#fff",
+  },
+  statusCancelled: {
     backgroundColor: "#ec0000",
     color: "#fff",
   },
-  booleanUnknown: {
-    backgroundColor: "#6ea4e0",
+  loading: {
+    backgroundColor: "#869bb2",
     color: "#fff",
   },
   booleanText: {

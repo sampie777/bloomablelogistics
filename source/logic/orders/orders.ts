@@ -3,6 +3,7 @@ import { emptyPromiseWithValue } from "../utils";
 import { Order } from "./models";
 import { BloomableApi } from "../bloomable/api";
 import { Server } from "../bloomable/server";
+import { Status } from "./status";
 
 export namespace Orders {
   export const list = (page: number = 1): Promise<Order[]> => {
@@ -45,10 +46,14 @@ export namespace Orders {
     return BloomableApi.getOrder({ id: order.id })
       .then(onlineOrder => {
         if (config.offlineData || Server.isDemoUser()) {
-          if (!onlineOrder.accepted) {
-            onlineOrder.accepted = true;
+          if (order.status === "open") {
+            onlineOrder.status = "accepted";
+          } else if (order.status === "accepted") {
+            onlineOrder.status = "fulfilled";
+          } else if (order.status === "fulfilled") {
+            onlineOrder.status = "delivered";
           } else {
-            onlineOrder.delivered = true;
+            onlineOrder.status = "cancelled";
           }
         }
 
@@ -61,9 +66,7 @@ export namespace Orders {
   export const sort = (orders: Order[]): Order[] =>
     orders
       .sort((a, b) => (a.number || 0) - (b.number || 0))
-      .sort((a, b) => (b.delivered ? 1 : -1) - (a.delivered ? 1 : -1))
-      .sort((a, b) => (b.deleted ? 1 : -1) - (a.deleted ? 1 : -1))
-      .sort((a, b) => (b.accepted ? 1 : -1) - (a.accepted ? 1 : -1))
+      .sort((a, b) => Status.sortValueForStatus(b.status) - Status.sortValueForStatus(a.status))
       .sort((a, b) => {
         if (a.deliverAtDate && b.deliverAtDate) {
           return a.deliverAtDate.getTime() - b.deliverAtDate.getTime();
@@ -80,21 +83,28 @@ export namespace Orders {
   export const accept = (order: Order): Promise<any> => {
     if (!order.id) throw new Error("Order has no valid id");
 
-    order.isAccepting = true;
+    order.isProcessing = true;
     return Server.acceptOrder(order.id);
   };
 
   export const reject = (order: Order): Promise<any> => {
     if (!order.id) throw new Error("Order has no valid id");
 
-    order.isRejecting = true;
+    order.isProcessing = true;
     return Server.rejectOrder(order.id);
+  };
+
+  export const fulfill = (order: Order): Promise<any> => {
+    if (!order.id) throw new Error("Order has no valid id");
+
+    order.isProcessing = true;
+    return Server.fulfillOrder(order.id);
   };
 
   export const deliver = (order: Order): Promise<any> => {
     if (!order.id) throw new Error("Order has no valid id");
 
-    order.isDelivering = true;
+    order.isProcessing = true;
     return Server.deliverOrder(order.id);
   };
 }

@@ -11,13 +11,13 @@ interface Props {
 
 const ProgressBar: React.FC<Props> = () => {
   const orders = useRecoilValue(selectedDateOrdersState)
-    .filter(it => !it.deleted && it.accepted);
+    .filter(it => it.status === "accepted" || it.status === "fulfilled" || it.status === "delivered");
   const animatedValue = useSharedValue(0);
   const animatedStyle = useAnimatedStyle(() => ({
     width: animatedValue.value + "%",
   }));
 
-  const delivered = orders.filter(it => it.delivered).length;
+  const delivered = orders.filter(it => it.status === "fulfilled" || it.status === "delivered").length;
   const percentageDelivered = Math.round(delivered / orders.length * 100);
 
   useEffect(() => {

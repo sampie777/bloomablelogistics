@@ -69,20 +69,20 @@ export namespace Mocks {
         return delayedPromiseWithValue({ ...defaultResponse(), json: () => Promise.resolve(demoResponseMe) }, 500);
       } else if (input === "https://dashboard.bloomable.com/api/orders?page=1&s=created_at&d=desc") {
         return delayedPromiseWithValue({ ...defaultResponse(), json: () => Promise.resolve(demoResponseOrders) }, 500);
-      } else if (typeof (input) === "string" && RegExp("https://dashboard.bloomable.com/api/product-variants/\\d+", "gi").test(input)) {
-        const id = +Array.from(input.matchAll(RegExp("https://dashboard.bloomable.com/api/product-variants/(\\d+)", "gi")))[0][1];
+      } else if (typeof (input) === "string" && RegExp("https://dashboard.bloomable.com/api/product-variants/\\d+$", "gi").test(input)) {
+        const id = +Array.from(input.matchAll(RegExp("https://dashboard.bloomable.com/api/product-variants/(\\d+)$", "gi")))[0][1];
         return delayedPromiseWithValue({
           ...defaultResponse(),
           json: () => Promise.resolve(demoResponseProduct[id]),
         }, 500);
-      } else if (typeof (input) === "string" && RegExp("https://dashboard.bloomable.com/api/orders/\\d+", "gi").test(input)) {
-        const id = Array.from(input.matchAll(RegExp("https://dashboard.bloomable.com/api/orders/(\\d+)", "gi")))[0][1];
+      } else if (typeof (input) === "string" && RegExp("https://dashboard.bloomable.com/api/orders/\\d+$", "gi").test(input)) {
+        const id = Array.from(input.matchAll(RegExp("https://dashboard.bloomable.com/api/orders/(\\d+)$", "gi")))[0][1];
         const order = demoResponseOrders.data.find(it => it.id === id);
         return delayedPromiseWithValue({
           ...defaultResponse(),
-          json: () => Promise.resolve(order),
+          json: () => Promise.resolve({ data: order }),
         }, 500);
-      } else if (typeof (input) === "string" && RegExp("https://dashboard.bloomable.com/api/orders/\\d+/(accept|reject|fulfill|deliver)", "gi").test(input)) {
+      } else if (typeof (input) === "string" && RegExp("https://dashboard.bloomable.com/api/orders/\\d+/(accept|reject|fulfill|deliver)$", "gi").test(input)) {
         return delayedPromiseWithValue(defaultResponse(), 500);
       }
 

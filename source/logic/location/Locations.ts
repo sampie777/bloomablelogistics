@@ -23,7 +23,7 @@ interface Coordinate {
 export namespace Locations {
   export const locationsForOrders = (orders: Order[], useSmartAddress = false): Promise<Location[]> => {
     return getLocationsForOrders(
-      orders.filter(it => it.recipient && (it.recipient.address || it.recipient.coordinates) && !it.deleted),
+      orders.filter(it => it.recipient && (it.recipient.address || it.recipient.coordinates) && !(it.status === "cancelled" || it.status === "cancel-confirmed")),
       [],
       useSmartAddress,
     )
@@ -171,7 +171,7 @@ export namespace Locations {
   };
 
   export const allOrdersDelivered = (location: Location): boolean => {
-    return location.orders.every(it => it.delivered);
+    return location.orders.every(it => it.status === "fulfilled" || it.status === "delivered");
   };
 
   export const fixWrongAddressWithoutHouseNumber = (recipient?: Recipient | null): string => {

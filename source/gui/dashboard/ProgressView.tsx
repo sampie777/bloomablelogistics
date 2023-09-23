@@ -11,8 +11,8 @@ interface Props {
 
 const ProgressView: React.FC<Props> = () => {
   const orders = useRecoilValue(selectedDateOrdersState)
-    .filter(it => !it.deleted && it.accepted);
-  const delivered = orders.filter(it => it.delivered).length;
+    .filter(it => it.status === "accepted" || it.status === "fulfilled" || it.status === "delivered");
+  const delivered = orders.filter(it => it.status === "fulfilled" || it.status === "delivered").length;
 
   return <View style={styles.container}>
     <View style={styles.fractionView}>
