@@ -4,21 +4,10 @@ import { convertToLocalOrder, convertToLocalOrders, convertToLocalProduct } from
 import { BloomableAuth } from "./auth";
 import { rollbar } from "../rollbar";
 import { Server } from "./server";
-import { config } from "../../config";
-import { delayedPromiseWithValue } from "../utils";
-import { demoOrders } from "../demoData/orders";
-import { demoMe } from "../demoData/me";
-import { demoProducts } from "../demoData/products";
 
 export namespace BloomableApi {
   export const getOrders = (withStatus: OrderStatus | "all" = "all",
                             credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<Order[]> => {
-    if (config.offlineData || Server.isDemoUser()) {
-      const response = [...demoOrders]
-        .map(it => Order.clone(it));  // Convert the dumb object to an Order class
-      return delayedPromiseWithValue(response, 500);
-    }
-
     return BloomableAuth.authenticatedFetch(credentials,
       `https://dashboard.bloomable.com/api/orders?page=1&s=created_at&d=desc${withStatus === "all" ? "" : `&filter=${withStatus}`}`,
       {
@@ -42,14 +31,6 @@ export namespace BloomableApi {
 
   export const getOrder = (order: { id: string },
                            credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<Order> => {
-    if (config.offlineData || Server.isDemoUser()) {
-      const response = [...demoOrders]
-        .map(it => Order.clone(it))  // Convert the dumb object to an Order class
-        .find(it => it.id === order.id);
-      if (!response) throw Error(`Order ${order.id} not found in demo data`);
-      return delayedPromiseWithValue(response, 500);
-    }
-
     return BloomableAuth.authenticatedFetch(credentials,
       `https://dashboard.bloomable.com/api/orders/${order.id}`,
       {
@@ -71,14 +52,6 @@ export namespace BloomableApi {
 
   export const getProduct = (product: { id: number },
                              credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<Product> => {
-    if (config.offlineData || Server.isDemoUser()) {
-      const response = [...demoProducts]
-        .map(it => Product.clone(it))  // Convert the dumb object to an Order class
-        .find(it => it.id === product.id);
-      if (!response) throw Error(`Product ${product.id} not found in demo data`);
-      return delayedPromiseWithValue(response, 500);
-    }
-
     return BloomableAuth.authenticatedFetch(credentials,
       `https://dashboard.bloomable.com/api/product-variants/${product.id}`,
       {
@@ -97,10 +70,6 @@ export namespace BloomableApi {
 
   export const acceptOrder = (order: { id: string },
                               credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<any> => {
-    if (config.offlineData || Server.isDemoUser()) {
-      return delayedPromiseWithValue(undefined, 500);
-    }
-
     return BloomableAuth.authenticatedFetch(credentials,
       `https://dashboard.bloomable.com/api/orders/${order.id}/accept`,
       {
@@ -124,10 +93,6 @@ export namespace BloomableApi {
   // Not tested
   export const rejectOrder = (order: { id: string },
                               credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<any> => {
-    if (config.offlineData || Server.isDemoUser()) {
-      return delayedPromiseWithValue(undefined, 500);
-    }
-
     return BloomableAuth.authenticatedFetch(credentials,
       `https://dashboard.bloomable.com/api/orders/${order.id}/reject`,
       {
@@ -151,12 +116,8 @@ export namespace BloomableApi {
   // Not tested
   export const deliverOrder = (order: { id: string },
                                credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<any> => {
-    if (config.offlineData || Server.isDemoUser()) {
-      return delayedPromiseWithValue(undefined, 500);
-    }
-
     return BloomableAuth.authenticatedFetch(credentials,
-      `https://dashboard.bloomable.com/api/orders/${order.id}/fulfill`,
+      `https://dashboard.bloomable.com/api/orders/${order.id}/deliver`,
       {
         headers: {
           "Accept": "application/json",
@@ -176,10 +137,6 @@ export namespace BloomableApi {
   };
 
   export const getProfile = (credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<MeResponse> => {
-    if (config.offlineData || Server.isDemoUser()) {
-      return delayedPromiseWithValue(demoMe, 500);
-    }
-
     return BloomableAuth.authenticatedFetch(credentials,
       "https://dashboard.bloomable.com/api/me",
       {

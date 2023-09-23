@@ -1,6 +1,6 @@
-import { MeResponse } from "../bloomable/serverModels";
+import { MeResponse } from "../../bloomable/serverModels";
 
-export const demoMe = {
+export const demoResponseMe = {
   "data": {
     "id": 1,
     "name": "Demo user",
@@ -42,5 +42,6 @@ export const demoMe = {
     "role": { "id": 1, "name": "Partner", "slug": "partner" },
     "isAdmin": false,
     "enabled": true,
+    "isDeveloper": false,
   },
 } as MeResponse;

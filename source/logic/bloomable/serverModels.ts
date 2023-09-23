@@ -171,5 +171,6 @@ export interface MeResponse {
     },
     isAdmin: boolean,
     enabled: boolean,
+    isDeveloper: boolean,
   };
 }
