@@ -84,6 +84,8 @@ export namespace Mocks {
         }, 500);
       } else if (typeof (input) === "string" && RegExp("https://dashboard.bloomable.com/api/orders/\\d+/(accept|reject|fulfill|deliver)$", "gi").test(input)) {
         return delayedPromiseWithValue(defaultResponse(), 500);
+      } else if (typeof (input) === "string" && RegExp("https://maps.google.com/.*$").test(input)) {
+        return originalFetch(input, init);
       }
 
       console.warn("Couldn't find mock for", input, init);
