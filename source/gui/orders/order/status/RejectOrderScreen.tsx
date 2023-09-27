@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { lightColors } from "../../../theme";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -10,15 +10,29 @@ import { useOrderAction } from "./utils";
 import { useRecoilValue } from "recoil";
 import { ordersState } from "../../../../logic/recoil";
 import LoadingOverlay from "../../../utils/LoadingOverlay";
+import { BloomableApi } from "../../../../logic/bloomable/api";
 
-const RejectOrderScreen: React.FC<NativeStackScreenProps<ParamList, typeof Routes.RejectOrder>> = ({ navigation, route }) => {
+const RejectOrderScreen: React.FC<NativeStackScreenProps<ParamList, typeof Routes.RejectOrder>> = ({
+                                                                                                     navigation,
+                                                                                                     route,
+                                                                                                   }) => {
   const orders = useRecoilValue(ordersState);
   const order = orders.find(it => it.id === route.params.orderId)!;
 
-  const [isProcessing, applyOrderAction] = useOrderAction(order);
+  const [defaultRejectReasons, setDefaultRejectReasons] = useState<string[]>([]);
+  const [isProcessing, applyOrderAction, setIsProcessing] = useOrderAction(order);
   const [selectedReason, setSelectedReason] = useState<string | undefined>(undefined);
 
-  const reasons: string[] = [];
+  const loadReasons = useCallback(() => {
+    setIsProcessing(true);
+    BloomableApi.getRejectReasons()
+      .then(setDefaultRejectReasons)
+      .finally(() => setIsProcessing(false));
+  }, []);
+
+  useEffect(() => {
+    loadReasons();
+  }, []);
 
   const closeScreen = () => navigation.pop();
 
@@ -45,8 +59,9 @@ const RejectOrderScreen: React.FC<NativeStackScreenProps<ParamList, typeof Route
       <Text style={styles.text}>Why do you want to reject this order?</Text>
 
       <View style={styles.list}>
-        {reasons.length === 0 ? <Text style={[styles.text, styles.errorText]}>No reasons loaded.</Text> : null}
-        {reasons.map(it =>
+        {defaultRejectReasons.length === 0 ?
+          <Text style={[styles.text, styles.errorText]}>No reasons loaded.</Text> : null}
+        {defaultRejectReasons.map(it =>
           <RejectReasonComponent key={it}
                                  text={it}
                                  isSelected={it === selectedReason}

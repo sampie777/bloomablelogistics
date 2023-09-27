@@ -14,7 +14,8 @@ type ApplyOrderActionProps = (action: (order: Order, args?: any) => Promise<any>
 
 export const useOrderAction = (order: Order): [
   isProcessing: boolean,
-  applyOrderAction: ApplyOrderActionProps
+  applyOrderAction: ApplyOrderActionProps,
+  setIsProcessing: (isProcessing: boolean) => void,
 ] => {
   const [orderActionInProgress, setOrderActionInProgress] = useRecoilState(orderActionInProgressState);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -53,5 +54,6 @@ export const useOrderAction = (order: Order): [
   return [
     isProcessing,
     applyOrderAction,
+    setIsProcessing,
   ];
 };

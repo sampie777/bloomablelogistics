@@ -11,6 +11,22 @@ export namespace BloomableApi {
     "Referer": "https://dashboard.bloomable.com/dashboard",
   };
 
+  export const getRejectReasons = (credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<string[]> =>
+    BloomableAuth.authenticatedFetch(credentials,
+      "https://dashboard.bloomable.com/api/order-line-reject-reasons",
+      { headers: jsonHeaders })
+      .then(response => response.json() as Promise<string[]>)
+      .then(data => {
+        if (data === undefined || !Array.isArray(data)) {
+          throw new Error(`Response for getRejectReasons is not the expected array but '${JSON.stringify(data)}'`);
+        }
+        return data;
+      })
+      .catch(error => {
+        rollbar.error("Could not get reject reasons", sanitizeErrorForRollbar(error));
+        throw error;
+      });
+
   export const getOrders = (withStatus: OrderStatus | "all" = "all",
                             credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<Order[]> =>
     BloomableAuth.authenticatedFetch(credentials,
@@ -91,7 +107,7 @@ export namespace BloomableApi {
       {
         headers: jsonHeaders,
         method: "POST",
-        body: reason,
+        body: JSON.stringify({ reason: reason }),
       })
       .then(response => {
         if (response.status !== 200) {

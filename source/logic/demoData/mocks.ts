@@ -3,6 +3,7 @@ import { HttpCode } from "../utils/http";
 import { demoResponseOrders } from "./responses/orders";
 import { demoResponseProduct } from "./responses/products";
 import { demoResponseMe } from "./responses/me";
+import { demoResponseRejectReasons } from "./responses/rejectReaons";
 
 class NotImplementedError extends Error {
   name = "NotImplementedError";
@@ -92,7 +93,17 @@ export namespace Mocks {
         }, 500);
 
       } else if (typeof (input) === "string" && RegExp("https://dashboard.bloomable.com/api/orders/\\d+/(accept|reject|fulfill|deliver)$", "gi").test(input)) {
+        console.debug("MOCKED", {
+          url: input,
+          args: init,
+        });
         return delayedPromiseWithValue(defaultResponse(), 500);
+
+      } else if (typeof (input) === "string" && RegExp("https://dashboard.bloomable.com/api/order-line-reject-reasons$", "gi").test(input)) {
+        return delayedPromiseWithValue({
+          ...defaultResponse(),
+          json: () => Promise.resolve(demoResponseRejectReasons),
+        }, 500);
 
       } else if (typeof (input) === "string" && !RegExp("https://dashboard.bloomable.com.*$").test(input)) {
         return originalFetch(input, init);

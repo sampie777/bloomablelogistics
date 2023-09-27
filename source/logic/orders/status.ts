@@ -16,6 +16,7 @@ export namespace Status {
       case "delivered":
         return "Delivered";
     }
+    return status;
   };
 
   export const sortValueForStatus = (status: OrderStatus) => {
@@ -33,5 +34,6 @@ export namespace Status {
       case "delivered":
         return 3;
     }
+    return -1;
   };
 }
