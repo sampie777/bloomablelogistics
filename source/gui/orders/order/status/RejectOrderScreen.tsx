@@ -11,6 +11,7 @@ import { useRecoilValue } from "recoil";
 import { ordersState } from "../../../../logic/recoil";
 import LoadingOverlay from "../../../utils/LoadingOverlay";
 import { BloomableApi } from "../../../../logic/bloomable/api";
+import CustomRejectReasonInput from "./CustomRejectReasonInput";
 
 const RejectOrderScreen: React.FC<NativeStackScreenProps<ParamList, typeof Routes.RejectOrder>> = ({
                                                                                                      navigation,
@@ -22,6 +23,7 @@ const RejectOrderScreen: React.FC<NativeStackScreenProps<ParamList, typeof Route
   const [defaultRejectReasons, setDefaultRejectReasons] = useState<string[]>([]);
   const [isProcessing, applyOrderAction, setIsProcessing] = useOrderAction(order);
   const [selectedReason, setSelectedReason] = useState<string | undefined>(undefined);
+  const [customReason, setCustomReason] = useState<string>("");
 
   const loadReasons = useCallback(() => {
     setIsProcessing(true);
@@ -43,7 +45,7 @@ const RejectOrderScreen: React.FC<NativeStackScreenProps<ParamList, typeof Route
       Orders.reject,
       "Reject order",
       "Failed to mark order as rejected.",
-      selectedReason,
+      selectedReason === "Other" ? customReason.trim() : selectedReason,
     )
       .then(success => {
         if (!success) return;
@@ -66,6 +68,13 @@ const RejectOrderScreen: React.FC<NativeStackScreenProps<ParamList, typeof Route
                                  text={it}
                                  isSelected={it === selectedReason}
                                  onSelect={setSelectedReason} />)}
+        <RejectReasonComponent text={"Other"}
+                               isSelected={selectedReason === "Other"}
+                               onSelect={setSelectedReason}>
+        </RejectReasonComponent>
+        {selectedReason !== "Other" ? null :
+          <CustomRejectReasonInput value={customReason}
+                                   onChange={setCustomReason} />}
       </View>
 
       <View style={styles.actionsContainer}>
@@ -96,6 +105,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: lightColors.textError,
+    paddingBottom: 10,
   },
   list: {
     paddingTop: 20,
