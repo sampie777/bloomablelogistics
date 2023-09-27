@@ -31,7 +31,7 @@ const AppRoot: React.FC<Props> = () => {
         <RootNav.Screen name={Routes.Settings} component={SettingsScreen}
                         options={{ headerShown: true }} />
         <RootNav.Screen name={Routes.RejectOrder} component={RejectOrderScreen as any}
-                        options={{ headerShown: true }} />
+                        options={{ headerShown: true, title: "Reject order" }} />
       </RootNav.Navigator>
     </NavigationContainer>
   </RecoilRoot>;
