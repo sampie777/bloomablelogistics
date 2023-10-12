@@ -105,7 +105,10 @@ export namespace BloomableApi {
     BloomableAuth.authenticatedFetch(credentials,
       `https://dashboard.bloomable.com/api/orders/${order.id}/reject`,
       {
-        headers: jsonHeaders,
+        headers: {
+          ...jsonHeaders,
+          "Content-Type": "application/json",
+        },
         method: "POST",
         body: JSON.stringify({ reason: reason }),
       })
@@ -123,12 +126,10 @@ export namespace BloomableApi {
         throw error;
       });
 
-  // Not tested
   export const fulfillOrder = (order: { id: string },
                                credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<any> =>
     callApiWithAction(credentials, order, "fulfill");
 
-  // Not tested
   export const deliverOrder = (order: { id: string },
                                credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<any> =>
     callApiWithAction(credentials, order, "deliver");

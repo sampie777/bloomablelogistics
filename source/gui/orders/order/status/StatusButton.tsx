@@ -76,7 +76,7 @@ export const styles = StyleSheet.create({
     color: "#fff",
   },
   statusFulfilled: {
-    backgroundColor: "#12d57f",
+    backgroundColor: "#12d5cf",
     color: "#fff",
   },
   statusDelivered: {
