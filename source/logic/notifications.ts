@@ -3,6 +3,7 @@ import { Permissions } from "./permissions";
 import { PermissionsAndroid } from "react-native";
 import { rollbar, sanitizeErrorForRollbar } from "./rollbar";
 import { settings } from "./settings/settings";
+import { emptyPromise } from "./utils";
 
 export namespace Notifications {
   let isInitialized = false;
@@ -55,11 +56,14 @@ export namespace Notifications {
       }));
   };
 
-  export const unsubscribe = () => {
+  export const unsubscribe = (): Promise<any> => {
     const topic = getUserTopic();
-    if (topic.length === 0) return;
+    if (topic.length === 0) {
+      rollbar.info("Can't unsubscribe from empty topic");
+      return emptyPromise();
+    }
 
-    messaging().unsubscribeFromTopic(topic)
+    return messaging().unsubscribeFromTopic(topic)
       .then(() => isSubscribed = false)
       .catch(error => rollbar.error("Failed to unsubscribe from topic", {
         ...sanitizeErrorForRollbar(error),

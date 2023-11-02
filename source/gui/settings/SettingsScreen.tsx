@@ -48,10 +48,15 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
       <SwitchComponent settingsKey={"notificationsShowForNewOrders"}
                        title={"New order"}
                        description={"Show notifications when new orders have been received"}
-                       callback={() => {
-                         settings.notificationsShowForNewOrders
-                           ? Notifications.subscribe()
-                           : Notifications.unsubscribe();
+                       callback={async () => {
+                         if (settings.notificationsShowForNewOrders) {
+                           Notifications.subscribe();
+                         } else {
+                           // For good measures, as the unsubscribing doesn't seem to always work.
+                           await Notifications.unsubscribe();
+                           await Notifications.unsubscribe();
+                           await Notifications.unsubscribe();
+                         }
                        }} />
 
       <Header title={"Account"} />

@@ -49,7 +49,8 @@ export namespace Server {
   };
 
   export const logout = (): Promise<unknown> => {
-    Notifications.unsubscribe();
+    Notifications.unsubscribe()
+      .then(Notifications.unsubscribe);  // For good measures, as the unsubscribing doesn't seem to always work.
     clearCredentials();
     return BloomableAuth.logout()
       .then(Mocks.tearDownDemoData);
