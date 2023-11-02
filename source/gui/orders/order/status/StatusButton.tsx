@@ -13,6 +13,7 @@ const getStyleForStatus = (status: OrderStatus) => {
   switch (status) {
     case "open":
       return styles.statusOpen;
+    case "rejected":
     case "cancelled":
     case "cancel-confirmed":
       return styles.statusCancelled;

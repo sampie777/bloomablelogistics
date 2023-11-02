@@ -5,6 +5,8 @@ export namespace Status {
     switch (status) {
       case "open":
         return "Accept or reject";
+      case "rejected":
+        return "Rejected";
       case "cancelled":
         return "Re-accept";
       case "cancel-confirmed":
@@ -23,6 +25,8 @@ export namespace Status {
     switch (status) {
       case "open":
         return 0;
+      case "rejected":
+        return 6;
       case "cancelled":
         return 4;
       case "cancel-confirmed":

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { lightColors } from "../../../theme";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ParamList, Routes } from "../../../../routes";
@@ -7,11 +7,13 @@ import { Orders } from "../../../../logic/orders/orders";
 import { Order } from "../../../../logic/orders/models";
 import RejectReasonComponent from "./RejectReasonComponent";
 import { useOrderAction } from "./utils";
-import { useRecoilValue } from "recoil";
-import { ordersState } from "../../../../logic/recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { orderActionInProgressState, ordersState } from "../../../../logic/recoil";
 import LoadingOverlay from "../../../utils/LoadingOverlay";
 import { BloomableApi } from "../../../../logic/bloomable/api";
 import CustomRejectReasonInput from "./CustomRejectReasonInput";
+import { settings } from "../../../../logic/settings/settings";
+import { rollbar, sanitizeErrorForRollbar } from "../../../../logic/rollbar";
 
 const RejectOrderScreen: React.FC<NativeStackScreenProps<ParamList, typeof Routes.RejectOrder>> = ({
                                                                                                      navigation,
@@ -20,6 +22,7 @@ const RejectOrderScreen: React.FC<NativeStackScreenProps<ParamList, typeof Route
   const orders = useRecoilValue(ordersState);
   const order = orders.find(it => it.id === route.params.orderId)!;
 
+  const [orderActionInProgress, setOrderActionInProgress] = useRecoilState(orderActionInProgressState);
   const [defaultRejectReasons, setDefaultRejectReasons] = useState<string[]>([]);
   const [isProcessing, applyOrderAction, setIsProcessing] = useOrderAction(order);
   const [selectedReason, setSelectedReason] = useState<string | undefined>(undefined);
@@ -40,13 +43,27 @@ const RejectOrderScreen: React.FC<NativeStackScreenProps<ParamList, typeof Route
 
   const submit = () => {
     if (selectedReason === undefined) return;
+    if (settings.disableOrderActions) return;
+    setIsProcessing(true);
 
-    applyOrderAction(
-      Orders.reject,
-      "Reject order",
-      "Failed to mark order as rejected.",
-      selectedReason === "Other" ? customReason.trim() : selectedReason,
-    )
+    Orders.reject(order, selectedReason === "Other" ? customReason.trim() : selectedReason)
+      .then(() => Orders.checkIsDeleted(order)
+        .then(isDeleted => {
+          order.isProcessing = false;
+          order.status = isDeleted ? "rejected" : order.status;
+
+          // Trigger GUI update
+          setOrderActionInProgress(true);
+          setOrderActionInProgress(false);
+        }))
+      .catch(error => {
+        rollbar.error("Failed to mark order as rejected.", { ...sanitizeErrorForRollbar(error), order: order });
+        Alert.alert("Reject order", `Failed to mark order as rejected.\n\n${error}.`);
+        return false;
+      })
+      .finally(() => {
+        setIsProcessing(false);
+      })
       .then(success => {
         if (!success) return;
         navigation.pop();
@@ -70,8 +87,7 @@ const RejectOrderScreen: React.FC<NativeStackScreenProps<ParamList, typeof Route
                                  onSelect={setSelectedReason} />)}
         <RejectReasonComponent text={"Other"}
                                isSelected={selectedReason === "Other"}
-                               onSelect={setSelectedReason}>
-        </RejectReasonComponent>
+                               onSelect={setSelectedReason} />
         {selectedReason !== "Other" ? null :
           <CustomRejectReasonInput value={customReason}
                                    onChange={setCustomReason} />}

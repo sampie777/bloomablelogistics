@@ -16,7 +16,10 @@ interface Props {
 }
 
 const OrderItem: React.FC<Props> = ({ order }) => {
-  return <View style={[styles.container, ((order.status === "cancelled" || order.status === "cancel-confirmed") ? styles.deleted : {})]}>
+  return <View style={[
+    styles.container,
+    (["rejected", "cancelled", "cancel-confirmed"].includes(order.status) ? styles.deleted : {}),
+  ]}>
     <View style={styles.row}>
       <UrlLink url={`https://dashboard.bloomable.com/order/${order.id}`}>
         <Text style={styles.number} selectable={true}>{order.number}</Text>

@@ -23,8 +23,10 @@ interface Coordinate {
 export namespace Locations {
   export const locationsForOrders = (orders: Order[], useSmartAddress = false): Promise<Location[]> => {
     return getLocationsForOrders(
-      orders.filter(it => it.recipient && (it.recipient.address || it.recipient.coordinates) && !(it.status === "cancelled" || it.status === "cancel-confirmed")),
-      [],
+      orders.filter(it => it.recipient
+        && (it.recipient.address || it.recipient.coordinates)
+        && !["rejected", "cancelled", "cancel-confirmed"].includes(it.status),
+      ), [],
       useSmartAddress,
     )
       .then(locations => mergeOrdersByLocation(locations));

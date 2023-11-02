@@ -62,6 +62,15 @@ export namespace Orders {
       });
   };
 
+  export const checkIsDeleted = (order: Order): Promise<boolean> => {
+    if (order.id == null) {
+      return Promise.resolve(false);
+    }
+
+    return BloomableApi.doesOrderExists({ id: order.id })
+      .then(doesExist => !doesExist);
+  };
+
   // Sort by order of importance (the later the sort, the more important the sort)
   export const sort = (orders: Order[]): Order[] =>
     orders

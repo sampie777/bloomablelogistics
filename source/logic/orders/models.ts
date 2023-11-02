@@ -1,4 +1,4 @@
-export type OrderStatus = "open" | "cancelled" | "cancel-confirmed" | "accepted" | "fulfilled" | "delivered";
+export type OrderStatus = "open" | "rejected" | "cancelled" | "cancel-confirmed" | "accepted" | "fulfilled" | "delivered";
 
 export class Order {
   id?: string = undefined;

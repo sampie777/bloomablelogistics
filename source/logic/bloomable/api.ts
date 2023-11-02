@@ -58,6 +58,14 @@ export namespace BloomableApi {
         throw error;
       });
 
+  export const doesOrderExists = (order: { id: string },
+                                  credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<boolean> =>
+    BloomableAuth.authenticatedFetch(credentials,
+      `https://dashboard.bloomable.com/api/orders/${order.id}`, { headers: jsonHeaders })
+      .then(response => response.json() as Promise<OrderResponse>)
+      .then(() => true)
+      .catch(() => false);
+
   export const getProduct = (product: { id: number },
                              credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<Product> =>
     BloomableAuth.authenticatedFetch(credentials,
