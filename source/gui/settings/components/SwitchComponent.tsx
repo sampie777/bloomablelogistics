@@ -17,27 +17,27 @@ const SwitchComponent: React.FC<Props> = ({
                                             description,
                                             callback,
                                           }) => {
-  const [value, setValue] = useState<boolean>((settings as { [key: string]: any })[settingsKey]);
+  const [value, setValue] = useState<boolean>(settings[settingsKey]);
   useEffect(() => {
-    (settings as { [key: string]: any })[settingsKey] = value;
+    settings[settingsKey] = value;
     settings.store();
     callback?.(value);
   }, [value]);
 
   return <View
-    style={[componentStyles.container, switchComponentStyles.container, componentStyles.whiteContainer]}>
+    style={[componentStyles.container, styles.container, componentStyles.whiteContainer]}>
     <View style={componentStyles.titleContainer}>
       <Text style={componentStyles.titleText}>{title}</Text>
       {description === undefined ? undefined : <Text style={componentStyles.descriptionText}>{description}</Text>}
     </View>
     <Switch onValueChange={(newValue) => setValue(newValue)}
-            thumbColor={switchComponentStyles.switch.color}
-            ios_backgroundColor={switchComponentStyles.switch.backgroundColor}
+            thumbColor={styles.switch.color}
+            ios_backgroundColor={styles.switch.backgroundColor}
             value={value} />
   </View>;
 };
 
-const switchComponentStyles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     justifyContent: "space-between",

@@ -17,7 +17,7 @@ export namespace SettingsUtils {
           return loadValueFor(key, value)
             .then(dbValue => {
               if (dbValue !== undefined) {
-                (obj as { [key: string]: any })[key] = dbValue;
+                obj[key] = dbValue;
               }
             })
             .catch(error => rollbar.error("Failed to get settings value from storage",

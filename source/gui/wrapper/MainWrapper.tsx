@@ -61,7 +61,7 @@ const MainWrapper: React.FC<Props> = () => {
     setErrorMessage(undefined);
 
     fetchPage.current++;
-    Orders.list(fetchPage.current)
+    Orders.list()
       .then(_orders => {
         if (!isMounted.current) {
           return;

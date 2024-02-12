@@ -1,14 +1,18 @@
-import { config } from "../../config";
 import { emptyPromiseWithValue } from "../utils";
 import { Order } from "./models";
 import { BloomableApi } from "../bloomable/api";
 import { Server } from "../bloomable/server";
 import { Status } from "./status";
+import { settings } from "../settings/settings";
 
 export namespace Orders {
-  export const list = (page: number = 1): Promise<Order[]> => {
-    return BloomableApi.getOrders()
-      .then(orders => sort(orders));
+  export const list = async (): Promise<Order[]> => {
+    // Parallel fetch order pages
+    const pages = await Promise.all(
+      Array.from(Array(settings.maxOrderPagesToFetch))
+        .map((_, index) => BloomableApi.getOrders(index + 1)),
+    );
+    return sort(pages.flatMap(it => it));
   };
 
   export const fetchDetailsForOrders = (orders: Order[]): Promise<Order[]> => {

@@ -12,6 +12,7 @@ import { useRecoilState } from "recoil";
 import { orderActionInProgressState, selectedDateState } from "../../logic/recoil";
 import { Server } from "../../logic/bloomable/server";
 import { getNextDay } from "../../logic/utils";
+import NumberComponent from "./components/NumberComponent";
 
 const Header: React.FC<{ title: string, isVisible?: boolean }> = ({ title, isVisible = true }) => {
   return !isVisible ? null : <Text style={styles.settingHeader}>{title}</Text>;
@@ -26,6 +27,9 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
       contentContainerStyle={styles.scrollContainer}>
 
       <Header title={"Orders"} />
+      <NumberComponent settingsKey={"maxOrderPagesToFetch"}
+                       title={"Order pages to load"}
+                       description={"Specify the amount of order pages (as seen on the Bloomable dashboard) to load. Increase this number if you're not seeing all your orders."} />
       <SwitchComponent settingsKey={"disableOrderActions"}
                        title={"Passive mode"}
                        description={"Disable applying actions to orders to prevent oopsies"}

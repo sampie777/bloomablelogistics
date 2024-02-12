@@ -27,10 +27,11 @@ export namespace BloomableApi {
         throw error;
       });
 
-  export const getOrders = (withStatus: OrderStatus | "all" = "all",
+  export const getOrders = (page = 1,
+                            withStatus: OrderStatus | "all" = "all",
                             credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<Order[]> =>
     BloomableAuth.authenticatedFetch(credentials,
-      `https://dashboard.bloomable.com/api/orders?page=1&s=created_at&d=desc${withStatus === "all" ? "" : `&filter=${withStatus}`}`,
+      `https://dashboard.bloomable.com/api/orders?page=${page}&s=created_at&d=desc${withStatus === "all" ? "" : `&filter=${withStatus}`}`,
       { headers: jsonHeaders })
       .then(response => response.json() as Promise<OrdersResponse | undefined>)
       .then(json => {
