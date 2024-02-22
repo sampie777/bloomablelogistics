@@ -11,6 +11,8 @@ interface Props {
   description?: string,
   callback?: (value: number) => void,
   valueRender?: (value: number) => string,
+  max?: number,
+  min?: number,
 }
 
 const NumberComponent: React.FC<Props> = ({
@@ -19,6 +21,8 @@ const NumberComponent: React.FC<Props> = ({
                                             description,
                                             callback,
                                             valueRender,
+                                            max,
+                                            min,
                                           }) => {
   const [value, setValue] = useState<number>(settings[settingsKey]);
 
@@ -28,8 +32,8 @@ const NumberComponent: React.FC<Props> = ({
     callback?.(value);
   }, [value]);
 
-  const increase = () => setValue(it => it + 1);
-  const decrease = () => setValue(it => Math.max(it - 1, 1));
+  const increase = () => setValue(it => max == undefined ? it + 1 : Math.min(it + 1, max));
+  const decrease = () => setValue(it => min == undefined ? it - 1 : Math.max(it - 1, min));
 
   if (valueRender === undefined) {
     valueRender = it => it.toString();

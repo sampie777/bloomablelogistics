@@ -30,6 +30,7 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
       <NumberComponent settingsKey={"maxOrderPagesToFetch"}
                        title={"Past orders to load"}
                        description={"Specify the amount of delivered orders to load. Increase this number if you want to see more past orders."}
+                       min={0}
                        valueRender={it => (it * 15).toString()} />
       <SwitchComponent settingsKey={"disableOrderActions"}
                        title={"Passive mode"}

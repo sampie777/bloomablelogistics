@@ -59,7 +59,7 @@ describe("Test Orders.getAllOrders", () => {
   });
 
   beforeEach(() => {
-    (BloomableApi.getOrders as Mock).mockClear();
+    (BloomableApi.getOrders as Mock).mockReset();
   });
 
   it("loads one page if there's no data", async () => {
@@ -82,6 +82,17 @@ describe("Test Orders.getAllOrders", () => {
 
     const result = await Orders.getOrdersWithStatus("open");
     expect(result.length).toBe(1);
+  });
+
+  it("loads no page if maxPage is 0", async () => {
+    (BloomableApi.getOrders as Mock).mockResolvedValueOnce({
+      ...emptyPageResponse,
+      data: [emptyOrder()],
+      meta: { ...emptyPageResponse.meta, last_page: 1 },
+    });
+
+    const result = await Orders.getOrdersWithStatus("open", 0);
+    expect(result.length).toBe(0);
   });
 
   it("loads all available pages if there are multiple", async () => {

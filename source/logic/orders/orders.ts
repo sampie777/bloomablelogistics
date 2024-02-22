@@ -23,12 +23,14 @@ export namespace Orders {
     return sort(pages.flatMap(it => it));
   };
 
-  export const getOrdersWithStatus = async (withStatus: OrderStatus, maxPages = 0, _currentPage = 0): Promise<Order[]> => {
+  export const getOrdersWithStatus = async (withStatus: OrderStatus, maxPages?: number, _currentPage = 0): Promise<Order[]> => {
+    if (maxPages != undefined && maxPages <= 0) return Promise.resolve([]);
+
     try {
       const page = await BloomableApi.getOrders(_currentPage + 1, withStatus);
       const orders = convertToLocalOrders(page.data);
 
-      if (_currentPage + 1 >= page.meta.last_page || (maxPages > 0 && _currentPage + 1 >= maxPages)) {
+      if (_currentPage + 1 >= page.meta.last_page || (maxPages !== undefined && _currentPage + 1 >= maxPages)) {
         return orders;
       }
 

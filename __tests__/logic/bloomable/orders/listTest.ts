@@ -60,7 +60,7 @@ describe("Test Orders.list", () => {
   });
 
   beforeEach(() => {
-    (BloomableApi.getOrders as Mock).mockClear();
+    (BloomableApi.getOrders as Mock).mockReset();
   });
 
   it("returns all orders for each status", async () => {
@@ -110,7 +110,7 @@ describe("Test Orders.list", () => {
     });
 
     const result = await Orders.list();
-    expect(result.length).toBe(12);
+    expect(result.length).toBe(9);
     expect(result[0].status).toBe("open");
     expect(result[1].status).toBe("open");
     expect(result[2].status).toBe("accepted");
@@ -119,9 +119,6 @@ describe("Test Orders.list", () => {
     expect(result[5].status).toBe("fulfilled");
     expect(result[6].status).toBe("delivered");
     expect(result[7].status).toBe("delivered");
-    expect(result[8].status).toBe("cancelled");
-    expect(result[9].status).toBe("cancelled");
-    expect(result[10].status).toBe("cancel-confirmed");
-    expect(result[11].status).toBe("cancel-confirmed");
+    expect(result[8].status).toBe("cancel-confirmed");
   });
 });
