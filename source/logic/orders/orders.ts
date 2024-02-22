@@ -16,8 +16,7 @@ export namespace Orders {
         getOrdersWithStatus("accepted"),
         getOrdersWithStatus("fulfilled"),
         getOrdersWithStatus("delivered", settings.maxOrderPagesToFetch),
-        getOrdersWithStatus("cancelled"),
-        getOrdersWithStatus("cancel-confirmed"),
+        getOrdersWithStatus("cancel-confirmed", 1),
       ],
     );
     return sort(pages.flatMap(it => it));
