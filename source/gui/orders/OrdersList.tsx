@@ -5,25 +5,29 @@ import ListEmptyComponent from "./ListEmptyComponent";
 import { Order } from "../../logic/orders/models";
 import ProgressView from "../dashboard/ProgressView";
 import { getNextDay, getPreviousDay } from "../../logic/utils";
-import { useRecoilState } from "recoil";
-import { orderActionInProgressState, ordersOutdatedState, selectedDateState } from "../../logic/recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  orderActionInProgressState,
+  ordersOutdatedState,
+  selectedDateOrdersState,
+  selectedDateState,
+} from "../../logic/recoil";
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { Directions, Gesture, GestureDetector } from "react-native-gesture-handler";
 import { config } from "../../config";
 
 interface Props {
-  orders: Order[];
   showHeader: boolean;
   onScrollViewScroll?: (e: NativeSyntheticEvent<NativeScrollEvent>) => void;
 }
 
 const OrdersList: React.FC<Props> = ({
-                                       orders,
                                        showHeader,
                                        onScrollViewScroll,
                                      }) => {
   let startX = 0, startY = 0;
 
+  const orders = useRecoilValue(selectedDateOrdersState);
   const _newDateRef = useRef<Date | undefined>(undefined);
   const swipeDirection = useRef<number>(0);
   const [screenWidth, setScreenWidth] = useState(0);
