@@ -41,7 +41,11 @@ export namespace BloomableApi {
         return json;
       })
       .catch(error => {
-        rollbar.error("Could not get orders", sanitizeErrorForRollbar(error));
+        rollbar.error("Could not get orders", {
+          ...sanitizeErrorForRollbar(error),
+          page: page,
+          withStatus: withStatus,
+        });
         throw error;
       });
 

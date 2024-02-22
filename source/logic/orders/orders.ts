@@ -12,26 +12,30 @@ export namespace Orders {
     // Parallel fetch orders
     const pages = await Promise.all(
       [
-        getAllOrders("open"),
-        getAllOrders("accepted"),
-        getAllOrders("fulfilled"),
-        getAllOrders("delivered", settings.maxOrderPagesToFetch),
-        getAllOrders("cancelled"),
-        getAllOrders("cancel-confirmed"),
+        getOrdersWithStatus("open"),
+        getOrdersWithStatus("accepted"),
+        getOrdersWithStatus("fulfilled"),
+        getOrdersWithStatus("delivered", settings.maxOrderPagesToFetch),
+        getOrdersWithStatus("cancelled"),
+        getOrdersWithStatus("cancel-confirmed"),
       ],
     );
     return sort(pages.flatMap(it => it));
   };
 
-  export const getAllOrders = async (withStatus: OrderStatus, maxPages = 0, _currentPage = 0): Promise<Order[]> => {
-    const page = await BloomableApi.getOrders(_currentPage + 1, withStatus);
-    const orders = convertToLocalOrders(page.data);
+  export const getOrdersWithStatus = async (withStatus: OrderStatus, maxPages = 0, _currentPage = 0): Promise<Order[]> => {
+    try {
+      const page = await BloomableApi.getOrders(_currentPage + 1, withStatus);
+      const orders = convertToLocalOrders(page.data);
 
-    if (_currentPage + 1 >= page.meta.last_page || (maxPages > 0 && _currentPage + 1 >= maxPages)) {
-      return orders;
+      if (_currentPage + 1 >= page.meta.last_page || (maxPages > 0 && _currentPage + 1 >= maxPages)) {
+        return orders;
+      }
+
+      return [...orders, ...await getOrdersWithStatus(withStatus, maxPages, _currentPage + 1)];
+    } catch (error) {
+      throw Error(`Failed to get orders with status ${withStatus}.\n\n${error}`);
     }
-
-    return [...orders, ...await getAllOrders(withStatus, maxPages, _currentPage + 1)];
   };
 
   export const fetchDetailsForOrders = (orders: Order[]): Promise<Order[]> => {

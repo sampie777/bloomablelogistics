@@ -69,7 +69,7 @@ describe("Test Orders.getAllOrders", () => {
       meta: { ...emptyPageResponse.meta, last_page: 1 },
     });
 
-    const result = await Orders.getAllOrders("open");
+    const result = await Orders.getOrdersWithStatus("open");
     expect(result.length).toBe(0);
   });
 
@@ -80,7 +80,7 @@ describe("Test Orders.getAllOrders", () => {
       meta: { ...emptyPageResponse.meta, last_page: 1 },
     });
 
-    const result = await Orders.getAllOrders("open");
+    const result = await Orders.getOrdersWithStatus("open");
     expect(result.length).toBe(1);
   });
 
@@ -101,7 +101,7 @@ describe("Test Orders.getAllOrders", () => {
       meta: { ...emptyPageResponse.meta, last_page: 3 },
     });
 
-    const result = await Orders.getAllOrders("open");
+    const result = await Orders.getOrdersWithStatus("open");
     expect(result.length).toBe(3);
   });
 
@@ -122,7 +122,7 @@ describe("Test Orders.getAllOrders", () => {
       meta: { ...emptyPageResponse.meta, last_page: 3 },
     });
 
-    const result = await Orders.getAllOrders("open", 2);
+    const result = await Orders.getOrdersWithStatus("open", 2);
     expect(result.length).toBe(2);
   });
 });

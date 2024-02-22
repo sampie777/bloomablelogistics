@@ -69,7 +69,7 @@ export namespace BloomableAuth {
         rollbar.error("Failed to log out", sanitizeErrorForRollbar(error));
       });
 
-  export const login = (credentials: Credentials, retries = 3): Promise<Session> => {
+  export const login = (credentials: Credentials): Promise<Session> => {
     if (credentials.username === "demo" && credentials.password === "demo") {
       rollbar.info("Demo account logged in");
       return delayedPromiseWithValue({}, 1000);
@@ -102,9 +102,6 @@ export namespace BloomableAuth {
             } else if (response.status === HttpCode.UnprocessableContent) {
               throw new LoginError(`Auth error. Payload: ${stringifiedContent}`);
             } else if (response.status === HttpCode.PageExpired) {
-              if (retries > 0) {
-                return login(credentials, retries - 1);
-              }
               throw new Error(`XSRF failed. Payload: ${stringifiedContent}`);
             }
             throw new Error(`No idea whats going on (status=${response.status}). Payload: ${stringifiedContent}`);
@@ -119,7 +116,7 @@ export namespace BloomableAuth {
       });
   };
 
-  export const authenticatedFetch = (credentials: Credentials, url: RequestInfo, init: RequestInit = {}): Promise<Response> => {
+  export const authenticatedFetch = async (credentials: Credentials, url: RequestInfo, init: RequestInit = {}): Promise<Response> => {
     const call = () => {
       init.headers = {
         ...init.headers,
@@ -128,17 +125,46 @@ export namespace BloomableAuth {
       return fetch(url, init);
     };
 
-    return call()
-      .then(response => {
+    const maxRetries = 4;
+    for (let retry = 0; retry < maxRetries; retry++) {
+      try {
+        const response = await call();
         if (response.status === HttpCode.Unauthorized) {
-          return login(credentials)
-            .then(call);
+          await login(credentials);
+          continue; // Retry
         }
-        return response;
-      })
-      .then(response => {
+
+        if (response.status < 200 || response.status >= 300) {
+          rollbar.warning("Got non OK status for call", {
+            url: url,
+            response: {
+              ok: response.ok,
+              status: response.status,
+              statusText: response.statusText,
+              type: response.type,
+              headers: response.headers,
+            },
+          });
+        }
+
         storeSession(getNewSession(response));
         return response;
-      });
+      } catch (error) {
+        rollbar.error("Failed to do call", {
+          ...sanitizeErrorForRollbar(error),
+          retry: retry,
+          maxRetries: maxRetries,
+          url: url,
+        });
+
+        if (retry == maxRetries) throw error;
+      }
+    }
+
+    rollbar.error("Fell out of authenticatedFetch retry loop", {
+      maxRetries: maxRetries,
+      url: url,
+    });
+    throw Error("Failed to perform request. Please try again.");
   };
 }
