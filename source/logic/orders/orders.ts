@@ -15,7 +15,7 @@ export namespace Orders {
         getOrdersWithStatus("open"),
         getOrdersWithStatus("accepted"),
         getOrdersWithStatus("fulfilled"),
-        getOrdersWithStatus("delivered", settings.maxOrderPagesToFetch),
+        getOrdersWithStatus("delivered", settings.maxPastOrderPagesToFetch),
         getOrdersWithStatus("cancel-confirmed", 1),
       ],
     );

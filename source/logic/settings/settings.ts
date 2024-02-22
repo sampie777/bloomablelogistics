@@ -7,7 +7,7 @@ export const settings: { [key: string]: any} = {
   notificationsShowForNewOrders: true,
   disableOrderActions: false,
   useInitialCoordinatesForOrders: true,
-  maxOrderPagesToFetch: 3,
+  maxPastOrderPagesToFetch: 1,
 };
 
 settings.load = () => SettingsUtils.load(settings);

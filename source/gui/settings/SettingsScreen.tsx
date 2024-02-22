@@ -27,7 +27,7 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
       contentContainerStyle={styles.scrollContainer}>
 
       <Header title={"Orders"} />
-      <NumberComponent settingsKey={"maxOrderPagesToFetch"}
+      <NumberComponent settingsKey={"maxPastOrderPagesToFetch"}
                        title={"Past orders to load"}
                        description={"Specify the amount of delivered orders to load. Increase this number if you want to see more past orders."}
                        min={0}
