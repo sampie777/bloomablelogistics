@@ -69,7 +69,7 @@ export namespace BloomableAuth {
         rollbar.error("Failed to log out", sanitizeErrorForRollbar(error));
       });
 
-  export const login = (credentials: Credentials): Promise<Session> => {
+  export const login = (credentials: Credentials, retries = 3): Promise<Session> => {
     if (credentials.username === "demo" && credentials.password === "demo") {
       rollbar.info("Demo account logged in");
       return delayedPromiseWithValue({}, 1000);
@@ -94,17 +94,21 @@ export namespace BloomableAuth {
           return session;
         }
 
-        return obtainResponseContent(response).then(content => {
-          const stringifiedContent = JSON.stringify(content);
-          if (response.status === HttpCode.NoContent) {
-            throw new Error(`Logged in with no content. Payload: ${stringifiedContent}`);
-          } else if (response.status === HttpCode.UnprocessableContent) {
-            throw new LoginError(`Auth error. Payload: ${stringifiedContent}`);
-          } else if (response.status === HttpCode.PageExpired) {
-            throw new Error(`XSRF failed. Payload: ${stringifiedContent}`);
-          }
-          throw new Error(`No idea whats going on (status=${response.status}). Payload: ${stringifiedContent}`);
-        });
+        return obtainResponseContent(response)
+          .then(content => {
+            const stringifiedContent = JSON.stringify(content);
+            if (response.status === HttpCode.NoContent) {
+              throw new Error(`Logged in with no content. Payload: ${stringifiedContent}`);
+            } else if (response.status === HttpCode.UnprocessableContent) {
+              throw new LoginError(`Auth error. Payload: ${stringifiedContent}`);
+            } else if (response.status === HttpCode.PageExpired) {
+              if (retries > 0) {
+                return login(credentials, retries - 1);
+              }
+              throw new Error(`XSRF failed. Payload: ${stringifiedContent}`);
+            }
+            throw new Error(`No idea whats going on (status=${response.status}). Payload: ${stringifiedContent}`);
+          });
       })
       .catch(error => {
         rollbar.error("Could not log in", {
