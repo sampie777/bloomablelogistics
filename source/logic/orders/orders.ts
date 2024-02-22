@@ -4,15 +4,34 @@ import { BloomableApi } from "../bloomable/api";
 import { Server } from "../bloomable/server";
 import { Status } from "./status";
 import { settings } from "../settings/settings";
+import { convertToLocalOrders } from "../bloomable/converter";
+import { OrderStatus } from "../bloomable/serverModels";
 
 export namespace Orders {
   export const list = async (): Promise<Order[]> => {
-    // Parallel fetch order pages
+    // Parallel fetch orders
     const pages = await Promise.all(
-      Array.from(Array(settings.maxOrderPagesToFetch))
-        .map((_, index) => BloomableApi.getOrders(index + 1)),
+      [
+        getAllOrders("open"),
+        getAllOrders("accepted"),
+        getAllOrders("fulfilled"),
+        getAllOrders("delivered", settings.maxOrderPagesToFetch),
+        getAllOrders("cancelled"),
+        getAllOrders("cancel-confirmed"),
+      ],
     );
     return sort(pages.flatMap(it => it));
+  };
+
+  export const getAllOrders = async (withStatus: OrderStatus, maxPages = 0, _currentPage = 0): Promise<Order[]> => {
+    const page = await BloomableApi.getOrders(_currentPage + 1, withStatus);
+    const orders = convertToLocalOrders(page.data);
+
+    if (_currentPage + 1 >= page.meta.last_page || (maxPages > 0 && _currentPage + 1 >= maxPages)) {
+      return orders;
+    }
+
+    return [...orders, ...await getAllOrders(withStatus, maxPages, _currentPage + 1)];
   };
 
   export const fetchDetailsForOrders = (orders: Order[]): Promise<Order[]> => {

@@ -1,6 +1,6 @@
 import { Order, Product } from "../orders/models";
 import { MeResponse, OrderResponse, OrdersResponse, OrderStatus, ProductResponse } from "./serverModels";
-import { convertToLocalOrder, convertToLocalOrders, convertToLocalProduct } from "./converter";
+import { convertToLocalOrder, convertToLocalProduct } from "./converter";
 import { BloomableAuth } from "./auth";
 import { rollbar, sanitizeErrorForRollbar } from "../rollbar";
 import { Server } from "./server";
@@ -29,7 +29,7 @@ export namespace BloomableApi {
 
   export const getOrders = (page = 1,
                             withStatus: OrderStatus | "all" = "all",
-                            credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<Order[]> =>
+                            credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<OrdersResponse> =>
     BloomableAuth.authenticatedFetch(credentials,
       `https://dashboard.bloomable.com/api/orders?page=${page}&s=created_at&d=desc${withStatus === "all" ? "" : `&filter=${withStatus}`}`,
       { headers: jsonHeaders })
@@ -38,7 +38,7 @@ export namespace BloomableApi {
         if (json === undefined || json.data === undefined || !Array.isArray(json.data)) {
           throw new Error(`Response for getOrders is not the expected array but '${JSON.stringify(json)}'`);
         }
-        return convertToLocalOrders(json.data);
+        return json;
       })
       .catch(error => {
         rollbar.error("Could not get orders", sanitizeErrorForRollbar(error));

@@ -59,7 +59,16 @@ export namespace Mocks {
     };
   };
 
-  const originalFetch = fetch;
+  const getOriginalFetch = () => {
+    try {
+      return fetch;
+    } catch (_) {
+      console.warn("Could not find default fetch() function. Ignore this warning if your are running tests.");
+      return () => Promise.resolve(defaultResponse());
+    }
+  };
+
+  const originalFetch = getOriginalFetch();
 
   export const tearDownDemoData = () => {
     // @ts-ignore

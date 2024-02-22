@@ -10,6 +10,7 @@ interface Props {
   title: string,
   description?: string,
   callback?: (value: number) => void,
+  valueRender?: (value: number) => string,
 }
 
 const NumberComponent: React.FC<Props> = ({
@@ -17,6 +18,7 @@ const NumberComponent: React.FC<Props> = ({
                                             title,
                                             description,
                                             callback,
+                                            valueRender,
                                           }) => {
   const [value, setValue] = useState<number>(settings[settingsKey]);
 
@@ -28,6 +30,10 @@ const NumberComponent: React.FC<Props> = ({
 
   const increase = () => setValue(it => it + 1);
   const decrease = () => setValue(it => Math.max(it - 1, 1));
+
+  if (valueRender === undefined) {
+    valueRender = it => it.toString();
+  }
 
   return <View
     style={[componentStyles.container, styles.container, componentStyles.whiteContainer]}>
@@ -42,7 +48,7 @@ const NumberComponent: React.FC<Props> = ({
         <FontAwesome5Icon name={"minus"} solid style={styles.icon} />
       </TouchableOpacity>
 
-      <Text style={styles.valueText}>{value}</Text>
+      <Text style={styles.valueText}>{valueRender(value)}</Text>
 
       <TouchableOpacity onPress={increase}
                         style={styles.button}>

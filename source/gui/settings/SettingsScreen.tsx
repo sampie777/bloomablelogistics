@@ -28,8 +28,9 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
 
       <Header title={"Orders"} />
       <NumberComponent settingsKey={"maxOrderPagesToFetch"}
-                       title={"Order pages to load"}
-                       description={"Specify the amount of order pages (as seen on the Bloomable dashboard) to load. Increase this number if you're not seeing all your orders."} />
+                       title={"Past orders to load"}
+                       description={"Specify the amount of delivered orders to load. Increase this number if you want to see more past orders."}
+                       valueRender={it => (it * 15).toString()} />
       <SwitchComponent settingsKey={"disableOrderActions"}
                        title={"Passive mode"}
                        description={"Disable applying actions to orders to prevent oopsies"}

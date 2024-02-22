@@ -18,6 +18,7 @@ module.exports = {
         "no-return-assign": "off",
         quotes: "off",
         curly: "off",
+        eqeqeq: "off",
       },
     },
   ],
