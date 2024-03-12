@@ -6,7 +6,7 @@ import UrlLink from "../../utils/UrlLink";
 import { Order } from "../../../logic/orders/models";
 import Products from "./products/Products";
 import Clipboard from "@react-native-clipboard/clipboard";
-import { isAndroid } from "../../../logic/utils";
+import { isAndroid } from "../../../logic/utils/utils";
 import { Orders } from "../../../logic/orders/orders";
 
 interface Props {

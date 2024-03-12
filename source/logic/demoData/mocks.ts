@@ -1,4 +1,4 @@
-import { delayedPromiseWithValue } from "../utils";
+import { delayedPromiseWithValue } from "../utils/utils";
 import { HttpCode } from "../utils/http";
 import { demoResponseOrders } from "./responses/orders";
 import { demoResponseProduct } from "./responses/products";

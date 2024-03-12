@@ -14,15 +14,15 @@ import DateHeader from "./DateHeader";
 import OrderDetailsLoader from "../orders/OrderDetailsLoader";
 import { Notifications } from "../../logic/notifications";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { BloomableApi } from "../../logic/bloomable/api";
 
 const TabNav = createBottomTabNavigator();
 
-interface Props {
-
-}
+interface Props {}
 
 const MainWrapper: React.FC<Props> = () => {
   const isMounted = useRef(false);
+  const isApiLoaded = useRef(false);
   const fetchPage = useRef(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
@@ -50,7 +50,30 @@ const MainWrapper: React.FC<Props> = () => {
     }
   }, [ordersOutdated]);
 
-  const fetchOrders = () => {
+  /**
+   * Fire up the api by sending a request, so the login procedure can be done,
+   * so the other api calls (fetching orders, ...) are authorized to go.
+   */
+  const initApi = async () => {
+    if (isApiLoaded.current) return;
+    if (!isMounted.current) return;
+    setIsProcessing(true);
+    setErrorMessage(undefined);
+
+    try {
+      await BloomableApi.getProfile();
+      isApiLoaded.current = true;
+    } catch (error: any) {
+      if (!isMounted.current) return;
+      setErrorMessage(error.toString());
+    }
+
+    if (!isMounted.current) return;
+    setIsProcessing(false);
+  };
+
+  const fetchOrders = async () => {
+    await initApi();
     fetchPage.current = 0;
     setOrders([]);
     fetchNextOrderPage();
@@ -59,13 +82,12 @@ const MainWrapper: React.FC<Props> = () => {
   const fetchNextOrderPage = () => {
     setIsProcessing(true);
     setErrorMessage(undefined);
+    if (!isMounted.current) return;
 
     fetchPage.current++;
     Orders.list()
       .then(_orders => {
-        if (!isMounted.current) {
-          return;
-        }
+        if (!isMounted.current) return;
 
         if (fetchPage.current > 1) {
           _orders = orders.concat(_orders);
@@ -74,15 +96,11 @@ const MainWrapper: React.FC<Props> = () => {
         setOrders(_orders);
       })
       .catch(error => {
-        if (!isMounted.current) {
-          return;
-        }
+        if (!isMounted.current) return;
         setErrorMessage(error.toString());
       })
       .finally(() => {
-        if (!isMounted.current) {
-          return;
-        }
+        if (!isMounted.current) return;
         setIsProcessing(false);
       });
   };

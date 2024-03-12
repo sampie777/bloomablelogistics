@@ -4,7 +4,7 @@ import OrderItem from "./order/OrderItem";
 import ListEmptyComponent from "./ListEmptyComponent";
 import { Order } from "../../logic/orders/models";
 import ProgressView from "../dashboard/ProgressView";
-import { getNextDay, getPreviousDay } from "../../logic/utils";
+import { getNextDay, getPreviousDay } from "../../logic/utils/utils";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
   orderActionInProgressState,

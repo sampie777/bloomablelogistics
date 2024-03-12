@@ -11,7 +11,7 @@ import { defaultFontFamilies, lightColors } from "../theme";
 import { useRecoilState } from "recoil";
 import { orderActionInProgressState, selectedDateState } from "../../logic/recoil";
 import { Server } from "../../logic/bloomable/server";
-import { getNextDay } from "../../logic/utils";
+import { getNextDay } from "../../logic/utils/utils";
 import NumberComponent from "./components/NumberComponent";
 
 const Header: React.FC<{ title: string, isVisible?: boolean }> = ({ title, isVisible = true }) => {

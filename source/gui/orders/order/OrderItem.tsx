@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { format } from "../../../logic/utils";
+import { format } from "../../../logic/utils/utils";
 import { lightColors } from "../../theme";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import OrderCosts from "./OrderCosts";

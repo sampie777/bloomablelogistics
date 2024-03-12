@@ -1,7 +1,7 @@
 import { settings } from "./settings";
 import { rollbar, sanitizeErrorForRollbar } from "../rollbar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { emptyPromiseWithValue } from "../utils";
+import { emptyPromiseWithValue } from "../utils/utils";
 
 export namespace SettingsUtils {
   let _isLoaded = false;

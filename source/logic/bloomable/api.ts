@@ -152,7 +152,7 @@ export namespace BloomableApi {
       "https://dashboard.bloomable.com/api/me", { headers: jsonHeaders })
       .then(response => response.json())
       .catch(error => {
-        rollbar.error("Could not get me details", sanitizeErrorForRollbar(error));
+        rollbar.error("Could not load profile", sanitizeErrorForRollbar(error));
         throw error;
       });
 

@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { selectedDateState, upcomingOrdersState } from "../../logic/recoil";
-import { formatDateToWords, getNextDay, getPreviousDay } from "../../logic/utils";
+import { formatDateToWords, getNextDay, getPreviousDay } from "../../logic/utils/utils";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../theme";
 

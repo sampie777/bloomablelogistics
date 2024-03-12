@@ -4,7 +4,7 @@ import { Product } from "../../../../logic/orders/models";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../../../theme";
 import ProductExtraComponent from "./ProductExtraComponent";
-import { htmlToString } from "../../../../logic/utils";
+import { htmlToString } from "../../../../logic/utils/utils";
 import ZoomableImage from "../../../utils/ZoomableImage";
 import ShowWhenLoaded from "./ShowWhenLoaded";
 

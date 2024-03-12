@@ -1,5 +1,5 @@
 import { Linking, Platform, ScaledSize } from "react-native";
-import { rollbar, sanitizeErrorForRollbar } from "./rollbar";
+import { rollbar, sanitizeErrorForRollbar } from "../rollbar";
 
 export function dateFrom(date: Date | string): Date {
   if (typeof date === "string") {

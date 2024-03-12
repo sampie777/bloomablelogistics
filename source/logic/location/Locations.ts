@@ -1,6 +1,6 @@
 import { Order, Recipient } from "../orders/models";
 import { rollbar, sanitizeErrorForRollbar } from "../rollbar";
-import { emptyPromise, emptyPromiseWithValue, hashCyrb53 } from "../utils";
+import { emptyPromise, emptyPromiseWithValue, hashCyrb53 } from "../utils/utils";
 import Geocoder from "react-native-geocoding";
 import Config from "react-native-config";
 import { locationCache } from "../cache";

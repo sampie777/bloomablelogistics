@@ -6,6 +6,7 @@ export const HttpCode = {
   Unauthorized: 401,
   Forbidden: 403,
   NotFound: 404,
+  NotAcceptable: 406,
   Gone: 410,
   PageExpired: 419,
   UnprocessableContent: 422,

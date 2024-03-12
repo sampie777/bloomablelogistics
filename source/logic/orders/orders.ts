@@ -1,4 +1,4 @@
-import { emptyPromiseWithValue } from "../utils";
+import { emptyPromiseWithValue } from "../utils/utils";
 import { Order } from "./models";
 import { BloomableApi } from "../bloomable/api";
 import { Server } from "../bloomable/server";

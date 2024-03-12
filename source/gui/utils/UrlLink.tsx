@@ -1,6 +1,6 @@
 import React from "react";
 import { Alert, TouchableOpacity, View } from "react-native";
-import { openLink } from "../../logic/utils";
+import { openLink } from "../../logic/utils/utils";
 
 const UrlLink: React.FC<{
   url: string,

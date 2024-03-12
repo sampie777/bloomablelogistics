@@ -1,5 +1,5 @@
 import { ColorValue } from "react-native";
-import { isIOS } from "../logic/utils";
+import { isIOS } from "../logic/utils/utils";
 
 export interface ThemeColors {
   primary: ColorValue,

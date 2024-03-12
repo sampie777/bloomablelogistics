@@ -2,7 +2,7 @@ import { getNewSession, getSession, Session, sessionToHeader, storeSession, veri
 import { obtainResponseContent } from "./utils";
 import { HttpCode } from "../utils/http";
 import { rollbar, sanitizeErrorForRollbar } from "../rollbar";
-import { delayedPromiseWithValue } from "../utils";
+import { delayedPromiseWithValue } from "../utils/utils";
 
 export namespace BloomableAuth {
 
@@ -86,6 +86,7 @@ export namespace BloomableAuth {
         method: "POST",
       }))
       .then(response => {
+        const originalSession = getSession();
         const session = getNewSession(response);
         storeSession(session);
 
@@ -103,6 +104,9 @@ export namespace BloomableAuth {
               throw new LoginError(`Auth error. Payload: ${stringifiedContent}`);
             } else if (response.status === HttpCode.PageExpired) {
               throw new Error(`XSRF failed. Payload: ${stringifiedContent}`);
+            } else if (response.status === HttpCode.NotAcceptable && stringifiedContent.includes("Already authenticated")) {
+              storeSession(originalSession);
+              return session;
             }
             throw new Error(`No idea whats going on (status=${response.status}). Payload: ${stringifiedContent}`);
           });
@@ -130,7 +134,11 @@ export namespace BloomableAuth {
       try {
         const response = await call();
         if (response.status === HttpCode.Unauthorized) {
-          await login(credentials);
+          try {
+            await login(credentials);
+          } catch (error) {
+            rollbar.debug("Failed to do login", { ...sanitizeErrorForRollbar(error), retry: retry });
+          }
           continue; // Retry
         }
 
