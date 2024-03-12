@@ -17,17 +17,18 @@ import { Directions, Gesture, GestureDetector } from "react-native-gesture-handl
 import { config } from "../../config";
 
 interface Props {
+  orders: Order[];
   showHeader: boolean;
   onScrollViewScroll?: (e: NativeSyntheticEvent<NativeScrollEvent>) => void;
 }
 
 const OrdersList: React.FC<Props> = ({
+                                       orders,
                                        showHeader,
                                        onScrollViewScroll,
                                      }) => {
   let startX = 0, startY = 0;
 
-  const orders = useRecoilValue(selectedDateOrdersState);
   const _newDateRef = useRef<Date | undefined>(undefined);
   const swipeDirection = useRef<number>(0);
   const [screenWidth, setScreenWidth] = useState(0);

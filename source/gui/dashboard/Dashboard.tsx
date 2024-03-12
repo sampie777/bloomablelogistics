@@ -1,6 +1,8 @@
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import OrdersList from "../orders/OrdersList";
+import { useRecoilValue } from "recoil";
+import { selectedDateOrdersState } from "../../logic/recoil";
 import { lightColors } from "../theme";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { ParamList, Routes } from "../../routes";
@@ -14,6 +16,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 const Dashboard: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }) => {
+  const orders = useRecoilValue(selectedDateOrdersState);
   const animatedVerticalOffset = useSharedValue(0);
   const animatedContainerStyle = useAnimatedStyle(() => {
     return {
@@ -49,7 +52,8 @@ const Dashboard: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }) 
       <FontAwesome5Icon name={"cog"} style={styles.settingsButtonIcon} />
     </AnimatedTouchableOpacity>
 
-    <OrdersList showHeader={true}
+    <OrdersList orders={orders}
+                showHeader={true}
                 onScrollViewScroll={onScrollViewScroll} />
   </View>;
 };
