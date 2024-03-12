@@ -3,7 +3,7 @@ import { Permissions } from "./permissions";
 import { PermissionsAndroid } from "react-native";
 import { rollbar, sanitizeErrorForRollbar } from "./rollbar";
 import { settings } from "./settings/settings";
-import { emptyPromise } from "./utils";
+import { emptyPromise } from "./utils/utils";
 
 export namespace Notifications {
   let isInitialized = false;

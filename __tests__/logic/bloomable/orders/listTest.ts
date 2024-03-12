@@ -64,7 +64,7 @@ describe("Test Orders.list", () => {
   });
 
   it("returns all orders for each status", async () => {
-    settings.maxOrderPagesToFetch = 2;
+    settings.maxPastOrderPagesToFetch = 2;
 
     (BloomableApi.getOrders as Mock).mockImplementation((page = 1, withStatus: OrderStatus | "all" = "all"): Promise<OrdersResponse> => {
       switch (withStatus) {

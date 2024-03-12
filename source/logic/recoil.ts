@@ -1,7 +1,7 @@
 import { atom, RecoilEnv, selector } from "recoil";
 import { Order } from "./orders/models";
 import { Orders } from "./orders/orders";
-import { getNextDay } from "./utils";
+import { getNextDay } from "./utils/utils";
 
 RecoilEnv.RECOIL_DUPLICATE_ATOM_KEY_CHECKING_ENABLED = false;
 

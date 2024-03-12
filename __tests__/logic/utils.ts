@@ -5,7 +5,7 @@ import {
   getPreviousDay,
   hashCyrb53,
   htmlToString,
-} from "../../source/logic/utils";
+} from "../../source/logic/utils/utils";
 
 describe("utils", () => {
   it("hashes with cyrb53 should give constant unique outputs", () => {

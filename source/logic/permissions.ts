@@ -1,6 +1,6 @@
 import { Permission, PermissionsAndroid } from "react-native";
 import { rollbar, sanitizeErrorForRollbar } from "./rollbar";
-import { emptyPromiseWithValue } from "./utils";
+import { emptyPromiseWithValue } from "./utils/utils";
 
 export namespace Permissions {
   export const askPermission = (permission: Permission): Promise<boolean> => {

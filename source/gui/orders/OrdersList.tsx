@@ -5,11 +5,10 @@ import ListEmptyComponent from "./ListEmptyComponent";
 import { Order } from "../../logic/orders/models";
 import ProgressView from "../dashboard/ProgressView";
 import { getNextDay, getPreviousDay } from "../../logic/utils/utils";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState } from "recoil";
 import {
   orderActionInProgressState,
   ordersOutdatedState,
-  selectedDateOrdersState,
   selectedDateState,
 } from "../../logic/recoil";
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";

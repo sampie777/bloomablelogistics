@@ -1,5 +1,4 @@
 import { getCookieValue } from "./utils";
-import { BloomableAuth } from "./auth";
 
 export interface Session {
   xsrfToken?: string;
