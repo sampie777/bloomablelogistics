@@ -1,6 +1,5 @@
 import { getNewSession, getSession, Session, sessionToHeader, storeSession, verifySession } from "./session";
-import { obtainResponseContent } from "./utils";
-import { HttpCode } from "../utils/http";
+import { HttpCode, obtainResponseContent } from "../utils/http";
 import { rollbar, sanitizeErrorForRollbar } from "../rollbar";
 import { delayedPromiseWithValue } from "../utils/utils";
 
@@ -151,6 +150,7 @@ export namespace BloomableAuth {
               statusText: response.statusText,
               type: response.type,
               headers: response.headers,
+              content: JSON.stringify(await obtainResponseContent(response)),
             },
           });
         }

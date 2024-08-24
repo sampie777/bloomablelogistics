@@ -1,3 +1,5 @@
+import { rollbar, sanitizeErrorForRollbar } from "../rollbar";
+
 export const HttpCode = {
   OK: 200,
   Created: 201,
@@ -24,3 +26,23 @@ export class HttpError extends Error {
     this.response = response;
   }
 }
+
+export const obtainResponseContent = async (response: Response): Promise<any> => {
+  const contentType = response.headers.get("content-type");
+  try {
+    if (contentType === "application/json") {
+      return await response.json();
+    } else {
+      return await response.text();
+    }
+  } catch (error) {
+    rollbar.error("Could not convert response", {
+      ...sanitizeErrorForRollbar(error),
+      contentType: contentType,
+      url: response.url,
+      status: response.status,
+      statusText: response.statusText,
+    });
+    return "";
+  }
+};
