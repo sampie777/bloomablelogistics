@@ -10,7 +10,8 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "bundle": "cd android && ./gradlew bundleRelease",
     "build": "cd android && ./gradlew assembleRelease",
-    "device-install": "adb -d install \"$(ls -t ./android/app/build/outputs/apk/release/*.apk | head -1)\""
+    "device-install": "adb -d install \"$(ls -t ./android/app/build/outputs/apk/release/*.apk | head -1)\"",
+    "device-install-windows": "adb -d install \"./android/app/build/outputs/apk/release/$(Get-ChildItem -Path ./android/app/build/outputs/apk/release/*.apk -Name | select -first 1)\""
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "1.17.10",
