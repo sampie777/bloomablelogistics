@@ -1,4 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="nl.sajansen.bloomablelogistics">
 
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -32,7 +32,7 @@
                  android:foregroundServiceType="location"/>
 
         <meta-data android:name="com.google.firebase.messaging.default_notification_icon"
-                   android:resource="@mipmap/ic_launcher_round"/>
+                   android:resource="@mipmap/ic_launcher_round_transparent"/>
     </application>
 
     <queries>
