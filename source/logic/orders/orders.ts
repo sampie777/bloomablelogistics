@@ -73,18 +73,6 @@ export namespace Orders {
 
     return BloomableApi.getOrder({ id: order.id })
       .then(onlineOrder => {
-        if (Server.isDemoUser()) {
-          if (order.status === "open") {
-            onlineOrder.status = "accepted";
-          } else if (order.status === "accepted") {
-            onlineOrder.status = "fulfilled";
-          } else if (order.status === "fulfilled") {
-            onlineOrder.status = "delivered";
-          } else {
-            onlineOrder.status = "cancelled";
-          }
-        }
-
         onlineOrder.products = order.products;
         return onlineOrder;
       });
