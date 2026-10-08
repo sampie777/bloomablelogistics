@@ -14,7 +14,10 @@ const LoginScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }
   const [isProcessing, setIsProcessing] = useState(true);
 
   const onLoggedInChange = () => {
-    if (!Server.isLoggedIn()) {
+    const loggedIn = Server.isLoggedIn();
+    setIsLoggedIn(loggedIn);
+
+    if (!loggedIn) {
       return;
     }
 

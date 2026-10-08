@@ -4,7 +4,7 @@ import { Order, Product, Recipient } from "../orders/models";
 export const convertToLocalOrder = (onlineOrder: BloomableOrder) => {
   const order = new Order();
   order.id = onlineOrder.id;
-  order.number = +onlineOrder.name.replace(/\D*/gi, "");
+  order.number = onlineOrder.name ? +(onlineOrder.name.replace(/\D+/gi, "") || 0) : undefined;
   order.createdAt = new Date(onlineOrder.created_at);
   order.deliverAtDate = new Date(onlineOrder.deliveryDate);
   order.orderValue = onlineOrder.totalValue;
@@ -12,14 +12,14 @@ export const convertToLocalOrder = (onlineOrder: BloomableOrder) => {
   order.status = onlineOrder.status;
 
   order.recipient = new Recipient();
-  order.recipient.name = (onlineOrder.firstName + " " + onlineOrder.lastName).trim();
+  order.recipient.name = ((onlineOrder.firstName ?? "") + " " + (onlineOrder.lastName ?? "")).trim();
   order.recipient.company = onlineOrder.company ?? "";
   order.recipient.phones = onlineOrder.phone ? [onlineOrder.phone] : [];
   order.recipient.address = [onlineOrder.address1, onlineOrder.address2, onlineOrder.postalCode, onlineOrder.city].filter(it => it).join(", ");
-  order.recipient.coordinates = {
+  order.recipient.coordinates = (onlineOrder.latitude != null && onlineOrder.longitude != null) ? {
     latitude: onlineOrder.latitude,
     longitude: onlineOrder.longitude,
-  };
+  } : undefined;
   order.recipient.specialInstructions = onlineOrder.notes ?? undefined;
   order.recipient.message = onlineOrder.lines.map(product => product.giftMessage)
     .filter(it => it)

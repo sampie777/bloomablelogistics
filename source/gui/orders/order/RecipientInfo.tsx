@@ -45,7 +45,7 @@ const RecipientInfo: React.FC<Props> = ({ order }) => {
         .map((it, i) =>
           <View key={i} style={styles.row}>
             <FontAwesome5Icon name={"phone-alt"} style={styles.icon} />
-            <UrlLink url={"tel:" + it}>
+            <UrlLink url={"tel:" + it.replace(/\s+/g, "")}>
               <Text style={styles.phone} selectable={true}>{it}</Text>
             </UrlLink>
           </View>)
@@ -72,7 +72,7 @@ const RecipientInfo: React.FC<Props> = ({ order }) => {
                 {!order.recipient.company && !order.recipient.unit ? undefined :
                   <Text style={styles.addressLabel}>Address:</Text>
                 }
-                <UrlLink url={Platform.select({ ios: "maps:0,0?q=", android: "geo:0,0?q=" }) + order.recipient.address}
+                <UrlLink url={Platform.select({ ios: "maps:0,0?q=", android: "geo:0,0?q=" }) + encodeURIComponent(order.recipient.address)}
                          style={{ flex: 1 }}
                          onLongPress={copyAddress}>
                   <Text style={[styles.addressValue, styles.url]}

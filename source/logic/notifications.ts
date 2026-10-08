@@ -108,8 +108,8 @@ export namespace Notifications {
     }
   };
 
-  export const unsubscribe = async (): Promise<any> => {
-    const topic = getUserTopic();
+  export const unsubscribe = async (customUsername?: string): Promise<any> => {
+    const topic = customUsername ? convertUsernameToTopicName(customUsername) : getUserTopic();
     if (topic.length === 0) {
       rollbar.info("Can't unsubscribe from empty topic");
       return emptyPromise();

@@ -158,8 +158,12 @@ export namespace BloomableApi {
 
   export const loadOrderProducts = (order: Order,
                                     credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<unknown> =>
-    Promise.all(order.products.map(product =>
-      getProduct(product, credentials)
+    Promise.all(order.products.map(product => {
+      if (!product.id) {
+        product._detailsLoaded = true;
+        return Promise.resolve();
+      }
+      return getProduct(product, credentials)
         .then(it => {
           product.name = it.name;
           product.size = it.size;
@@ -168,6 +172,10 @@ export namespace BloomableApi {
           product.image = it.image;
           product.extras = it.extras;
           product._detailsLoaded = true;
-        }),
-    ));
+        })
+        .catch(() => {
+          // Mark as loaded so failing/missing products don't cause infinite reload loops
+          product._detailsLoaded = true;
+        });
+    }));
 }

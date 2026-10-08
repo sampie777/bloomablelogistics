@@ -41,7 +41,7 @@ const MainWrapper: React.FC<Props> = () => {
     return () => {
       isMounted.current = false;
     };
-  });
+  }, []);
 
   useEffect(() => {
     if (!isProcessing && ordersOutdated) {

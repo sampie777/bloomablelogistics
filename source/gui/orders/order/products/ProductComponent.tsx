@@ -30,7 +30,7 @@ const ProductComponent: React.FC<Props> = ({ product }) => {
         </>
       }
 
-      {product.retailPrice === undefined ? undefined :
+      {product.retailPrice == null ? undefined :
         <Text style={styles.retailPrice}>R {product.retailPrice.toFixed(2)}</Text>}
     </View>
 

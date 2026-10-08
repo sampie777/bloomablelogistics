@@ -26,6 +26,14 @@ const RejectOrderScreen: React.FC<NativeStackScreenProps<ParamList, typeof Route
   const [selectedReason, setSelectedReason] = useState<string | undefined>(undefined);
   const [customReason, setCustomReason] = useState<string>("");
 
+  const closeScreen = useCallback(() => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      navigation.navigate(Routes.Main);
+    }
+  }, [navigation]);
+
   const loadReasons = useCallback(() => {
     setIsProcessing(true);
     BloomableApi.getRejectReasons()
@@ -34,20 +42,16 @@ const RejectOrderScreen: React.FC<NativeStackScreenProps<ParamList, typeof Route
   }, [setIsProcessing]);
 
   useEffect(() => {
+    if (!order) {
+      closeScreen();
+      return;
+    }
     loadReasons();
-  }, [loadReasons]);
+  }, [order, loadReasons, closeScreen]);
 
   if (!order) {
     return null;
   }
-
-  const closeScreen = () => {
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-    } else {
-      navigation.navigate(Routes.Main);
-    }
-  };
 
   const isSubmitDisabled = selectedReason === undefined || (selectedReason === "Other" && customReason.trim().length === 0);
 

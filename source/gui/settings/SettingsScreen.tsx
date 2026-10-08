@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import SwitchComponent from "./components/SwitchComponent";
 import PressableComponent from "./components/PressableComponent";
@@ -8,11 +8,12 @@ import { settings } from "../../logic/settings/settings";
 import { Notifications } from "../../logic/notifications";
 import { getBuildNumber, getVersion } from "react-native-device-info";
 import { defaultFontFamilies, lightColors } from "../theme";
-import { useRecoilState } from "recoil";
-import { orderActionInProgressState, selectedDateState } from "../../logic/recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
+import { orderActionInProgressState, ordersState, selectedDateState } from "../../logic/recoil";
 import { Server } from "../../logic/bloomable/server";
 import { getNextDay } from "../../logic/utils/utils";
 import NumberComponent from "./components/NumberComponent";
+import LoadingOverlay from "../utils/LoadingOverlay";
 
 const Header: React.FC<{ title: string, isVisible?: boolean }> = ({ title, isVisible = true }) => {
   return !isVisible ? null : (
@@ -25,8 +26,11 @@ const Header: React.FC<{ title: string, isVisible?: boolean }> = ({ title, isVis
 const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }) => {
   const [orderActionInProgress, setOrderActionInProgress] = useRecoilState(orderActionInProgressState);
   const [selectedDate, setSelectedDate] = useRecoilState(selectedDateState);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const setOrders = useSetRecoilState(ordersState);
 
   return <View style={styles.container}>
+    <LoadingOverlay isVisible={isLoggingOut} text={"Logging out..."} />
     <ScrollView
       contentContainerStyle={styles.scrollContainer}>
 
@@ -48,10 +52,17 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
                        title={"Recipient coordinates from Bloomable"}
                        description={"Use the coordinates from Bloomable for orders. Turn this off to use Google's API for calculating order coordinates."}
                        callback={() => {
-                         // Just quickly refresh the GUI so the new setting is applied to the map.
-                         const currentDate = selectedDate;
+                         // Just quickly refresh the GUI so the new setting is applied to the buttons.
+                         setOrderActionInProgress(true);
+                         setOrderActionInProgress(false);
+                       }} />
+      <SwitchComponent settingsKey={"orderDaysAddNextDayOnSunday"}
+                       title={"Add Monday to Sunday"}
+                       description={"On Sundays, also show the upcoming orders of Monday (the next day) in the dashboard."}
+                       callback={() => {
+                         // Just quickly refresh the GUI so the new setting is applied to the buttons.
                          setSelectedDate(getNextDay(selectedDate));
-                         setSelectedDate(currentDate);
+                         setSelectedDate(selectedDate);
                        }} />
 
       <Header title={"Notifications"} />
@@ -72,18 +83,23 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
       <Header title={"Account"} />
       <PressableComponent title={"Log out"}
                           description={`Currently logged in as '${Server.getCredentials().username}'`}
-                          onPress={() => {
-                            Server.logout();
-                            navigation.navigate(Routes.Login);
-                            navigation.reset({
-                              index: 0,
-                              routes: [{ name: Routes.Login }],
-                            });
+                          onPress={async () => {
+                            setIsLoggingOut(true);
+                            try {
+                              await Server.logout();
+                              setOrders([]);
+                            } finally {
+                              setIsLoggingOut(false);
+                              navigation.reset({
+                                index: 0,
+                                routes: [{ name: Routes.Login }],
+                              });
+                            }
                           }} />
 
       <View style={styles.versionContainer}>
         <Text style={styles.versionText}>
-          version: {getVersion()} ({getBuildNumber()}) {process.env.NODE_ENV === "production" ? undefined : `(${process.env.NODE_ENV})`}
+          version: {getVersion()} ({getBuildNumber()}) {process.env.NODE_ENV === "production" ? undefined : `(${process.env.NODE_ENV})`}\
         </Text>
       </View>
     </ScrollView>
@@ -111,15 +127,14 @@ const styles = StyleSheet.create({
   },
 
   versionContainer: {
-    marginTop: 100,
+    marginTop: 40,
+    marginBottom: 20,
   },
   versionText: {
     textAlign: "center",
+    fontFamily: defaultFontFamilies.sansSerifThin,
     color: lightColors.textLighter,
-    fontSize: 12,
-    fontFamily: defaultFontFamilies.sansSerifLight,
   },
 });
-
 
 export default SettingsScreen;

@@ -57,13 +57,19 @@ export namespace Server {
     Validation.validate(value.length > 0, "Password cannot be empty");
   };
 
-  export const logout = (): Promise<unknown> => {
-    Notifications.unsubscribe()
-      .then(Notifications.unsubscribe);  // For good measures, as the unsubscribing doesn't seem to always work.
-    clearCredentials();
+  export const logout = async (): Promise<unknown> => {
+    const currentUser = _credentials.username;
+    setCredentials(emptyCredentials);
     getUniqueId().then(deviceId => rollbar.setPerson(deviceId)).catch(() => {});
-    return BloomableAuth.logout()
-      .finally(Mocks.tearDownDemoData);
+
+    const promises: Promise<any>[] = [
+      clearCredentials(),
+      BloomableAuth.logout().finally(Mocks.tearDownDemoData),
+    ];
+    if (currentUser) {
+      promises.push(Notifications.unsubscribe(currentUser).catch(() => {}));
+    }
+    return Promise.all(promises);
   };
 
   export const isLoggedIn = () => {
@@ -112,10 +118,12 @@ export namespace Server {
       );
   };
 
-  const clearCredentials = () => {
+  const clearCredentials = async () => {
     setCredentials(emptyCredentials);
-    storageUpdateOrRemove("username", undefined);
-    storageUpdateOrRemove("password", undefined);
+    await Promise.all([
+      storageUpdateOrRemove("username", undefined),
+      storageUpdateOrRemove("password", undefined),
+    ]);
   };
 
   const storeCredentials = (credentials: BloomableAuth.Credentials) => {
@@ -124,9 +132,9 @@ export namespace Server {
     storageUpdateOrRemove("password", credentials.password);
   };
 
-  const storageUpdateOrRemove = (key: string, value: string | undefined) => {
+  const storageUpdateOrRemove = (key: string, value: string | undefined): Promise<void> => {
     if (value !== undefined) {
-      EncryptedStorage.setItem(key, value)
+      return EncryptedStorage.setItem(key, value)
         .catch(error => {
           rollbar.critical("Error setting EncryptedStorage item", {
             ...sanitizeErrorForRollbar(error),
@@ -134,7 +142,7 @@ export namespace Server {
           });
         });
     } else {
-      EncryptedStorage.removeItem(key)
+      return EncryptedStorage.removeItem(key)
         .catch(error => {
           rollbar.error("Error clearing EncryptedStorage item", {
             ...sanitizeErrorForRollbar(error),
@@ -145,52 +153,32 @@ export namespace Server {
   };
 
   export const acceptOrder = (id: string) => {
-    const { BloomableApi } = require("./api");
-    return BloomableApi.acceptOrder({ id: id })
-      .catch((error: any) => {
-        rollbar.error("Error accepting order", {
-          ...sanitizeErrorForRollbar(error),
-          id: id,
-        });
-        throw error;
-      });
-  };
-
-  export const rejectOrder = (id: string, reason: string) => {
-    const { BloomableApi } = require("./api");
-    return BloomableApi.rejectOrder({ id: id }, reason)
-      .catch((error: any) => {
-        rollbar.error("Error rejecting order", {
-          ...sanitizeErrorForRollbar(error),
-          id: id,
-        });
-        throw error;
-      });
+    return BloomableAuth.authenticatedFetch(_credentials, `https://dashboard.bloomable.com/api/orders/${id}/accept`, {
+      method: "POST",
+    });
   };
 
   export const fulfillOrder = (id: string) => {
-    const { BloomableApi } = require("./api");
-    return BloomableApi.fulfillOrder({ id: id })
-      .catch((error: any) => {
-        rollbar.error("Error fulfilling order", {
-          ...sanitizeErrorForRollbar(error),
-          id: id,
-        });
-        throw error;
-      });
+    return BloomableAuth.authenticatedFetch(_credentials, `https://dashboard.bloomable.com/api/orders/${id}/fulfill`, {
+      method: "POST",
+    });
   };
 
   export const deliverOrder = (id: string) => {
-    const { BloomableApi } = require("./api");
-    return BloomableApi.deliverOrder({ id: id })
-      .catch((error: any) => {
-        rollbar.error("Error delivering order", {
-          ...sanitizeErrorForRollbar(error),
-          id: id,
-        });
-        throw error;
-      });
+    return BloomableAuth.authenticatedFetch(_credentials, `https://dashboard.bloomable.com/api/orders/${id}/deliver`, {
+      method: "POST",
+    });
+  };
+
+  export const rejectOrder = (id: string, reason: string) => {
+    return BloomableAuth.authenticatedFetch(_credentials, `https://dashboard.bloomable.com/api/orders/${id}/reject`, {
+      method: "POST",
+      body: JSON.stringify({
+        reason: reason,
+      }),
+    });
   };
 }
 
+// Register dynamic demo status provider for Rollbar error tracking
 setDemoStatusProvider(() => Server.isDemoUser());

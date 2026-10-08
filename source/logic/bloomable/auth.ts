@@ -51,7 +51,11 @@ export namespace BloomableAuth {
         method: "POST",
       }))
       .then(response => {
-        storeSession(getNewSession(response));
+        try {
+          storeSession(getNewSession(response));
+        } catch {
+          // ignore
+        }
 
         if (response.status !== HttpCode.NoContent) {
           obtainResponseContent(response)
@@ -155,7 +159,15 @@ export namespace BloomableAuth {
           });
         }
 
-        storeSession(getNewSession(response));
+        try {
+          const newSession = getNewSession(response);
+          if (newSession.xsrfToken || newSession.sessionToken) {
+            storeSession(newSession);
+          }
+        } catch {
+          // Set-Cookie is optional on subsequent API calls
+        }
+
         return response;
       } catch (error) {
         rollbar.error("Failed to do call", {
@@ -165,7 +177,7 @@ export namespace BloomableAuth {
           url: url,
         });
 
-        if (retry == maxRetries) throw error;
+        if (retry === maxRetries - 1) throw error;
       }
     }
 

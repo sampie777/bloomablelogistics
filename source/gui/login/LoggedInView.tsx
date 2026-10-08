@@ -1,20 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { lightColors } from "../theme";
 import { Server } from "../../logic/bloomable/server";
+import { useSetRecoilState } from "recoil";
+import { ordersState } from "../../logic/recoil";
+import LoadingOverlay from "../utils/LoadingOverlay";
 
 interface Props {
   onLoggedOut?: () => void;
 }
 
 const LoggedInView: React.FC<Props> = ({ onLoggedOut }) => {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const setOrders = useSetRecoilState(ordersState);
 
-  const logout = () => {
-    Server.logout();
-    onLoggedOut?.();
+  const logout = async () => {
+    setIsProcessing(true);
+    try {
+      await Server.logout();
+      setOrders([]);
+    } finally {
+      setIsProcessing(false);
+      onLoggedOut?.();
+    }
   };
 
   return <View style={styles.container}>
+    <LoadingOverlay isVisible={isProcessing} text={"Logging out..."} />
     <TouchableOpacity onPress={logout} style={styles.logoutButton}>
       <Text style={styles.logoutButtonText}>Log out</Text>
     </TouchableOpacity>

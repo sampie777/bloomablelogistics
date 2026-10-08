@@ -22,14 +22,16 @@ const OrderDetailsLoader: React.FC<Props> = () => {
 
     Orders.fetchDetailsForOrders(selectedOrders)
       .then((updatedOrders) => {
-        const newOrders = allOrders.map(it => {
+        setAllOrders(prevOrders => prevOrders.map(it => {
           const updatedOrder = updatedOrders.find(order => order.id === it.id);
           if (updatedOrder !== undefined) {
             return updatedOrder;
           }
           return it;
-        });
-        setAllOrders(newOrders);
+        }));
+      })
+      .catch(() => {
+        // Prevent unhandled promise rejection
       });
   };
 

@@ -1,6 +1,6 @@
 import { Order } from "../../../../logic/orders/models";
 import { useRecoilState } from "recoil";
-import { orderActionInProgressState } from "../../../../logic/recoil";
+import { orderActionInProgressState, ordersState } from "../../../../logic/recoil";
 import { useState } from "react";
 import { settings } from "../../../../logic/settings/settings";
 import { rollbar, sanitizeErrorForRollbar } from "../../../../logic/rollbar";
@@ -18,11 +18,13 @@ export const useOrderAction = (order: Order): [
   setIsProcessing: (isProcessing: boolean) => void,
 ] => {
   const [orderActionInProgress, setOrderActionInProgress] = useRecoilState(orderActionInProgressState);
+  const [orders, setOrders] = useRecoilState(ordersState);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const applyOrderAction: ApplyOrderActionProps = (action, errorTitle, errorMessage, args = undefined): Promise<boolean> => {
     if (settings.disableOrderActions) return Promise.resolve(false);
     setIsProcessing(true);
+    setOrderActionInProgress(true);
 
     return action(order, args)
       .then(loadOrder)
@@ -34,21 +36,17 @@ export const useOrderAction = (order: Order): [
       })
       .finally(() => {
         setIsProcessing(false);
+        setOrderActionInProgress(false);
       });
   };
 
   const loadOrder = () => Orders.fetchStatusForOrder(order)
     .then(updatedOrder => {
       updatedOrder.isProcessing = false;
-      return updatedOrder;
-    })
-    .then(updatedOrder => {
-      order.isProcessing = updatedOrder.isProcessing;
+      order.isProcessing = false;
       order.status = updatedOrder.status;
 
-      // Trigger GUI update
-      setOrderActionInProgress(true);
-      setOrderActionInProgress(false);
+      setOrders(prevOrders => prevOrders.map(it => it.id === updatedOrder.id ? Order.clone(updatedOrder) : it));
     });
 
   return [

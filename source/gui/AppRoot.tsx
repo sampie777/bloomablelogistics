@@ -18,7 +18,7 @@ interface Props {
 const AppRoot: React.FC<Props> = () => {
   useEffect(() => {
     settings.load();
-  });
+  }, []);
 
   return <RecoilRoot>
     <NavigationContainer>

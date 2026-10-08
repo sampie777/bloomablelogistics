@@ -10,13 +10,13 @@ interface Props {
 
 const OrderCosts: React.FC<Props> = ({ order }) => {
   return <View style={styles.container}>
-    {order.orderValue === undefined ? <View /> :
+    {order.orderValue == null ? <View /> :
       <View style={styles.row}>
         <FontAwesome5Icon name={"shopping-cart"} solid style={styles.icon} />
         <Text style={styles.orderValue}>R {order.orderValue.toFixed(2)}</Text>
       </View>
     }
-    {order.orderCosts === undefined ? undefined :
+    {order.orderCosts == null ? undefined :
       <View style={styles.row}>
         <FontAwesome5Icon name={"hand-holding-usd"} solid style={styles.icon} />
         <Text style={styles.orderCosts}>R {order.orderCosts.toFixed(2)}</Text>

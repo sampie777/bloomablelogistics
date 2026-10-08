@@ -100,3 +100,5 @@ describe("Rollbar Error Logging & Demo Status", () => {
     expect(sanitized.error.json).toBe(JSON.stringify(nonError));
   });
 });
+
+export {};
