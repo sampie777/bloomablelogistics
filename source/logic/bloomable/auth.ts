@@ -6,11 +6,38 @@ import { delayedPromiseWithValue } from "../utils/utils";
 export namespace BloomableAuth {
 
   export class LoginError extends Error {
-    constructor(message: string) {
+    payload?: any;
+    constructor(message: string, payload?: any) {
       super(message);
       this.name = "LoginError";
+      this.payload = payload;
     }
   }
+
+  export const parseLoginErrorMessage = (content: any, defaultMessage: string = "These credentials do not match our records."): string => {
+    if (!content) return defaultMessage;
+    if (typeof content === "string") {
+      try {
+        content = JSON.parse(content);
+      } catch {
+        return content.trim() || defaultMessage;
+      }
+    }
+    if (content.errors && typeof content.errors === "object") {
+      for (const key of Object.keys(content.errors)) {
+        const err = content.errors[key];
+        if (Array.isArray(err) && err.length > 0 && typeof err[0] === "string" && err[0].trim().length > 0) {
+          return err[0].trim();
+        } else if (typeof err === "string" && err.trim().length > 0) {
+          return err.trim();
+        }
+      }
+    }
+    if (typeof content.message === "string" && content.message.trim().length > 0) {
+      return content.message.trim();
+    }
+    return defaultMessage;
+  };
 
   export interface Credentials {
     username: string;
@@ -104,21 +131,27 @@ export namespace BloomableAuth {
             if (response.status === HttpCode.NoContent) {
               throw new Error(`Logged in with no content. Payload: ${stringifiedContent}`);
             } else if (response.status === HttpCode.UnprocessableContent) {
-              throw new LoginError(`Auth error. Payload: ${stringifiedContent}`);
+              throw new LoginError(parseLoginErrorMessage(content), content);
+            } else if (response.status === HttpCode.Unauthorized) {
+              throw new LoginError(parseLoginErrorMessage(content), content);
+            } else if (response.status === HttpCode.TooManyRequests) {
+              throw new LoginError(parseLoginErrorMessage(content, "Too many login attempts. Please try again later."), content);
             } else if (response.status === HttpCode.PageExpired) {
-              throw new Error(`XSRF failed. Payload: ${stringifiedContent}`);
+              throw new LoginError("Session expired. Please try again.", content);
             } else if (response.status === HttpCode.NotAcceptable && stringifiedContent.includes("Already authenticated")) {
               storeSession(originalSession);
               return session;
             }
-            throw new Error(`No idea whats going on (status=${response.status}). Payload: ${stringifiedContent}`);
+            throw new Error(`Login failed (status=${response.status}). Payload: ${stringifiedContent}`);
           });
       })
       .catch(error => {
-        rollbar.error("Could not log in", {
-          ...sanitizeErrorForRollbar(error),
-          errorMessage: error ? error.message : undefined,
-        });
+        if (!(error instanceof LoginError)) {
+          rollbar.error("Could not log in", {
+            ...sanitizeErrorForRollbar(error),
+            errorMessage: error ? error.message : undefined,
+          });
+        }
         throw error;
       });
   };

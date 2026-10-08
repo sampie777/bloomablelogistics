@@ -55,10 +55,10 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
         if (!isMounted.current) return;
 
         if (error instanceof BloomableAuth.LoginError) {
-          setErrorMessage(error.message || "Undefined login error occurred. Try again.");
+          setErrorMessage(error.message || "These credentials do not match our records.");
         } else {
           rollbar.error("Error for login credentials respond", { error: error });
-          setErrorMessage(error.toString() || "Undefined error occurred. Try again.");
+          setErrorMessage(error?.message || error.toString() || "An unexpected error occurred. Please try again.");
         }
       })
       .finally(() => {
