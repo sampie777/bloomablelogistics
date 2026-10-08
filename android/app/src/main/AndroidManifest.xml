@@ -28,8 +28,6 @@
         <meta-data android:name="com.google.android.geo.API_KEY"
                    android:value="@string/GOOGLE_MAPS_API_KEY"/>
         <uses-library android:name="org.apache.http.legacy" android:required="false"/>
-        <service android:name=".LocationService"
-                 android:foregroundServiceType="location"/>
 
         <meta-data android:name="com.google.firebase.messaging.default_notification_icon"
                    android:resource="@mipmap/ic_launcher_round_transparent"/>
