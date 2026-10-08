@@ -24,6 +24,12 @@ export namespace Server {
         verifyUsername(credentials.username);
         verifyPassword(credentials.password);
 
+        if (credentials.username === "demo") {
+          Mocks.setupDemoData();
+        } else {
+          Mocks.tearDownDemoData();
+        }
+
         return BloomableAuth.login(credentials)
           .then(() => storeCredentials(credentials))
           .catch(error => {
@@ -53,7 +59,7 @@ export namespace Server {
       .then(Notifications.unsubscribe);  // For good measures, as the unsubscribing doesn't seem to always work.
     clearCredentials();
     return BloomableAuth.logout()
-      .then(Mocks.tearDownDemoData);
+      .finally(Mocks.tearDownDemoData);
   };
 
   export const isLoggedIn = () => {
@@ -90,6 +96,11 @@ export namespace Server {
             password: password,
           };
           setCredentials(credentials);
+          if (credentials.username === "demo") {
+            Mocks.setupDemoData();
+          } else {
+            Mocks.tearDownDemoData();
+          }
           return credentials;
         }),
       );
