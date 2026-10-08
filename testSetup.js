@@ -9,24 +9,49 @@ jest.mock("rollbar-react-native", () => {
         warning: () => undefined,
         error: () => undefined,
         critical: () => undefined,
+        setPerson: () => undefined,
+        clearPerson: () => undefined,
       };
     },
   };
 });
 
 jest.mock("./source/logic/rollbar", () => {
+  let isDemo = false;
+  let demoProvider = null;
+  const getDemo = () => (demoProvider ? demoProvider() : isDemo);
+
   return {
     rollbar: {
-      log: () => undefined,
-      debug: () => undefined,
-      info: () => undefined,
-      warning: () => undefined,
-      error: () => undefined,
-      critical: () => undefined,
+      log: jest.fn(),
+      debug: jest.fn(),
+      info: jest.fn(),
+      warning: jest.fn(),
+      error: jest.fn(),
+      critical: jest.fn(),
+      setPerson: jest.fn(),
+      clearPerson: jest.fn(),
     },
     sanitizeErrorForRollbar: (error) => ({
       message: error?.message || error?.toString(),
     }),
+    setDemoStatusProvider: jest.fn((provider) => {
+      demoProvider = provider;
+    }),
+    setDemoStatus: jest.fn((status) => {
+      isDemo = status;
+    }),
+    getIsDemo: jest.fn(() => getDemo()),
+    getDemoStatus: jest.fn(() => (getDemo() ? "demo" : "normal")),
+    getDemoMetadata: jest.fn(() => ({
+      is_demo: getDemo(),
+      demo_status: getDemo() ? "demo" : "normal",
+    })),
+    enrichExtraWithDemoStatus: jest.fn((extra) => ({
+      is_demo: getDemo(),
+      demo_status: getDemo() ? "demo" : "normal",
+      ...(extra && typeof extra === "object" ? extra : { extra }),
+    })),
   };
 });
 
@@ -34,6 +59,7 @@ jest.mock("react-native-device-info", () => {
   return {
     getVersion: () => 1,
     getBuildNumber: () => 1,
+    getUniqueId: jest.fn(() => Promise.resolve("mock-unique-id")),
     isEmulator: jest.fn(() => Promise.resolve(false)),
     isEmulatorSync: jest.fn(() => false),
   };

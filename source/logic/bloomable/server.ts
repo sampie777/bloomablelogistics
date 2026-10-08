@@ -1,5 +1,6 @@
-import { rollbar, sanitizeErrorForRollbar } from "../rollbar";
+import { rollbar, sanitizeErrorForRollbar, setDemoStatusProvider } from "../rollbar";
 import EncryptedStorage from "react-native-encrypted-storage";
+import { getUniqueId } from "react-native-device-info";
 import { Notifications } from "../notifications";
 import { BloomableAuth } from "./auth";
 import LoginError = BloomableAuth.LoginError;
@@ -26,8 +27,10 @@ export namespace Server {
 
         if (credentials.username === "demo") {
           Mocks.setupDemoData();
+          rollbar.setPerson("demo", "demo", "demo@bloomable.com");
         } else {
           Mocks.tearDownDemoData();
+          getUniqueId().then(deviceId => rollbar.setPerson(deviceId, credentials.username)).catch(() => {});
         }
 
         return BloomableAuth.login(credentials)
@@ -58,6 +61,7 @@ export namespace Server {
     Notifications.unsubscribe()
       .then(Notifications.unsubscribe);  // For good measures, as the unsubscribing doesn't seem to always work.
     clearCredentials();
+    getUniqueId().then(deviceId => rollbar.setPerson(deviceId)).catch(() => {});
     return BloomableAuth.logout()
       .finally(Mocks.tearDownDemoData);
   };
@@ -98,8 +102,10 @@ export namespace Server {
           setCredentials(credentials);
           if (credentials.username === "demo") {
             Mocks.setupDemoData();
+            rollbar.setPerson("demo", "demo", "demo@bloomable.com");
           } else {
             Mocks.tearDownDemoData();
+            getUniqueId().then(deviceId => rollbar.setPerson(deviceId, credentials.username)).catch(() => {});
           }
           return credentials;
         }),
@@ -186,3 +192,5 @@ export namespace Server {
       });
   };
 }
+
+setDemoStatusProvider(() => Server.isDemoUser());
