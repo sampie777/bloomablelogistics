@@ -24,12 +24,18 @@ jest.mock("./source/logic/rollbar", () => {
       error: () => undefined,
       critical: () => undefined,
     },
+    sanitizeErrorForRollbar: (error) => ({
+      message: error?.message || error?.toString(),
+    }),
   };
 });
 
 jest.mock("react-native-device-info", () => {
   return {
     getVersion: () => 1,
+    getBuildNumber: () => 1,
+    isEmulator: jest.fn(() => Promise.resolve(false)),
+    isEmulatorSync: jest.fn(() => false),
   };
 });
 
@@ -47,13 +53,30 @@ jest.mock("./source/logic/cache", () => {
 });
 
 jest.mock("@react-native-firebase/messaging", () => {
+  const mockMessagingInstance = {
+    subscribeToTopic: jest.fn(() => Promise.resolve()),
+    unsubscribeFromTopic: jest.fn(() => Promise.resolve()),
+    getToken: jest.fn(() => Promise.resolve("mock-token")),
+    getAPNSToken: jest.fn(() => Promise.resolve("mock-apns-token")),
+    setBackgroundMessageHandler: jest.fn(),
+    requestPermission: jest.fn(() => Promise.resolve(1)),
+    hasPermission: jest.fn(() => Promise.resolve(1)),
+    registerDeviceForRemoteMessages: jest.fn(() => Promise.resolve()),
+    isDeviceRegisteredForRemoteMessages: true,
+  };
+
+  const mockMessagingFn = jest.fn(() => mockMessagingInstance);
+  mockMessagingFn.AuthorizationStatus = {
+    NOT_DETERMINED: -1,
+    DENIED: 0,
+    AUTHORIZED: 1,
+    PROVISIONAL: 2,
+  };
+
   return {
-    messaging: () => ({
-      subscribeToTopic: () => undefined,
-      unsubscribeFromTopic: () => undefined,
-      getToken: () => undefined,
-      setBackgroundMessageHandler: () => undefined,
-    })
+    __esModule: true,
+    default: mockMessagingFn,
+    messaging: mockMessagingFn,
   };
 });
 
