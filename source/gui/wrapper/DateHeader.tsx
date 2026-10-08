@@ -70,12 +70,12 @@ const styles = StyleSheet.create({
   middle: {
     flex: 1,
     marginHorizontal: 10,
+    paddingVertical: 15,
   },
   currentDateText: {
     fontWeight: "bold",
     fontSize: 16,
     textAlign: "center",
-    paddingVertical: 15,
     textTransform: "capitalize",
     color: lightColors.text,
   },
@@ -97,6 +97,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     textAlign: "center",
     marginRight: 10,
+    overflow: "hidden",
   },
 });
 

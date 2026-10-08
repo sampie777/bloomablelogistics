@@ -29,13 +29,13 @@ const styles = StyleSheet.create({
   },
   header: {},
   logoutButton: {
-  },
-  logoutButtonText: {
     backgroundColor: lightColors.primary,
-    color: lightColors.onPrimary,
     borderRadius: 10,
     paddingHorizontal: 15,
     paddingVertical: 8,
+  },
+  logoutButtonText: {
+    color: lightColors.onPrimary,
   },
 });
 

@@ -89,14 +89,18 @@ const RecipientInfo: React.FC<Props> = ({ order }) => {
       {!order.recipient.specialInstructions ? undefined :
         <View style={styles.row}>
           <FontAwesome5Icon name={"exclamation-triangle"} solid style={styles.icon} />
-          <Text style={styles.specialInstructions} selectable={true}>{order.recipient.specialInstructions}</Text>
+          <View style={styles.specialInstructionsContainer}>
+            <Text style={styles.specialInstructionsText} selectable={true}>{order.recipient.specialInstructions}</Text>
+          </View>
         </View>
       }
 
       {!order.recipient.message ? undefined :
         <View style={styles.row}>
           <FontAwesome5Icon name={"comment"} solid style={styles.icon} />
-          <Text style={styles.message} selectable={true}>{order.recipient.message}</Text>
+          <View style={styles.messageContainer}>
+            <Text style={styles.messageText} selectable={true}>{order.recipient.message}</Text>
+          </View>
         </View>
       }
 
@@ -152,7 +156,7 @@ const styles = StyleSheet.create({
     color: lightColors.text,
   },
 
-  specialInstructions: {
+  specialInstructionsContainer: {
     flex: 1,
     borderWidth: 1,
     borderColor: "#a00",
@@ -162,10 +166,12 @@ const styles = StyleSheet.create({
     backgroundColor: lightColors.surface2,
     marginTop: 10,
     marginBottom: 10,
+  },
+  specialInstructionsText: {
     color: lightColors.text,
   },
 
-  message: {
+  messageContainer: {
     flex: 1,
     borderWidth: 1,
     borderColor: lightColors.borderVariant,
@@ -173,6 +179,8 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 15,
     backgroundColor: lightColors.surface2,
+  },
+  messageText: {
     color: lightColors.text,
   },
 

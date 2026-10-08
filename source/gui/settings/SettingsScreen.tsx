@@ -15,7 +15,11 @@ import { getNextDay } from "../../logic/utils/utils";
 import NumberComponent from "./components/NumberComponent";
 
 const Header: React.FC<{ title: string, isVisible?: boolean }> = ({ title, isVisible = true }) => {
-  return !isVisible ? null : <Text style={styles.settingHeader}>{title}</Text>;
+  return !isVisible ? null : (
+    <View style={styles.settingHeaderContainer}>
+      <Text style={styles.settingHeader}>{title}</Text>
+    </View>
+  );
 };
 
 const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }) => {
@@ -94,10 +98,12 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
 
-  settingHeader: {
+  settingHeaderContainer: {
     marginTop: 15,
     paddingHorizontal: 20,
     paddingVertical: 15,
+  },
+  settingHeader: {
     fontWeight: "bold",
     fontSize: 15,
     textTransform: "uppercase",

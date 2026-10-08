@@ -105,8 +105,8 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
                  returnKeyType={"send"}
                  onSubmitEditing={login} />
 
-      <TouchableOpacity onPress={login}>
-        <Text style={styles.button}>Log in</Text>
+      <TouchableOpacity style={styles.button} onPress={login}>
+        <Text style={styles.buttonText}>Log in</Text>
       </TouchableOpacity>
     </View>
   </View>;
@@ -142,6 +142,8 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     marginHorizontal: 30,
     paddingHorizontal: 20,
+    paddingVertical: 15,
+    fontSize: 16,
     color: lightColors.text,
   },
   placeholder: {
@@ -153,8 +155,13 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     marginHorizontal: 30,
     paddingVertical: 15,
-    textAlign: "center",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonText: {
     color: lightColors.onPrimary,
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
 
