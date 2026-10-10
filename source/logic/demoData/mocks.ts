@@ -1,9 +1,10 @@
 import { delayedPromiseWithValue } from "../utils/utils";
 import { HttpCode } from "../utils/http";
-import { demoResponseOrders } from "./responses/orders";
+import { getDemoResponseOrders } from "./responses/orders";
 import { demoResponseProduct } from "./responses/products";
 import { demoResponseMe } from "./responses/me";
 import { demoResponseRejectReasons } from "./responses/rejectReaons";
+import { BloomableOrder, OrdersResponse } from "../bloomable/serverModels";
 
 class NotImplementedError extends Error {
   name = "NotImplementedError";
@@ -14,112 +15,230 @@ class NotImplementedError extends Error {
 }
 
 export namespace Mocks {
-  const MockHeaders = (values: { [key: string]: string; } = {}): Headers & { values: any } => ({
-    values: values,
-    set(name: string, value: string) {
-      this.values[name] = value;
-    },
-    append(name: string, value: string) {
-      this.set(name, value);
-    },
-    delete(name: string) {
-      delete this.values[name];
-    },
-    get(name: string) {
-      return this.values[name];
-    },
-    has(name: string) {
-      return Object.keys(this.values).includes(name);
-    },
-    forEach(callback: Function, thisArg?: any) {
-      throw new NotImplementedError();
-    },
-  });
+  let demoOrders: BloomableOrder[] = [];
 
-  const defaultResponse = (): Response => {
-    const headers = MockHeaders({ "Set-Cookie": "XSRF-TOKEN=demotoken%3D; expires=Sat, 23 Sep 2023 11:01:07 GMT; Max-Age=7200; path=/; samesite=lax,bloomable_session=demosession%3D; expires=Sat, 23 Sep 2023 11:02:47 GMT; Max-Age=7200; path=/; httponly; samesite=lax" });
-    return {
-      headers: headers,
-      ok: true,
-      status: HttpCode.OK,
-      statusText: "OK",
-      type: "default",
-      url: "",
-      redirected: false,
+  export const resetDemoOrders = () => {
+    demoOrders = JSON.parse(JSON.stringify(getDemoResponseOrders().data));
+  };
 
-      bodyUsed: false,
-      arrayBuffer: (): Promise<ArrayBuffer> => Promise.reject(new NotImplementedError()),
-      blob: (): Promise<Blob> => Promise.reject(new NotImplementedError()),
-      json: (): Promise<any> => Promise.reject(new NotImplementedError()),
-      text: (): Promise<string> => Promise.reject(new NotImplementedError()),
-      formData: (): Promise<FormData> => Promise.reject(new NotImplementedError()),
-      clone: () => {
+  export const getDemoOrders = (): BloomableOrder[] => {
+    if (demoOrders.length === 0) {
+      resetDemoOrders();
+    }
+    return demoOrders;
+  };
+
+  const MockHeaders = (initialValues: { [key: string]: string; } = {}): Headers & { values: any } => {
+    const values: { [key: string]: string } = { ...initialValues };
+    const headers = {
+      values,
+      set(name: string, value: string) {
+        values[name] = value;
+      },
+      append(name: string, value: string) {
+        this.set(name, value);
+      },
+      delete(name: string) {
+        delete values[name];
+      },
+      get(name: string) {
+        const lower = name.toLowerCase();
+        const matchKey = Object.keys(values).find(k => k.toLowerCase() === lower);
+        return matchKey ? values[matchKey] : null;
+      },
+      has(name: string) {
+        const lower = name.toLowerCase();
+        return Object.keys(values).some(k => k.toLowerCase() === lower);
+      },
+      forEach(callbackfn: (value: string, key: string, parent: Headers) => void, thisArg?: any) {
+        Object.keys(values).forEach(key => callbackfn(values[key], key, headers as any));
+      },
+      get [Symbol.toStringTag]() {
+        return "Headers";
+      },
+      entries() {
+        throw new NotImplementedError();
+      },
+      keys() {
+        throw new NotImplementedError();
+      },
+      values_() {
+        throw new NotImplementedError();
+      },
+      [Symbol.iterator]() {
         throw new NotImplementedError();
       },
     };
+    return headers as unknown as Headers & { values: any };
   };
 
-  const getOriginalFetch = () => {
-    try {
-      return fetch;
-    } catch (_) {
-      console.warn("Could not find default fetch() function. Ignore this warning if your are running tests.");
-      return () => Promise.resolve(defaultResponse());
-    }
-  };
+  const defaultResponse = (status: number = 200): Response => ({
+    ok: status >= 200 && status < 300,
+    status: status,
+    statusText: `${status}`,
+    headers: MockHeaders({
+      "X-XSRF-TOKEN": "demotoken=",
+      "set-cookie": "XSRF-TOKEN=demotoken%3D; Path=/\nbloomable_session=demosession%3D; Path=/",
+    }),
+    redirected: false,
+    type: "basic",
+    url: "",
+    clone() {
+      throw new NotImplementedError();
+    },
+    body: null,
+    bodyUsed: false,
+    arrayBuffer() {
+      throw new NotImplementedError();
+    },
+    blob() {
+      throw new NotImplementedError();
+    },
+    formData() {
+      throw new NotImplementedError();
+    },
+    json: () => Promise.resolve({}),
+    text: () => Promise.resolve(""),
+  } as unknown as Response);
 
-  const originalFetch = getOriginalFetch();
-
-  export const tearDownDemoData = () => {
-    // @ts-ignore
-    fetch = originalFetch;
-  };
+  const originalFetch = fetch;
 
   export const setupDemoData = () => {
     console.debug("Using demo data");
+    resetDemoOrders();
+
+    const defaultDelay = process.env.NODE_ENV === "test" ? 5 : 500;
+    const shortDelay = process.env.NODE_ENV === "test" ? 5 : 300;
 
     // @ts-ignore
     fetch = (input: RequestInfo, init?: RequestInit): Promise<Response> => {
-      if (input === "https://dashboard.bloomable.com/api/me") {
-        return delayedPromiseWithValue({ ...defaultResponse(), json: () => Promise.resolve(demoResponseMe) }, 500);
+      const url = typeof input === "string" ? input : (input && (input as Request).url) || "";
 
-      } else if (input === "https://dashboard.bloomable.com/api/orders?page=1&s=created_at&d=desc") {
-        return delayedPromiseWithValue({ ...defaultResponse(), json: () => Promise.resolve(demoResponseOrders) }, 500);
-
-      } else if (typeof (input) === "string" && RegExp("https://dashboard.bloomable.com/api/product-variants/\\d+$", "gi").test(input)) {
-        const id = +Array.from(input.matchAll(RegExp("https://dashboard.bloomable.com/api/product-variants/(\\d+)$", "gi")))[0][1];
+      if (url === "https://dashboard.bloomable.com/api/me") {
         return delayedPromiseWithValue({
           ...defaultResponse(),
-          json: () => Promise.resolve(demoResponseProduct[id]),
-        }, 500);
+          json: () => Promise.resolve(demoResponseMe),
+        }, defaultDelay);
 
-      } else if (typeof (input) === "string" && RegExp("https://dashboard.bloomable.com/api/orders/\\d+$", "gi").test(input)) {
-        const id = Array.from(input.matchAll(RegExp("https://dashboard.bloomable.com/api/orders/(\\d+)$", "gi")))[0][1];
-        const order = demoResponseOrders.data.find(it => it.id === id);
-        return delayedPromiseWithValue({
-          ...defaultResponse(),
-          json: () => Promise.resolve({ data: order }),
-        }, 500);
+      } else if (/^https:\/\/dashboard\.bloomable\.com\/sanctum\/csrf-cookie$/i.test(url)) {
+        return delayedPromiseWithValue(defaultResponse(HttpCode.NoContent), shortDelay);
 
-      } else if (typeof (input) === "string" && RegExp("https://dashboard.bloomable.com/api/orders/\\d+/(accept|reject|fulfill|deliver)$", "gi").test(input)) {
-        console.debug("MOCKED", {
-          url: input,
-          args: init,
-        });
-        return delayedPromiseWithValue(defaultResponse(), 500);
+      } else if (/^https:\/\/dashboard\.bloomable\.com\/api\/login$/i.test(url)) {
+        return delayedPromiseWithValue(defaultResponse(HttpCode.OK), shortDelay);
 
-      } else if (typeof (input) === "string" && RegExp("https://dashboard.bloomable.com/api/order-line-reject-reasons$", "gi").test(input)) {
+      } else if (/^https:\/\/dashboard\.bloomable\.com\/api\/logout$/i.test(url)) {
+        return delayedPromiseWithValue(defaultResponse(HttpCode.NoContent), shortDelay);
+
+      } else if (/^https:\/\/dashboard\.bloomable\.com\/api\/order-line-reject-reasons$/i.test(url)) {
         return delayedPromiseWithValue({
           ...defaultResponse(),
           json: () => Promise.resolve(demoResponseRejectReasons),
-        }, 500);
+        }, defaultDelay);
 
-      } else if (typeof (input) === "string" && !RegExp("https://dashboard.bloomable.com.*$").test(input)) {
+      } else if (/^https:\/\/dashboard\.bloomable\.com\/api\/orders(\?.*)?$/i.test(url)) {
+        const pageMatch = url.match(/[?&]page=(\d+)/);
+        const page = pageMatch ? parseInt(pageMatch[1], 10) : 1;
+        const filterMatch = url.match(/[?&]filter=([^&#]+)/);
+        const filter = filterMatch ? decodeURIComponent(filterMatch[1]) : undefined;
+
+        const currentOrders = getDemoOrders();
+        const filtered = filter && filter !== "all"
+          ? currentOrders.filter(it => it.status === filter)
+          : currentOrders;
+
+        const perPage = 15;
+        const total = filtered.length;
+        const lastPage = Math.max(1, Math.ceil(total / perPage));
+        const startIndex = (page - 1) * perPage;
+        const pageData = filtered.slice(startIndex, startIndex + perPage);
+
+        const ordersResponse: OrdersResponse = {
+          data: pageData,
+          links: {
+            first: "https://dashboard.bloomable.com/api/orders?page=1",
+            last: `https://dashboard.bloomable.com/api/orders?page=${lastPage}`,
+            prev: page > 1 ? `https://dashboard.bloomable.com/api/orders?page=${page - 1}` : null,
+            next: page < lastPage ? `https://dashboard.bloomable.com/api/orders?page=${page + 1}` : null,
+          },
+          meta: {
+            current_page: page,
+            from: total === 0 ? null : startIndex + 1,
+            last_page: lastPage,
+            links: [
+              { url: page > 1 ? `https://dashboard.bloomable.com/api/orders?page=${page - 1}` : null, label: "&laquo; Previous", active: false },
+              { url: `https://dashboard.bloomable.com/api/orders?page=${page}`, label: `${page}`, active: true },
+              { url: page < lastPage ? `https://dashboard.bloomable.com/api/orders?page=${page + 1}` : null, label: "Next &raquo;", active: false },
+            ],
+            path: "https://dashboard.bloomable.com/api/orders",
+            per_page: perPage,
+            to: total === 0 ? null : Math.min(startIndex + perPage, total),
+            total: total,
+          },
+        };
+
+        return delayedPromiseWithValue({
+          ...defaultResponse(),
+          json: () => Promise.resolve(ordersResponse),
+        }, defaultDelay);
+
+      } else if (RegExp("^https://dashboard\\.bloomable\\.com/api/orders/([^/]+)/(accept|reject|fulfill|deliver)$", "i").test(url)) {
+        const match = url.match(/^https:\/\/dashboard\.bloomable\.com\/api\/orders\/([^/]+)\/(accept|reject|fulfill|deliver)$/i);
+        if (match) {
+          const id = match[1];
+          const action = match[2].toLowerCase();
+          const order = getDemoOrders().find(it => it.id === id);
+          if (order) {
+            if (action === "accept") {
+              order.status = "accepted";
+            } else if (action === "reject") {
+              order.status = "cancelled";
+            } else if (action === "fulfill") {
+              order.status = "fulfilled";
+            } else if (action === "deliver") {
+              order.status = "delivered";
+            }
+            order.lines.forEach(line => {
+              line.status = order.status;
+            });
+          }
+        }
+        return delayedPromiseWithValue(defaultResponse(HttpCode.OK), defaultDelay);
+
+      } else if (RegExp("^https://dashboard\\.bloomable\\.com/api/orders/([^/]+)$", "i").test(url)) {
+        const match = url.match(/^https:\/\/dashboard\.bloomable\.com\/api\/orders\/([^/]+)$/i);
+        const id = match ? match[1] : undefined;
+        const order = getDemoOrders().find(it => it.id === id);
+        if (!order) {
+          return delayedPromiseWithValue({
+            ...defaultResponse(404),
+            ok: false,
+            json: () => Promise.reject(new Error(`Order ${id} not found`)),
+          }, defaultDelay);
+        }
+        return delayedPromiseWithValue({
+          ...defaultResponse(),
+          json: () => Promise.resolve({ data: order }),
+        }, defaultDelay);
+
+      } else if (RegExp("^https://dashboard\\.bloomable\\.com/api/product-variants/(\\d+)$", "i").test(url)) {
+        const match = url.match(/^https:\/\/dashboard\.bloomable\.com\/api\/product-variants\/(\\d+)$/i);
+        const id = match ? +match[1] : 222;
+        const product = demoResponseProduct[id] ?? demoResponseProduct[222];
+        return delayedPromiseWithValue({
+          ...defaultResponse(),
+          json: () => Promise.resolve(product),
+        }, defaultDelay);
+
+      } else if (!/^https:\/\/dashboard\.bloomable\.com/i.test(url)) {
         return originalFetch(input, init);
       }
 
-      console.warn("Couldn't find mock for", input, init);
+      console.warn("Couldn't find mock for", url, init);
       return originalFetch(input, init);
     };
+  };
+
+  export const tearDownDemoData = () => {
+    (fetch as any) = originalFetch;
   };
 }

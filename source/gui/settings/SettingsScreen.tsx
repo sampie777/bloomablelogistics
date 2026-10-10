@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import SwitchComponent from "./components/SwitchComponent";
 import PressableComponent from "./components/PressableComponent";
@@ -8,21 +8,28 @@ import { settings } from "../../logic/settings/settings";
 import { Notifications } from "../../logic/notifications";
 import { getBuildNumber, getVersion } from "react-native-device-info";
 import { defaultFontFamilies, lightColors } from "../theme";
-import { useRecoilState } from "recoil";
-import { orderActionInProgressState, selectedDateState } from "../../logic/recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
+import { orderActionInProgressState, ordersState, selectedDateState } from "../../logic/recoil";
 import { Server } from "../../logic/bloomable/server";
-import { getNextDay } from "../../logic/utils/utils";
 import NumberComponent from "./components/NumberComponent";
+import LoadingOverlay from "../utils/LoadingOverlay";
 
 const Header: React.FC<{ title: string, isVisible?: boolean }> = ({ title, isVisible = true }) => {
-  return !isVisible ? null : <Text style={styles.settingHeader}>{title}</Text>;
+  return !isVisible ? null : (
+    <View style={styles.settingHeaderContainer}>
+      <Text style={styles.settingHeader}>{title}</Text>
+    </View>
+  );
 };
 
 const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigation }) => {
   const [orderActionInProgress, setOrderActionInProgress] = useRecoilState(orderActionInProgressState);
   const [selectedDate, setSelectedDate] = useRecoilState(selectedDateState);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const setOrders = useSetRecoilState(ordersState);
 
   return <View style={styles.container}>
+    <LoadingOverlay isVisible={isLoggingOut} text={"Logging out..."} />
     <ScrollView
       contentContainerStyle={styles.scrollContainer}>
 
@@ -44,10 +51,9 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
                        title={"Recipient coordinates from Bloomable"}
                        description={"Use the coordinates from Bloomable for orders. Turn this off to use Google's API for calculating order coordinates."}
                        callback={() => {
-                         // Just quickly refresh the GUI so the new setting is applied to the map.
-                         const currentDate = selectedDate;
-                         setSelectedDate(getNextDay(selectedDate));
-                         setSelectedDate(currentDate);
+                         // Just quickly refresh the GUI so the new setting is applied to the buttons.
+                         setOrderActionInProgress(true);
+                         setOrderActionInProgress(false);
                        }} />
 
       <Header title={"Notifications"} />
@@ -55,10 +61,11 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
                        title={"New order"}
                        description={"Show notifications when new orders have been received"}
                        callback={async () => {
-                         if (settings.notificationsShowForNewOrders) {
+                         if (settings.notificationsShowNewOrders) {
                            Notifications.subscribe();
                          } else {
                            // For good measures, as the unsubscribing doesn't seem to always work.
+                           await Notifications.unsubscribe();
                            await Notifications.unsubscribe();
                            await Notifications.unsubscribe();
                            await Notifications.unsubscribe();
@@ -68,18 +75,23 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
       <Header title={"Account"} />
       <PressableComponent title={"Log out"}
                           description={`Currently logged in as '${Server.getCredentials().username}'`}
-                          onPress={() => {
-                            Server.logout();
-                            navigation.navigate(Routes.Login);
-                            navigation.reset({
-                              index: 0,
-                              routes: [{ name: Routes.Login }],
-                            });
+                          onPress={async () => {
+                            setIsLoggingOut(true);
+                            try {
+                              setOrders([]);
+                              await Server.logout();
+                            } finally {
+                              setIsLoggingOut(false);
+                              navigation.reset({
+                                index: 0,
+                                routes: [{ name: Routes.Login }],
+                              });
+                            }
                           }} />
 
       <View style={styles.versionContainer}>
         <Text style={styles.versionText}>
-          version: {getVersion()} ({getBuildNumber()}) {process.env.NODE_ENV === "production" ? undefined : `(${process.env.NODE_ENV})`}
+          version: {getVersion()} ({getBuildNumber()}) {process.env.NODE_ENV === "production" ? undefined : `(${process.env.NODE_ENV})` }
         </Text>
       </View>
     </ScrollView>
@@ -94,26 +106,28 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
 
-  settingHeader: {
+  settingHeaderContainer: {
     marginTop: 15,
     paddingHorizontal: 20,
     paddingVertical: 15,
+  },
+  settingHeader: {
     fontWeight: "bold",
     fontSize: 15,
     textTransform: "uppercase",
-    color: "#999",
+    fontFamily: defaultFontFamilies.sansSerifThin,
+    letterSpacing: 2,
+    color: lightColors.textLight,
   },
 
   versionContainer: {
-    marginTop: 100,
+    alignItems: "center",
+    marginVertical: 20,
   },
   versionText: {
-    textAlign: "center",
-    color: lightColors.textLighter,
-    fontSize: 12,
-    fontFamily: defaultFontFamilies.sansSerifLight,
+    color: lightColors.textLight,
+    fontFamily: defaultFontFamilies.sansSerifThin,
   },
 });
-
 
 export default SettingsScreen;

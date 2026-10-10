@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { StyleSheet, Switch, Text, View } from "react-native";
 import { settings } from "../../../logic/settings/settings";
 import { lightColors } from "../../theme";
@@ -17,12 +17,14 @@ const SwitchComponent: React.FC<Props> = ({
                                             description,
                                             callback,
                                           }) => {
-  const [value, setValue] = useState<boolean>(settings[settingsKey]);
-  useEffect(() => {
-    settings[settingsKey] = value;
+  const [value, setValue] = useState<boolean>(settings[settingsKey] ?? false);
+
+  const onToggle = (newValue: boolean) => {
+    setValue(newValue);
+    settings[settingsKey] = newValue;
     settings.store();
-    callback?.(value);
-  }, [value]);
+    callback?.(newValue);
+  };
 
   return <View
     style={[componentStyles.container, styles.container, componentStyles.whiteContainer]}>
@@ -30,7 +32,7 @@ const SwitchComponent: React.FC<Props> = ({
       <Text style={componentStyles.titleText}>{title}</Text>
       {description === undefined ? undefined : <Text style={componentStyles.descriptionText}>{description}</Text>}
     </View>
-    <Switch onValueChange={(newValue) => setValue(newValue)}
+    <Switch onValueChange={onToggle}
             thumbColor={styles.switch.color}
             ios_backgroundColor={styles.switch.backgroundColor}
             value={value} />

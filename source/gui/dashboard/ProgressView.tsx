@@ -43,13 +43,13 @@ const styles = StyleSheet.create({
   },
   fractionDividerText: {
     fontSize: 30,
-    paddingBottom: 11,
+    marginBottom: 11,
     paddingLeft: 10,
     fontFamily: defaultFontFamilies.sansSerifThin,
     color: lightColors.text,
   },
   description: {
-    paddingBottom: 15,
+    marginBottom: 15,
     paddingLeft: 8,
     fontFamily: defaultFontFamilies.sansSerifLight,
     color: lightColors.textLighter,

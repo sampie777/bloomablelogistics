@@ -72,3 +72,5 @@ ios/assets
 
 google-services.json
 upload_source_map_secrets.txt
+GoogleService-Info.plist
+*.key.json

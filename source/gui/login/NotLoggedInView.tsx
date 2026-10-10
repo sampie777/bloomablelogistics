@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import LoadingOverlay from "../utils/LoadingOverlay";
 import { defaultFontFamilies, lightColors } from "../theme";
 import { displayName } from "../../../app.json";
@@ -15,6 +16,7 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
   const isMounted = useRef(false);
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   let passwordInput: TextInput | null = null;
@@ -55,10 +57,10 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
         if (!isMounted.current) return;
 
         if (error instanceof BloomableAuth.LoginError) {
-          setErrorMessage(error.message || "Undefined login error occurred. Try again.");
+          setErrorMessage(error.message || "These credentials do not match our records.");
         } else {
           rollbar.error("Error for login credentials respond", { error: error });
-          setErrorMessage(error.toString() || "Undefined error occurred. Try again.");
+          setErrorMessage(error?.message || error.toString() || "An unexpected error occurred. Please try again.");
         }
       })
       .finally(() => {
@@ -91,22 +93,33 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
                  onSubmitEditing={() => passwordInput?.focus()}
                  blurOnSubmit={false} />
 
-      <TextInput placeholder={"Password"}
-                 ref={ref => passwordInput = ref}
-                 style={styles.input}
-                 placeholderTextColor={styles.placeholder.color}
-                 maxLength={255}
-                 value={password}
-                 onChangeText={setPassword}
-                 textContentType={"password"}
-                 autoCapitalize={"none"}
-                 autoComplete={"password"}
-                 secureTextEntry={true}
-                 returnKeyType={"send"}
-                 onSubmitEditing={login} />
+      <View style={styles.passwordContainer}>
+        <TextInput placeholder={"Password"}
+                   ref={ref => passwordInput = ref}
+                   style={styles.passwordInput}
+                   placeholderTextColor={styles.placeholder.color}
+                   maxLength={255}
+                   value={password}
+                   onChangeText={setPassword}
+                   textContentType={"password"}
+                   autoCapitalize={"none"}
+                   autoComplete={"password"}
+                   secureTextEntry={!isPasswordVisible}
+                   returnKeyType={"send"}
+                   onSubmitEditing={login} />
+        <TouchableOpacity style={styles.visibilityButton}
+                          onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                          accessibilityRole="button"
+                          accessibilityLabel={isPasswordVisible ? "Hide password" : "Show password"}>
+          <FontAwesome5Icon name={isPasswordVisible ? "eye-slash" : "eye"}
+                            solid
+                            size={18}
+                            color={lightColors.primary} />
+        </TouchableOpacity>
+      </View>
 
-      <TouchableOpacity onPress={login}>
-        <Text style={styles.button}>Log in</Text>
+      <TouchableOpacity style={styles.button} onPress={login}>
+        <Text style={styles.buttonText}>Log in</Text>
       </TouchableOpacity>
     </View>
   </View>;
@@ -142,7 +155,31 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     marginHorizontal: 30,
     paddingHorizontal: 20,
+    paddingVertical: 15,
+    fontSize: 16,
     color: lightColors.text,
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: lightColors.primary,
+    borderRadius: 15,
+    marginVertical: 10,
+    marginHorizontal: 30,
+    paddingRight: 15,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    fontSize: 16,
+    color: lightColors.text,
+  },
+  visibilityButton: {
+    padding: 8,
+    justifyContent: "center",
+    alignItems: "center",
   },
   placeholder: {
     color: lightColors.textLighter,
@@ -153,8 +190,13 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     marginHorizontal: 30,
     paddingVertical: 15,
-    textAlign: "center",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonText: {
     color: lightColors.onPrimary,
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
 

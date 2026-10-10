@@ -39,6 +39,7 @@ export namespace SettingsUtils {
     try {
       Object.entries(obj).forEach(([key, value]) => {
         if (reservedKeys.includes(key)) return;
+        if (value === undefined) return;
 
         switch (typeof value) {
           case "string":
@@ -118,7 +119,7 @@ export namespace SettingsUtils {
       .then(stringValue => {
         if (stringValue === undefined) return undefined;
 
-        return stringValue.toString() === "true";
+        return stringValue === "true";
       });
   }
 }

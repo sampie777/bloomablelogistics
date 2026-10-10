@@ -49,7 +49,9 @@ export namespace Locations {
 
   export const getLocationForOrder = (order: Order, useSmartAddress = false): Promise<Location | null> => {
     if (settings.useInitialCoordinatesForOrders && order.recipient && order.recipient.coordinates
-      && order.recipient.coordinates.latitude !== 0 && order.recipient.coordinates.longitude !== null) {
+      && order.recipient.coordinates.latitude != null && order.recipient.coordinates.latitude !== 0
+      && order.recipient.coordinates.longitude != null && order.recipient.coordinates.longitude !== 0
+      && !isNaN(order.recipient.coordinates.latitude) && !isNaN(order.recipient.coordinates.longitude)) {
       return emptyPromiseWithValue({
         key: order.id || (Math.random() * 1000).toString(),
         latitude: order.recipient.coordinates.latitude,

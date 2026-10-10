@@ -8,17 +8,41 @@ import { convertToLocalOrders } from "../bloomable/converter";
 import { OrderStatus } from "../bloomable/serverModels";
 
 export namespace Orders {
-  export const list = async (): Promise<Order[]> => {
-    // Parallel fetch orders
-    const pages = await Promise.all(
-      [
-        getOrdersWithStatus("open"),
-        getOrdersWithStatus("accepted"),
-        getOrdersWithStatus("fulfilled"),
-        getOrdersWithStatus("delivered", settings.maxPastOrderPagesToFetch),
-        getOrdersWithStatus("cancel-confirmed", 1),
-      ],
+  export const list = async (
+    onBatch?: (accumulatedOrders: Order[], completedCount: number, totalCount: number, pendingStatuses: OrderStatus[]) => void,
+  ): Promise<Order[]> => {
+    const totalCount = 5;
+    let completedCount = 0;
+    const accumulatedOrdersMap = new Map<string, Order>();
+
+    const statusQueries: { status: OrderStatus; maxPages?: number }[] = [
+      { status: "open" },
+      { status: "accepted" },
+      { status: "fulfilled" },
+      { status: "delivered", maxPages: settings.maxPastOrderPagesToFetch },
+      { status: "cancel-confirmed", maxPages: 1 },
+    ];
+
+    const pendingStatuses = new Set<OrderStatus>(statusQueries.map(q => q.status));
+
+    const wrappedPromises = statusQueries.map(({ status, maxPages }) =>
+      getOrdersWithStatus(status, maxPages).then(batchOrders => {
+        completedCount++;
+        pendingStatuses.delete(status);
+        for (const order of batchOrders) {
+          if (order.id) {
+            accumulatedOrdersMap.set(order.id, order);
+          }
+        }
+        if (onBatch) {
+          const currentList = sort(Array.from(accumulatedOrdersMap.values()));
+          onBatch(currentList, completedCount, totalCount, Array.from(pendingStatuses));
+        }
+        return batchOrders;
+      }),
     );
+
+    const pages = await Promise.all(wrappedPromises);
     return sort(pages.flatMap(it => it));
   };
 
@@ -39,26 +63,27 @@ export namespace Orders {
     }
   };
 
-  export const fetchDetailsForOrders = (orders: Order[]): Promise<Order[]> => {
-    if (orders.length === 0) {
+  export const fetchDetailsForOrders = async (orders: Order[], concurrency = 4): Promise<Order[]> => {
+    if (!Server.isLoggedIn() || orders.length === 0) {
       return emptyPromiseWithValue(orders);
     }
 
-    const nextOrder = orders.find(order => order.products.some(it => !it._detailsLoaded));
-    if (nextOrder === undefined) {
+    const ordersToLoad = orders.filter(order => order.products.some(it => !it._detailsLoaded));
+    if (ordersToLoad.length === 0) {
       return emptyPromiseWithValue(orders);
     }
 
-    return fetchDetailsForOrder(nextOrder)
-      .then((order) => {
-        orders = orders.filter(it => it !== nextOrder);
-        orders.push(order);
-        return fetchDetailsForOrders(orders);
-      });
+    for (let i = 0; i < ordersToLoad.length; i += concurrency) {
+      if (!Server.isLoggedIn()) break;
+      const chunk = ordersToLoad.slice(i, i + concurrency);
+      await Promise.all(chunk.map(order => fetchDetailsForOrder(order)));
+    }
+
+    return orders;
   };
 
   export const fetchDetailsForOrder = (order: Order): Promise<Order> => {
-    if (order.products.every(it => it._detailsLoaded)) {
+    if (!Server.isLoggedIn() || order.products.every(it => it._detailsLoaded)) {
       return emptyPromiseWithValue(order);
     }
 
@@ -73,18 +98,6 @@ export namespace Orders {
 
     return BloomableApi.getOrder({ id: order.id })
       .then(onlineOrder => {
-        if (Server.isDemoUser()) {
-          if (order.status === "open") {
-            onlineOrder.status = "accepted";
-          } else if (order.status === "accepted") {
-            onlineOrder.status = "fulfilled";
-          } else if (order.status === "fulfilled") {
-            onlineOrder.status = "delivered";
-          } else {
-            onlineOrder.status = "cancelled";
-          }
-        }
-
         onlineOrder.products = order.products;
         return onlineOrder;
       });
@@ -145,5 +158,6 @@ export namespace Orders {
     return Server.deliverOrder(order.id);
   };
 
-  export const recipientName = (order: Order) => order.recipient.name.length > 0 ? order.recipient.name : order.recipient.company;
+  export const recipientName = (order: Order): string =>
+    order.recipient.name.length > 0 ? order.recipient.name : (order.recipient.company || "");
 }

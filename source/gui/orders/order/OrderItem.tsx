@@ -21,7 +21,7 @@ const OrderItem: React.FC<Props> = ({ order }) => {
     (["rejected", "cancelled", "cancel-confirmed"].includes(order.status) ? styles.deleted : {}),
   ]}>
     <View style={styles.row}>
-      <UrlLink url={`https://dashboard.bloomable.com/order/${order.id}`}>
+      <UrlLink url={`https://dashboard.bloomable.com/orders/${order.id}`}>
         <Text style={styles.number} selectable={true}>{order.number}</Text>
       </UrlLink>
 
@@ -68,15 +68,13 @@ const styles = StyleSheet.create({
   },
   deliverAtDateDate: {
     fontWeight: "bold",
-    fontSize: 16,
+    marginLeft: 5,
     color: lightColors.text,
   },
   icon: {
-    marginRight: 10,
-    minWidth: 16,
+    marginRight: 5,
     color: lightColors.text,
   },
 });
 
 export default OrderItem;
-

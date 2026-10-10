@@ -30,19 +30,23 @@ const ProductComponent: React.FC<Props> = ({ product }) => {
         </>
       }
 
-      {product.retailPrice === undefined ? undefined :
+      {product.retailPrice == null ? undefined :
         <Text style={styles.retailPrice}>R {product.retailPrice.toFixed(2)}</Text>}
     </View>
 
     <ShowWhenLoaded product={product}>
       {!product.guidelines ? undefined : <View style={styles.row}>
         <FontAwesome5Icon name={"comment-alt"} style={styles.icon} />
-        <Text style={styles.guidelines}>{product.guidelines}</Text>
+        <View style={styles.guidelinesContainer}>
+          <Text style={styles.guidelinesText}>{product.guidelines}</Text>
+        </View>
       </View>}
 
       {description.length === 0 ? undefined : <View style={styles.row}>
         <FontAwesome5Icon name={"comment"} style={styles.icon} />
-        <Text style={styles.description}>{description}</Text>
+        <View style={styles.descriptionContainer}>
+          <Text style={styles.descriptionText}>{description}</Text>
+        </View>
       </View>}
 
       {product.extras?.map((it, index) =>
@@ -84,19 +88,25 @@ const styles = StyleSheet.create({
   retailPrice: {
     color: lightColors.text,
   },
-  guidelines: {
+  guidelinesContainer: {
+    flex: 1,
     borderLeftWidth: 1,
     borderLeftColor: lightColors.border,
     marginVertical: 8,
     paddingHorizontal: 10,
+  },
+  guidelinesText: {
     fontStyle: "italic",
     color: lightColors.text,
   },
-  description: {
+  descriptionContainer: {
+    flex: 1,
     borderLeftWidth: 1,
     borderLeftColor: lightColors.border,
     marginVertical: 8,
     paddingHorizontal: 10,
+  },
+  descriptionText: {
     fontStyle: "italic",
     color: lightColors.text,
   },

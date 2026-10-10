@@ -34,8 +34,8 @@ describe("Test Orders.list", () => {
     },
   };
 
-  const emptyOrder = (): BloomableOrder => ({
-    id: "string",
+  const emptyOrder = (id = "string"): BloomableOrder => ({
+    id: id,
     name: "string",
     firstName: "string",
     lastName: "string",
@@ -71,37 +71,37 @@ describe("Test Orders.list", () => {
         case "open":
           return Promise.resolve({
             ...emptyPageResponse,
-            data: [{ ...emptyOrder(), status: "open" }],
+            data: [{ ...emptyOrder("o1"), status: "open" }],
             meta: { ...emptyPageResponse.meta, last_page: 2 },
           });
         case "accepted":
           return Promise.resolve({
             ...emptyPageResponse,
-            data: [{ ...emptyOrder(), status: "accepted" }, { ...emptyOrder(), status: "accepted" }],
+            data: [{ ...emptyOrder("a1"), status: "accepted" }, { ...emptyOrder("a2"), status: "accepted" }],
             meta: { ...emptyPageResponse.meta, last_page: 1 },
           });
         case "fulfilled":
           return Promise.resolve({
             ...emptyPageResponse,
-            data: [{ ...emptyOrder(), status: "fulfilled" }],
+            data: [{ ...emptyOrder("f1"), status: "fulfilled" }],
             meta: { ...emptyPageResponse.meta, last_page: 2 },
           });
         case "delivered":
           return Promise.resolve({
             ...emptyPageResponse,
-            data: [{ ...emptyOrder(), status: "delivered" }],
+            data: [{ ...emptyOrder("d1"), status: "delivered" }],
             meta: { ...emptyPageResponse.meta, last_page: 3 },
           });
         case "cancelled":
           return Promise.resolve({
             ...emptyPageResponse,
-            data: [{ ...emptyOrder(), status: "cancelled" }],
+            data: [{ ...emptyOrder("c1"), status: "cancelled" }],
             meta: { ...emptyPageResponse.meta, last_page: 2 },
           });
         case "cancel-confirmed":
           return Promise.resolve({
             ...emptyPageResponse,
-            data: [{ ...emptyOrder(), status: "cancel-confirmed" }],
+            data: [{ ...emptyOrder("cc1"), status: "cancel-confirmed" }],
             meta: { ...emptyPageResponse.meta, last_page: 2 },
           });
         default:
@@ -120,5 +120,29 @@ describe("Test Orders.list", () => {
     expect(result[6].status).toBe("delivered");
     expect(result[7].status).toBe("delivered");
     expect(result[8].status).toBe("cancel-confirmed");
+  });
+
+  it("calls onBatch callback progressively as each status query completes", async () => {
+    settings.maxPastOrderPagesToFetch = 1;
+
+    (BloomableApi.getOrders as Mock).mockImplementation((page = 1, withStatus: OrderStatus | "all" = "all"): Promise<OrdersResponse> => {
+      return Promise.resolve({
+        ...emptyPageResponse,
+        data: [{ ...emptyOrder(`order-${withStatus}`), status: withStatus === "all" ? "open" : withStatus }],
+        meta: { ...emptyPageResponse.meta, last_page: 1 },
+      });
+    });
+
+    const batchCalls: { count: number; completed: number; total: number; pendingCount: number }[] = [];
+    const result = await Orders.list((orders, completed, total, pendingStatuses) => {
+      batchCalls.push({ count: orders.length, completed, total, pendingCount: pendingStatuses.length });
+    });
+
+    expect(batchCalls.length).toBe(5);
+    expect(batchCalls[0].total).toBe(5);
+    expect(batchCalls[0].pendingCount).toBe(4);
+    expect(batchCalls[batchCalls.length - 1].completed).toBe(5);
+    expect(batchCalls[batchCalls.length - 1].pendingCount).toBe(0);
+    expect(batchCalls[batchCalls.length - 1].count).toBe(result.length);
   });
 });

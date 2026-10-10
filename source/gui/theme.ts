@@ -62,7 +62,7 @@ export interface ThemeFontFamilies {
 }
 
 export const defaultFontFamilies: ThemeFontFamilies = {
-  // sansSerif: "sans-serif",
-  sansSerifLight: "sans-serif-light",
-  sansSerifThin: "sans-serif-thin",
+  // sansSerif: isIOS ? "HelveticaNeue" : "sans-serif",
+  sansSerifLight: isIOS ? "HelveticaNeue-Light" : "sans-serif-light",
+  sansSerifThin: isIOS ? "HelveticaNeue-Thin" : "sans-serif-thin",
 };

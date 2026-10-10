@@ -32,7 +32,7 @@ const DateHeader: React.FC<Props> = () => {
     <TouchableOpacity style={styles.side} onPress={previousDay}>
       <FontAwesome5Icon name={"chevron-left"} style={styles.arrow} />
       {!upcomingOrders || upcomingOrders.length === 0 ? undefined :
-        <View style={{ width: styles.badge.minWidth + styles.badge.marginRight }} />
+        <View style={styles.badgeSpacer} />
       }
     </TouchableOpacity>
 
@@ -44,7 +44,9 @@ const DateHeader: React.FC<Props> = () => {
 
     <TouchableOpacity style={styles.side} onPress={nextDay}>
       {!upcomingOrders || upcomingOrders.length === 0 ? undefined :
-        <Text style={styles.badge}>{upcomingOrders.length}</Text>
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>{upcomingOrders.length}</Text>
+        </View>
       }
 
       <FontAwesome5Icon name={"chevron-right"} style={styles.arrow} />
@@ -70,12 +72,12 @@ const styles = StyleSheet.create({
   middle: {
     flex: 1,
     marginHorizontal: 10,
+    paddingVertical: 15,
   },
   currentDateText: {
     fontWeight: "bold",
     fontSize: 16,
     textAlign: "center",
-    paddingVertical: 15,
     textTransform: "capitalize",
     color: lightColors.text,
   },
@@ -88,15 +90,23 @@ const styles = StyleSheet.create({
   },
 
   badge: {
-    fontSize: 12,
     height: 18,
     minWidth: 18,
+    paddingHorizontal: 5,
     backgroundColor: lightColors.background,
-    lineHeight: 17,
-    color: lightColors.text,
-    borderRadius: 20,
-    textAlign: "center",
+    borderRadius: 9,
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 10,
+  },
+  badgeText: {
+    fontSize: 12,
+    color: lightColors.text,
+    textAlign: "center",
+    includeFontPadding: false,
+  },
+  badgeSpacer: {
+    width: 28,
   },
 });
 
