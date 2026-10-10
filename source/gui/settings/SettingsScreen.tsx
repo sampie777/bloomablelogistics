@@ -61,10 +61,11 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
                        title={"New order"}
                        description={"Show notifications when new orders have been received"}
                        callback={async () => {
-                         if (settings.notificationsShowForNewOrders) {
+                         if (settings.notificationsShowNewOrders) {
                            Notifications.subscribe();
                          } else {
                            // For good measures, as the unsubscribing doesn't seem to always work.
+                           await Notifications.unsubscribe();
                            await Notifications.unsubscribe();
                            await Notifications.unsubscribe();
                            await Notifications.unsubscribe();
@@ -77,8 +78,8 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
                           onPress={async () => {
                             setIsLoggingOut(true);
                             try {
-                              await Server.logout();
                               setOrders([]);
+                              await Server.logout();
                             } finally {
                               setIsLoggingOut(false);
                               navigation.reset({
@@ -90,7 +91,7 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
 
       <View style={styles.versionContainer}>
         <Text style={styles.versionText}>
-          version: {getVersion()} ({getBuildNumber()}) {process.env.NODE_ENV === "production" ? undefined : `(${process.env.NODE_ENV})`}
+          version: {getVersion()} ({getBuildNumber()}) {process.env.NODE_ENV === "production" ? undefined : `(${process.env.NODE_ENV})` }
         </Text>
       </View>
     </ScrollView>
@@ -114,17 +115,18 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 15,
     textTransform: "uppercase",
-    color: "#999",
+    fontFamily: defaultFontFamilies.sansSerifThin,
+    letterSpacing: 2,
+    color: lightColors.textLight,
   },
 
   versionContainer: {
-    marginTop: 40,
-    marginBottom: 20,
+    alignItems: "center",
+    marginVertical: 20,
   },
   versionText: {
-    textAlign: "center",
+    color: lightColors.textLight,
     fontFamily: defaultFontFamilies.sansSerifThin,
-    color: lightColors.textLighter,
   },
 });
 

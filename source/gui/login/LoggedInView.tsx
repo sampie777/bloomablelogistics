@@ -17,8 +17,8 @@ const LoggedInView: React.FC<Props> = ({ onLoggedOut }) => {
   const logout = async () => {
     setIsProcessing(true);
     try {
-      await Server.logout();
       setOrders([]);
+      await Server.logout();
     } finally {
       setIsProcessing(false);
       onLoggedOut?.();
@@ -39,15 +39,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  header: {},
   logoutButton: {
+    padding: 10,
     backgroundColor: lightColors.primary,
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    paddingVertical: 8,
+    borderRadius: 5,
   },
   logoutButtonText: {
-    color: lightColors.onPrimary,
+    color: lightColors.textLight,
   },
 });
 

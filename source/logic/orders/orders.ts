@@ -40,7 +40,7 @@ export namespace Orders {
   };
 
   export const fetchDetailsForOrders = (orders: Order[]): Promise<Order[]> => {
-    if (orders.length === 0) {
+    if (!Server.isLoggedIn() || orders.length === 0) {
       return emptyPromiseWithValue(orders);
     }
 
@@ -51,6 +51,9 @@ export namespace Orders {
 
     return fetchDetailsForOrder(nextOrder)
       .then((order) => {
+        if (!Server.isLoggedIn()) {
+          return orders;
+        }
         orders = orders.filter(it => it !== nextOrder);
         orders.push(order);
         return fetchDetailsForOrders(orders);
@@ -58,7 +61,7 @@ export namespace Orders {
   };
 
   export const fetchDetailsForOrder = (order: Order): Promise<Order> => {
-    if (order.products.every(it => it._detailsLoaded)) {
+    if (!Server.isLoggedIn() || order.products.every(it => it._detailsLoaded)) {
       return emptyPromiseWithValue(order);
     }
 

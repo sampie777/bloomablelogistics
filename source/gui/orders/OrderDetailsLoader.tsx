@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Orders } from "../../logic/orders/orders";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { ordersState, selectedDateOrdersState } from "../../logic/recoil";
+import { Server } from "../../logic/bloomable/server";
 
 interface Props {
 
@@ -16,12 +17,15 @@ const OrderDetailsLoader: React.FC<Props> = () => {
   }, [selectedOrders]);
 
   const loadDetails = () => {
-    if (!selectedOrders.some(order => order.products.some(it => !it._detailsLoaded))) {
+    if (!Server.isLoggedIn() || !selectedOrders.some(order => order.products.some(it => !it._detailsLoaded))) {
       return;
     }
 
     Orders.fetchDetailsForOrders(selectedOrders)
       .then((updatedOrders) => {
+        if (!Server.isLoggedIn()) {
+          return;
+        }
         setAllOrders(prevOrders => prevOrders.map(it => {
           const updatedOrder = updatedOrders.find(order => order.id === it.id);
           if (updatedOrder !== undefined) {

@@ -6,6 +6,7 @@ import { BloomableAuth } from "./auth";
 import LoginError = BloomableAuth.LoginError;
 import { Validation } from "../utils/validation";
 import { Mocks } from "../demoData/mocks";
+import { clearSession } from "./session";
 
 export namespace Server {
   const emptyCredentials = { username: "", password: "" };
@@ -59,13 +60,28 @@ export namespace Server {
 
   export const logout = async (): Promise<unknown> => {
     const currentUser = _credentials.username;
+    const isDemo = currentUser === "demo";
+
     setCredentials(emptyCredentials);
     getUniqueId().then(deviceId => rollbar.setPerson(deviceId)).catch(() => {});
 
     const promises: Promise<any>[] = [
       clearCredentials(),
-      BloomableAuth.logout().finally(Mocks.tearDownDemoData),
     ];
+
+    if (isDemo || !currentUser) {
+      clearSession();
+      Mocks.tearDownDemoData();
+    } else {
+      promises.push(
+        BloomableAuth.logout()
+          .finally(() => {
+            clearSession();
+            Mocks.tearDownDemoData();
+          })
+      );
+    }
+
     if (currentUser) {
       promises.push(Notifications.unsubscribe(currentUser).catch(() => {}));
     }
@@ -85,71 +101,68 @@ export namespace Server {
           ...sanitizeErrorForRollbar(error),
           key: "username",
         });
-        throw error;
+        return null;
       })
-      .then(username => EncryptedStorage.getItem("password")
-        .catch(error => {
-          rollbar.critical("Error getting EncryptedStorage item", {
-            ...sanitizeErrorForRollbar(error),
-            key: "password",
+      .then(username => {
+        return EncryptedStorage.getItem("password")
+          .catch(error => {
+            rollbar.critical("Error getting EncryptedStorage item", {
+              ...sanitizeErrorForRollbar(error),
+              key: "password",
+            });
+            return null;
+          })
+          .then(password => {
+            return {
+              username: username ?? "",
+              password: password ?? "",
+            };
           });
-          throw error;
-        })
-        .then(password => {
-          credentialsRecalled = true;
-
-          if (username == null) throw Error("Username not found in EncryptedStorage");
-          if (password == null) throw Error("Password not found in EncryptedStorage");
-
-          const credentials = {
-            username: username,
-            password: password,
-          };
-          setCredentials(credentials);
-          if (credentials.username === "demo") {
-            Mocks.setupDemoData();
-            rollbar.setPerson("demo", "demo", "demo@bloomable.com");
-          } else {
-            Mocks.tearDownDemoData();
-            getUniqueId().then(deviceId => rollbar.setPerson(deviceId, credentials.username)).catch(() => {});
-          }
-          return credentials;
-        }),
-      );
+      })
+      .then(credentials => {
+        credentialsRecalled = true;
+        setCredentials(credentials);
+        return credentials;
+      });
   };
 
-  const clearCredentials = async () => {
-    setCredentials(emptyCredentials);
-    await Promise.all([
-      storageUpdateOrRemove("username", undefined),
-      storageUpdateOrRemove("password", undefined),
-    ]);
-  };
-
-  const storeCredentials = (credentials: BloomableAuth.Credentials) => {
+  export const storeCredentials = (credentials: BloomableAuth.Credentials) => {
     setCredentials(credentials);
-    storageUpdateOrRemove("username", credentials.username);
-    storageUpdateOrRemove("password", credentials.password);
+    return EncryptedStorage.setItem("username", credentials.username)
+      .catch(error => {
+        rollbar.critical("Error setting EncryptedStorage item", {
+          ...sanitizeErrorForRollbar(error),
+          key: "username",
+        });
+      })
+      .then(() => EncryptedStorage.setItem("password", credentials.password))
+      .catch(error => {
+        rollbar.critical("Error setting EncryptedStorage item", {
+          ...sanitizeErrorForRollbar(error),
+          key: "password",
+        });
+      });
   };
 
-  const storageUpdateOrRemove = (key: string, value: string | undefined): Promise<void> => {
-    if (value !== undefined) {
-      return EncryptedStorage.setItem(key, value)
-        .catch(error => {
-          rollbar.critical("Error setting EncryptedStorage item", {
-            ...sanitizeErrorForRollbar(error),
-            key: key,
-          });
+  const removeStorageItemSafely = (key: string): Promise<void> => {
+    return EncryptedStorage.removeItem(key)
+      .catch((error: any) => {
+        // -25300 is errSecItemNotFound on iOS keychain: the item did not exist in storage to remove
+        const errorCode = error?.code || error?.userInfo?.code;
+        if (errorCode === "-25300" || errorCode === -25300) {
+          return;
+        }
+        rollbar.critical("Error removing EncryptedStorage item", {
+          ...sanitizeErrorForRollbar(error),
+          key: key,
         });
-    } else {
-      return EncryptedStorage.removeItem(key)
-        .catch(error => {
-          rollbar.error("Error clearing EncryptedStorage item", {
-            ...sanitizeErrorForRollbar(error),
-            key: key,
-          });
-        });
-    }
+      });
+  };
+
+  export const clearCredentials = () => {
+    setCredentials(emptyCredentials);
+    return removeStorageItemSafely("username")
+      .then(() => removeStorageItemSafely("password"));
   };
 
   export const acceptOrder = (id: string) => {

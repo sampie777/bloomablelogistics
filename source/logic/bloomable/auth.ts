@@ -1,4 +1,13 @@
-import { getNewSession, getSession, Session, sessionToHeader, storeSession, verifySession } from "./session";
+import {
+  clearNativeCookies,
+  clearSession,
+  getNewSession,
+  getSession,
+  Session,
+  sessionToHeader,
+  storeSession,
+  verifySession,
+} from "./session";
 import { HttpCode, obtainResponseContent } from "../utils/http";
 import { rollbar, sanitizeErrorForRollbar } from "../rollbar";
 import { delayedPromiseWithValue } from "../utils/utils";
@@ -44,8 +53,11 @@ export namespace BloomableAuth {
     password: string;
   }
 
-  export const getXSRFCookies = (): Promise<Session> =>
-    fetch("https://dashboard.bloomable.com/sanctum/csrf-cookie")
+  export const getXSRFCookies = (): Promise<Session> => {
+    clearNativeCookies();
+    return fetch("https://dashboard.bloomable.com/sanctum/csrf-cookie", {
+      credentials: "omit",
+    })
       .then(response => {
         if (response.status !== HttpCode.NoContent) {
           obtainResponseContent(response)
@@ -67,6 +79,7 @@ export namespace BloomableAuth {
         rollbar.error("Could not get XSRF tokens", sanitizeErrorForRollbar(error));
         throw error;
       });
+  };
 
   export const logout = (): Promise<unknown> =>
     getXSRFCookies()
@@ -76,10 +89,14 @@ export namespace BloomableAuth {
           ...sessionToHeader(getSession()),
         },
         method: "POST",
+        credentials: "omit",
       }))
       .then(response => {
         try {
-          storeSession(getNewSession(response));
+          const newSession = getNewSession(response);
+          if (newSession.xsrfToken && newSession.sessionToken) {
+            storeSession(newSession);
+          }
         } catch {
           // ignore
         }
@@ -99,12 +116,13 @@ export namespace BloomableAuth {
         rollbar.error("Failed to log out", sanitizeErrorForRollbar(error));
       });
 
-  export const login = (credentials: Credentials): Promise<Session> => {
+  export const login = (credentials: Credentials, retries: number = 2): Promise<Session> => {
     if (credentials.username === "demo" && credentials.password === "demo") {
       rollbar.info("Demo account logged in");
       return delayedPromiseWithValue({}, 1000);
     }
 
+    clearSession();
     return getXSRFCookies()
       .then(() => fetch("https://dashboard.bloomable.com/api/login", {
         headers: {
@@ -114,15 +132,26 @@ export namespace BloomableAuth {
         },
         body: `{"email":"${credentials.username}","password":"${credentials.password}"}`,
         method: "POST",
+        credentials: "omit",
       }))
       .then(response => {
         const originalSession = getSession();
-        const session = getNewSession(response);
-        storeSession(session);
 
         if (response.status === HttpCode.OK) {
+          const session = getNewSession(response);
           verifySession(session);
+          storeSession(session);
           return session;
+        }
+
+        // Try extracting session tokens if provided in response headers
+        try {
+          const newSession = getNewSession(response);
+          if (newSession.xsrfToken || newSession.sessionToken) {
+            storeSession(newSession);
+          }
+        } catch {
+          // Set-Cookie is not mandatory on error responses
         }
 
         return obtainResponseContent(response)
@@ -137,10 +166,13 @@ export namespace BloomableAuth {
             } else if (response.status === HttpCode.TooManyRequests) {
               throw new LoginError(parseLoginErrorMessage(content, "Too many login attempts. Please try again later."), content);
             } else if (response.status === HttpCode.PageExpired) {
+              if (retries > 0) {
+                return login(credentials, retries - 1);
+              }
               throw new LoginError("Session expired. Please try again.", content);
             } else if (response.status === HttpCode.NotAcceptable && stringifiedContent.includes("Already authenticated")) {
               storeSession(originalSession);
-              return session;
+              return originalSession;
             }
             throw new Error(`Login failed (status=${response.status}). Payload: ${stringifiedContent}`);
           });
@@ -162,6 +194,7 @@ export namespace BloomableAuth {
         ...init.headers,
         ...sessionToHeader(getSession()),
       };
+      init.credentials = "omit";
       return fetch(url, init);
     };
 
@@ -170,6 +203,9 @@ export namespace BloomableAuth {
       try {
         const response = await call();
         if (response.status === HttpCode.Unauthorized) {
+          if (!credentials?.username || !credentials?.password) {
+            return response;
+          }
           try {
             await login(credentials);
           } catch (error) {
@@ -209,8 +245,7 @@ export namespace BloomableAuth {
           maxRetries: maxRetries,
           url: url,
         });
-
-        if (retry === maxRetries - 1) throw error;
+        throw error;
       }
     }
 
@@ -218,6 +253,6 @@ export namespace BloomableAuth {
       maxRetries: maxRetries,
       url: url,
     });
-    throw Error("Failed to perform request. Please try again.");
+    throw new Error("Failed to perform request. Please try again.");
   };
 }
