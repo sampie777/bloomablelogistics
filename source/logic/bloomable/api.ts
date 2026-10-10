@@ -4,6 +4,7 @@ import { convertToLocalOrder, convertToLocalProduct } from "./converter";
 import { BloomableAuth } from "./auth";
 import { rollbar, sanitizeErrorForRollbar } from "../rollbar";
 import { Server } from "./server";
+import { ProductCache } from "./productCache";
 
 export namespace BloomableApi {
   const jsonHeaders = {
@@ -72,11 +73,20 @@ export namespace BloomableApi {
       .catch(() => false);
 
   export const getProduct = (product: { id: number },
-                             credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<Product> =>
-    BloomableAuth.authenticatedFetch(credentials,
+                             credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<Product> => {
+    const cached = ProductCache.get(product.id);
+    if (cached) {
+      return Promise.resolve(cached);
+    }
+
+    return BloomableAuth.authenticatedFetch(credentials,
       `https://dashboard.bloomable.com/api/product-variants/${product.id}`, { headers: jsonHeaders })
       .then(response => response.json() as Promise<ProductResponse>)
-      .then(json => convertToLocalProduct(json.data))
+      .then(json => {
+        const localProduct = convertToLocalProduct(json.data);
+        ProductCache.set(product.id, localProduct);
+        return localProduct;
+      })
       .catch(error => {
         rollbar.error("Could not get product", {
           ...sanitizeErrorForRollbar(error),
@@ -84,6 +94,7 @@ export namespace BloomableApi {
         });
         throw error;
       });
+  };
 
   const callApiWithAction = (credentials: BloomableAuth.Credentials,
                              order: { id: string },

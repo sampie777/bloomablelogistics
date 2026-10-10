@@ -25,6 +25,23 @@ export const orderActionInProgressState = atom<boolean>({
   default: false,
 });
 
+export interface OrdersLoadingProgress {
+  isLoading: boolean;
+  completed: number;
+  total: number;
+  pendingStatuses: string[];
+}
+
+export const ordersLoadingProgressState = atom<OrdersLoadingProgress>({
+  key: "ordersLoadingProgress",
+  default: {
+    isLoading: false,
+    completed: 0,
+    total: 5,
+    pendingStatuses: [],
+  },
+});
+
 export const selectedDateOrdersState = selector<Order[]>({
   key: "selectedDateOrders",
   get: ({ get }) => {

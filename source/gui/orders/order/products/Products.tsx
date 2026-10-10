@@ -13,7 +13,7 @@ const Products: React.FC<Props> = ({ products }) => {
   }
 
   return <View style={styles.container}>
-    {products.map((it, i) => <ProductComponent key={(it.image || i.toString()) + (it.retailPrice || "")}
+    {products.map((it, i) => <ProductComponent key={it.id ?? i}
                                                product={it} />)}
   </View>;
 };

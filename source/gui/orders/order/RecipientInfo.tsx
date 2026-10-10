@@ -8,6 +8,8 @@ import Products from "./products/Products";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { isAndroid } from "../../../logic/utils/utils";
 import { Orders } from "../../../logic/orders/orders";
+import { useSetRecoilState } from "recoil";
+import { ordersState } from "../../../logic/recoil";
 
 interface Props {
   order: Order;
@@ -15,6 +17,25 @@ interface Props {
 
 const RecipientInfo: React.FC<Props> = ({ order }) => {
   const [collapsed, setCollapsed] = useState(true);
+  const setAllOrders = useSetRecoilState(ordersState);
+
+  const toggleCollapsed = () => {
+    const willExpand = collapsed;
+    setCollapsed(!collapsed);
+
+    if (willExpand && order.products.some(p => !p._detailsLoaded)) {
+      Orders.fetchDetailsForOrder(order)
+        .then(updatedOrder => {
+          setAllOrders(prevOrders => prevOrders.map(it => {
+            if (it.id === updatedOrder.id) {
+              return { ...updatedOrder, products: [...updatedOrder.products] };
+            }
+            return it;
+          }));
+        })
+        .catch(() => {});
+    }
+  };
 
   const copyAddress = () => {
     if (!order.recipient.address) {
@@ -28,7 +49,7 @@ const RecipientInfo: React.FC<Props> = ({ order }) => {
   };
 
   return <View style={styles.container}>
-    <TouchableOpacity onPress={() => setCollapsed(!collapsed)}>
+    <TouchableOpacity onPress={toggleCollapsed}>
       <View style={styles.row}>
         <FontAwesome5Icon name={"user"} solid style={styles.icon} />
         <Text style={styles.name} selectable={true}>{Orders.recipientName(order)}</Text>
@@ -118,10 +139,11 @@ const styles = StyleSheet.create({
   collapsedContainer: {
     paddingBottom: 15,
   },
+
   row: {
     flexDirection: "row",
     alignItems: "center",
-    paddingBottom: 3,
+    paddingVertical: 3,
   },
   icon: {
     marginRight: 10,
@@ -129,63 +151,54 @@ const styles = StyleSheet.create({
     color: lightColors.text,
   },
   iconCollapse: {
+    marginLeft: 10,
     color: lightColors.text,
   },
 
   name: {
-    flex: 1,
-    paddingVertical: 8,
     fontWeight: "bold",
+    flex: 1,
     color: lightColors.text,
   },
+
   phone: {
-    color: lightColors.url,
+    color: lightColors.primary,
   },
 
   address: {
     flex: 1,
   },
   addressLabel: {
-    fontStyle: "italic",
-    marginRight: 10,
-    minWidth: 65,
-    color: lightColors.text,
+    color: lightColors.textLighter,
+    paddingRight: 5,
   },
   addressValue: {
-    flex: 1,
     color: lightColors.text,
+  },
+  url: {
+    color: lightColors.primary,
   },
 
   specialInstructionsContainer: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: "#a00",
-    borderRadius: 10,
-    paddingVertical: 15,
-    paddingHorizontal: 15,
-    backgroundColor: lightColors.surface2,
-    marginTop: 10,
-    marginBottom: 10,
+    backgroundColor: "#fff0da",
+    borderRadius: 5,
+    padding: 10,
+    marginVertical: 5,
   },
   specialInstructionsText: {
-    color: lightColors.text,
+    color: "#834400",
   },
 
   messageContainer: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: lightColors.borderVariant,
-    borderRadius: 10,
-    paddingVertical: 15,
-    paddingHorizontal: 15,
-    backgroundColor: lightColors.surface2,
+    backgroundColor: "#ecf4fa",
+    borderRadius: 5,
+    padding: 10,
+    marginVertical: 5,
   },
   messageText: {
-    color: lightColors.text,
-  },
-
-  url: {
-    color: lightColors.url,
+    color: "#083355",
   },
 });
 

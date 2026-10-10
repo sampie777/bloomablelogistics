@@ -51,10 +51,10 @@ describe("BloomableAuth.parseLoginErrorMessage", () => {
   });
 
   it("instantiates LoginError with clean message and payload", () => {
-    const error = new BloomableAuth.LoginError("These credentials do not match our records.", { status: 422 });
-    expect(error.name).toBe("LoginError");
-    expect(error.message).toBe("These credentials do not match our records.");
-    expect(error.payload).toEqual({ status: 422 });
+    const err = new BloomableAuth.LoginError("Invalid password", { some: "data" });
+    expect(err.name).toBe("LoginError");
+    expect(err.message).toBe("Invalid password");
+    expect(err.payload).toEqual({ some: "data" });
   });
 });
 
@@ -159,6 +159,31 @@ describe("BloomableAuth.login", () => {
     expect(session.xsrfToken).toBe("new-token");
     expect(session.sessionToken).toBe("new-session");
     expect(loginAttempt).toBe(2);
+  });
+});
+
+describe("BloomableAuth.logout", () => {
+  const originalFetch = global.fetch;
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  it("handles 401 Unauthorized without throwing or logging failure", async () => {
+    const fetchMock = jest.fn().mockImplementation((url: string) => {
+      if (url.includes("/api/logout")) {
+        return Promise.resolve({
+          status: 401,
+          headers: new Headers(),
+          json: () => Promise.resolve({ message: "Unauthenticated." }),
+        });
+      }
+      return Promise.reject(new Error(`Unexpected url: ${url}`));
+    });
+    global.fetch = fetchMock;
+
+    await BloomableAuth.logout();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
 

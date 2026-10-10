@@ -1,11 +1,13 @@
 import React from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
-const LoadingOverlay: React.FC<{
+interface Props {
   isVisible: boolean;
   text?: string | null;
   opacity?: number;
-}> = ({ isVisible, text, opacity }) => {
+}
+
+const LoadingOverlay: React.FC<Props> = ({ isVisible, text, opacity }) => {
   if (!isVisible) {
     return null;
   }

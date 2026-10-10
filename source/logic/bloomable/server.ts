@@ -7,6 +7,7 @@ import LoginError = BloomableAuth.LoginError;
 import { Validation } from "../utils/validation";
 import { Mocks } from "../demoData/mocks";
 import { clearSession } from "./session";
+import { ProductCache } from "./productCache";
 
 export namespace Server {
   const emptyCredentials = { username: "", password: "" };
@@ -63,6 +64,7 @@ export namespace Server {
     const isDemo = currentUser === "demo";
 
     setCredentials(emptyCredentials);
+    ProductCache.clear();
     getUniqueId().then(deviceId => rollbar.setPerson(deviceId)).catch(() => {});
 
     const promises: Promise<any>[] = [

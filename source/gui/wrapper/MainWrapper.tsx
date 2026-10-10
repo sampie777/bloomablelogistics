@@ -6,11 +6,17 @@ import Dashboard from "../dashboard/Dashboard";
 import MapOverview from "../map/MapOverview";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../theme";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { orderActionInProgressState, ordersOutdatedState, ordersState } from "../../logic/recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import {
+  orderActionInProgressState,
+  ordersLoadingProgressState,
+  ordersOutdatedState,
+  ordersState,
+} from "../../logic/recoil";
 import { Orders } from "../../logic/orders/orders";
 import LoadingOverlay from "../utils/LoadingOverlay";
 import DateHeader from "./DateHeader";
+import OrdersLoadingProgressBar from "../dashboard/OrdersLoadingProgressBar";
 import OrderDetailsLoader from "../orders/OrderDetailsLoader";
 import { Notifications } from "../../logic/notifications";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -19,6 +25,8 @@ import { BloomableApi } from "../../logic/bloomable/api";
 const TabNav = createBottomTabNavigator();
 
 interface Props {}
+
+const initialPendingStatuses = ["open", "accepted", "fulfilled", "delivered", "cancel-confirmed"];
 
 const MainWrapper: React.FC<Props> = () => {
   const isMounted = useRef(false);
@@ -29,6 +37,7 @@ const MainWrapper: React.FC<Props> = () => {
   const [orders, setOrders] = useRecoilState(ordersState);
   const [ordersOutdated, setOrdersOutdated] = useRecoilState(ordersOutdatedState);
   const orderActionInProgress = useRecoilValue(orderActionInProgressState);
+  const setOrdersLoadingProgress = useSetRecoilState(ordersLoadingProgressState);
 
   useEffect(() => {
     isMounted.current = true;
@@ -57,8 +66,6 @@ const MainWrapper: React.FC<Props> = () => {
   const initApi = async () => {
     if (isApiLoaded.current) return;
     if (!isMounted.current) return;
-    setIsProcessing(true);
-    setErrorMessage(undefined);
 
     try {
       await BloomableApi.getProfile();
@@ -66,26 +73,53 @@ const MainWrapper: React.FC<Props> = () => {
     } catch (error: any) {
       if (!isMounted.current) return;
       setErrorMessage(error.toString());
+      throw error;
     }
-
-    if (!isMounted.current) return;
-    setIsProcessing(false);
   };
 
   const fetchOrders = async () => {
-    await initApi();
-    fetchPage.current = 0;
-    setOrders([]);
-    fetchNextOrderPage();
+    setIsProcessing(true);
+    setErrorMessage(undefined);
+
+    try {
+      await initApi();
+      if (!isMounted.current) return;
+
+      fetchPage.current = 0;
+      setOrders([]);
+      fetchNextOrderPage();
+    } catch {
+      if (!isMounted.current) return;
+      setIsProcessing(false);
+      setOrdersLoadingProgress({ isLoading: false, completed: 0, total: 5, pendingStatuses: [] });
+    }
   };
 
   const fetchNextOrderPage = () => {
     setIsProcessing(true);
     setErrorMessage(undefined);
+    setOrdersLoadingProgress({
+      isLoading: true,
+      completed: 0,
+      total: 5,
+      pendingStatuses: [...initialPendingStatuses],
+    });
     if (!isMounted.current) return;
 
     fetchPage.current++;
-    Orders.list()
+    Orders.list((batchOrders, completed, total, pendingStatuses) => {
+      if (!isMounted.current) return;
+      setOrders(batchOrders);
+      setOrdersLoadingProgress({
+        isLoading: true,
+        completed,
+        total,
+        pendingStatuses: pendingStatuses ?? [],
+      });
+      // As soon as the first batch arrives, dismiss the blocking overlay
+      // so the user can see and interact with incoming orders immediately
+      setIsProcessing(false);
+    })
       .then(_orders => {
         if (!isMounted.current) return;
 
@@ -102,6 +136,7 @@ const MainWrapper: React.FC<Props> = () => {
       .finally(() => {
         if (!isMounted.current) return;
         setIsProcessing(false);
+        setOrdersLoadingProgress({ isLoading: false, completed: 5, total: 5, pendingStatuses: [] });
       });
   };
 
@@ -112,6 +147,7 @@ const MainWrapper: React.FC<Props> = () => {
                         (orderActionInProgress ? "Applying..." : undefined)} />
       <OrderDetailsLoader />
       <DateHeader />
+      <OrdersLoadingProgressBar />
 
       <View>
         {errorMessage === undefined ? undefined :
@@ -152,29 +188,23 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+  },
+  icon: {
+    paddingRight: 10,
+    fontSize: 18,
+  },
+  error: {
+    color: lightColors.textError,
   },
   errorView: {
     paddingHorizontal: 20,
-    paddingVertical: 12,
-    marginHorizontal: 15,
-    marginVertical: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#800",
-  },
-  icon: {
-    marginRight: 10,
-    color: lightColors.text,
-  },
-  error: {
-    color: "#800",
+    paddingVertical: 10,
+    backgroundColor: "#fff0f0",
   },
   tabBar: {
-    paddingBottom: 10,
-    paddingTop: 7,
-    height: 60,
     backgroundColor: lightColors.surface2,
-    borderTopColor: lightColors.background,
+    borderTopColor: lightColors.border,
   },
   tabBarActiveLabel: {
     color: lightColors.primary,

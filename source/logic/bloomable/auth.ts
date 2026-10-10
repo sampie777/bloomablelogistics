@@ -81,16 +81,18 @@ export namespace BloomableAuth {
       });
   };
 
-  export const logout = (): Promise<unknown> =>
-    getXSRFCookies()
-      .then(() => fetch("https://dashboard.bloomable.com/api/logout", {
-        headers: {
-          "Accept": "application/json",
-          ...sessionToHeader(getSession()),
-        },
-        method: "POST",
-        credentials: "omit",
-      }))
+  export const logout = (): Promise<unknown> => {
+    const session = getSession();
+    const headers = {
+      "Accept": "application/json",
+      ...sessionToHeader(session),
+    };
+
+    return fetch("https://dashboard.bloomable.com/api/logout", {
+      headers: headers,
+      method: "POST",
+      credentials: "omit",
+    })
       .then(response => {
         try {
           const newSession = getNewSession(response);
@@ -101,7 +103,9 @@ export namespace BloomableAuth {
           // ignore
         }
 
-        if (response.status !== HttpCode.NoContent) {
+        // 204 NoContent is standard success.
+        // 401 Unauthorized indicates the session is already unauthenticated/expired, which is also an effective logout.
+        if (response.status !== HttpCode.NoContent && response.status !== HttpCode.Unauthorized) {
           obtainResponseContent(response)
             .then(content => JSON.stringify(content))
             .catch(error => error)
@@ -115,6 +119,7 @@ export namespace BloomableAuth {
       .catch(error => {
         rollbar.error("Failed to log out", sanitizeErrorForRollbar(error));
       });
+  };
 
   export const login = (credentials: Credentials, retries: number = 2): Promise<Session> => {
     if (credentials.username === "demo" && credentials.password === "demo") {
@@ -138,121 +143,56 @@ export namespace BloomableAuth {
         const originalSession = getSession();
 
         if (response.status === HttpCode.OK) {
-          const session = getNewSession(response);
-          verifySession(session);
-          storeSession(session);
-          return session;
-        }
-
-        // Try extracting session tokens if provided in response headers
-        try {
-          const newSession = getNewSession(response);
-          if (newSession.xsrfToken || newSession.sessionToken) {
-            storeSession(newSession);
-          }
-        } catch {
-          // Set-Cookie is not mandatory on error responses
-        }
-
-        return obtainResponseContent(response)
-          .then(content => {
-            const stringifiedContent = JSON.stringify(content);
-            if (response.status === HttpCode.NoContent) {
-              throw new Error(`Logged in with no content. Payload: ${stringifiedContent}`);
-            } else if (response.status === HttpCode.UnprocessableContent) {
-              throw new LoginError(parseLoginErrorMessage(content), content);
-            } else if (response.status === HttpCode.Unauthorized) {
-              throw new LoginError(parseLoginErrorMessage(content), content);
-            } else if (response.status === HttpCode.TooManyRequests) {
-              throw new LoginError(parseLoginErrorMessage(content, "Too many login attempts. Please try again later."), content);
-            } else if (response.status === HttpCode.PageExpired) {
-              if (retries > 0) {
-                return login(credentials, retries - 1);
-              }
-              throw new LoginError("Session expired. Please try again.", content);
-            } else if (response.status === HttpCode.NotAcceptable && stringifiedContent.includes("Already authenticated")) {
-              storeSession(originalSession);
+          try {
+            const session = getNewSession(response);
+            verifySession(session);
+            storeSession(session);
+            return session;
+          } catch {
+            if (originalSession.xsrfToken && originalSession.sessionToken) {
               return originalSession;
             }
-            throw new Error(`Login failed (status=${response.status}). Payload: ${stringifiedContent}`);
-          });
+          }
+        }
+
+        return obtainResponseContent(response).then(content => {
+          if (response.status === HttpCode.PageExpired && retries > 0) {
+            return login(credentials, retries - 1);
+          }
+          if (response.status === HttpCode.UnprocessableContent) {
+            const parsedMessage = parseLoginErrorMessage(content);
+            throw new LoginError(parsedMessage, content);
+          }
+          throw new Error(`Failed to log in (${response.status}). ${parseLoginErrorMessage(content, "")}`);
+        });
       })
       .catch(error => {
         if (!(error instanceof LoginError)) {
-          rollbar.error("Could not log in", {
-            ...sanitizeErrorForRollbar(error),
-            errorMessage: error ? error.message : undefined,
-          });
+          rollbar.error("Could not log in", sanitizeErrorForRollbar(error));
         }
         throw error;
       });
   };
 
-  export const authenticatedFetch = async (credentials: Credentials, url: RequestInfo, init: RequestInit = {}): Promise<Response> => {
+  export const authenticatedFetch = (credentials: Credentials, url: RequestInfo, init: RequestInit = {}): Promise<Response> => {
     const call = () => {
       init.headers = {
         ...init.headers,
         ...sessionToHeader(getSession()),
       };
-      init.credentials = "omit";
-      return fetch(url, init);
+      return fetch(url, {
+        ...init,
+        credentials: "omit",
+      });
     };
 
-    const maxRetries = 4;
-    for (let retry = 0; retry < maxRetries; retry++) {
-      try {
-        const response = await call();
-        if (response.status === HttpCode.Unauthorized) {
-          if (!credentials?.username || !credentials?.password) {
-            return response;
-          }
-          try {
-            await login(credentials);
-          } catch (error) {
-            rollbar.debug("Failed to do login", { ...sanitizeErrorForRollbar(error), retry: retry });
-          }
-          continue; // Retry
+    return call()
+      .then(response => {
+        if (response.status === HttpCode.Unauthorized && credentials.username.length > 0 && credentials.password.length > 0) {
+          return login(credentials)
+            .then(call);
         }
-
-        if (response.status < 200 || response.status >= 300) {
-          rollbar.warning("Got non OK status for call", {
-            url: url,
-            response: {
-              ok: response.ok,
-              status: response.status,
-              statusText: response.statusText,
-              type: response.type,
-              headers: response.headers,
-              content: JSON.stringify(await obtainResponseContent(response)),
-            },
-          });
-        }
-
-        try {
-          const newSession = getNewSession(response);
-          if (newSession.xsrfToken || newSession.sessionToken) {
-            storeSession(newSession);
-          }
-        } catch {
-          // Set-Cookie is optional on subsequent API calls
-        }
-
         return response;
-      } catch (error) {
-        rollbar.error("Failed to do call", {
-          ...sanitizeErrorForRollbar(error),
-          retry: retry,
-          maxRetries: maxRetries,
-          url: url,
-        });
-        throw error;
-      }
-    }
-
-    rollbar.error("Fell out of authenticatedFetch retry loop", {
-      maxRetries: maxRetries,
-      url: url,
-    });
-    throw new Error("Failed to perform request. Please try again.");
+      });
   };
 }
