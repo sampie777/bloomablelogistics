@@ -17,6 +17,28 @@ function usage {
 HEREDOC
 }
 
+# Ask user if local APK build is desired (defaults to Yes)
+BUILD_LOCAL_APK=1
+function promptLocalApkBuild {
+  if [[ -t 0 ]]; then
+    echo ""
+    read -r -p "Do you want to build a local APK to install on your phone directly? (Y/n): " response
+    case "$response" in
+      [nN][oO]|[nN])
+        BUILD_LOCAL_APK=0
+        echo "Skipping local build. GitHub Actions will handle the release builds."
+        ;;
+      *)
+        BUILD_LOCAL_APK=1
+        echo "Local APK build enabled."
+        ;;
+    esac
+    echo ""
+  else
+    BUILD_LOCAL_APK=1
+  fi
+}
+
 # Environment & preflight checks
 function checkEnvironment {
   local missing=()
@@ -32,35 +54,38 @@ function checkEnvironment {
     exit 1
   fi
 
-  # Check Java availability and version compatibility for Android build
-  if ! command -v java &>/dev/null; then
-    echo ""
-    echo "============================================================"
-    echo "  WARNING: 'java' command not found in your PATH!"
-    echo "  The Android build ('yarn build' / 'yarn bundle') will fail."
-    echo "============================================================"
-    if [[ -t 0 ]]; then
-      read -r -p "Do you want to continue anyway? (y/N): " response
-      case "$response" in
-        [yY][eE][sS]|[yY])
-          echo "Continuing release without Java..."
-          ;;
-        *)
-          echo "Aborting release. Please install or configure Java."
-          exit 1
-          ;;
-      esac
+  # Checks specific to local Android APK builds
+  if [[ $BUILD_LOCAL_APK -eq 1 ]]; then
+    # Check Java availability and version compatibility
+    if ! command -v java &>/dev/null; then
+      echo ""
+      echo "============================================================"
+      echo "  WARNING: 'java' command not found in your PATH!"
+      echo "  The local Android build ('yarn build') will fail."
+      echo "============================================================"
+      if [[ -t 0 ]]; then
+        read -r -p "Do you want to continue without local APK build? (y/N): " response
+        case "$response" in
+          [yY][eE][sS]|[yY])
+            echo "Skipping local APK build..."
+            BUILD_LOCAL_APK=0
+            ;;
+          *)
+            echo "Aborting release. Please install or configure Java."
+            exit 1
+            ;;
+        esac
+      else
+        echo "Non-interactive terminal detected: aborting release due to missing Java." >&2
+        exit 1
+      fi
+      echo ""
     else
-      echo "Non-interactive terminal detected: aborting release due to missing Java." >&2
-      exit 1
-    fi
-    echo ""
-  else
-    local java_version_raw
-    local java_major
-    java_version_raw=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
-    # Extract major version number (handles "1.8.x" as 8, "17.0.x" as 17, "21.0.x" as 21, etc.)
-    java_major=$(echo "$java_version_raw" | awk -F'.' '{if ($1 == "1") print $2; else print $1}')
+      local java_version_raw
+      local java_major
+      java_version_raw=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
+      # Extract major version number (handles "1.8.x" as 8, "17.0.x" as 17, "21.0.x" as 21, etc.)
+      java_major=$(echo "$java_version_raw" | awk -F'.' '{if ($1 == "1") print $2; else print $1}')
 
     # AGP 7.2.1 and Gradle 7.5.1 require Java 11 or 17 (Java 17 recommended, Java 21+ may fail during dexing)
     if [[ -n "$java_major" && ($java_major -lt 11 || $java_major -gt 17) ]]; then
@@ -71,58 +96,59 @@ function checkEnvironment {
       echo "  Java version between 11 and 17 (Java 17 recommended)."
       echo "  Building with Java $java_major is likely to fail or produce errors."
       echo "============================================================"
+        if [[ -t 0 ]]; then
+          read -r -p "Do you want to continue building despite Java incompatibility? (y/N): " response
+          case "$response" in
+            [yY][eE][sS]|[yY])
+              echo "Continuing release with current Java version ($java_version_raw)..."
+              ;;
+            *)
+              echo "Aborting release. Please switch to a compatible Java version (JDK 11 - 17)."
+              exit 1
+              ;;
+          esac
+        else
+          echo "Non-interactive terminal detected: continuing with Java warning."
+        fi
+        echo ""
+      fi
+    fi
+
+    # Check for .env file (only needed for local builds)
+    if [[ ! -f ".env" ]]; then
+      echo ""
+      echo "============================================================"
+      echo "  WARNING: '.env' file not found in the project root!"
+      echo "  Building a local APK without '.env' may result in missing"
+      echo "  configuration or secrets required by the application."
+      echo "============================================================"
       if [[ -t 0 ]]; then
-        read -r -p "Do you want to continue building despite Java incompatibility? (y/N): " response
+        read -r -p "Do you want to continue building local APK without .env? (y/N): " response
         case "$response" in
           [yY][eE][sS]|[yY])
-            echo "Continuing release with current Java version ($java_version_raw)..."
+            echo "Continuing local build without .env..."
             ;;
           *)
-            echo "Aborting release. Please switch to a compatible Java version (JDK 11 - 17)."
+            echo "Aborting release. Please provide a .env file or choose not to build a local APK."
             exit 1
             ;;
         esac
       else
-        echo "Non-interactive terminal detected: continuing with Java warning."
+        echo "Non-interactive terminal detected: continuing with warning."
       fi
       echo ""
     fi
-  fi
 
-  # Check for .env file
-  if [[ ! -f ".env" ]]; then
-    echo ""
-    echo "============================================================"
-    echo "  WARNING: '.env' file not found in the project root!"
-    echo "  Building without '.env' may result in missing configuration"
-    echo "  or secrets required by the application."
-    echo "============================================================"
-    if [[ -t 0 ]]; then
-      read -r -p "Do you want to continue building without .env? (y/N): " response
-      case "$response" in
-        [yY][eE][sS]|[yY])
-          echo "Continuing release without .env..."
-          ;;
-        *)
-          echo "Aborting release. Please provide a .env file."
-          exit 1
-          ;;
-      esac
-    else
-      echo "Non-interactive terminal detected: continuing with warning."
+    # Check for google-services.json
+    if [[ ! -f "android/app/google-services.json" ]]; then
+      echo ""
+      echo "============================================================"
+      echo "  WARNING: 'android/app/google-services.json' not found!"
+      echo "  If Google Services or Firebase is configured, the Android"
+      echo "  release build might fail or behave unexpectedly."
+      echo "============================================================"
+      echo ""
     fi
-    echo ""
-  fi
-
-  # Check for google-services.json
-  if [[ ! -f "android/app/google-services.json" ]]; then
-    echo ""
-    echo "============================================================"
-    echo "  WARNING: 'android/app/google-services.json' not found!"
-    echo "  If Google Services or Firebase is configured, the Android"
-    echo "  release build might fail or behave unexpectedly."
-    echo "============================================================"
-    echo ""
   fi
 }
 
@@ -274,7 +300,7 @@ function releasePatch {
   retry git pull || return 1
 
   # Create patch version
-  CURRENT_VERSION=$(sed -n 's/.*"version": *"\{0,1\}\([^",]*\)"\{0,1\}.*/\1/p' ./package.json)
+  CURRENT_VERSION=$(node -p "require('./package.json').version")
   RELEASE_VERSION=$(echo ${CURRENT_VERSION} | awk -F'.' '{print $1"."$2"."$3+1}')
 
   git merge develop || return 1
@@ -291,7 +317,7 @@ function releaseMinor {
   retry git pull || return 1
 
   # Create version
-  CURRENT_VERSION=$(sed -n 's/.*"version": *"\{0,1\}\([^",]*\)"\{0,1\}.*/\1/p' ./package.json)
+  CURRENT_VERSION=$(node -p "require('./package.json').version")
   RELEASE_VERSION=$(echo ${CURRENT_VERSION} | sed 's/v//g' | awk -F'.' '{print $1"."$2+1".0"}')
 
   git merge develop || return 1
@@ -308,7 +334,7 @@ function releaseMajor {
   retry git pull || return 1
 
   # Create version
-  CURRENT_VERSION=$(sed -n 's/.*"version": *"\{0,1\}\([^",]*\)"\{0,1\}.*/\1/p' ./package.json)
+  CURRENT_VERSION=$(node -p "require('./package.json').version")
   RELEASE_VERSION=$(echo ${CURRENT_VERSION} | sed 's/v//g' | awk -F'.' '{print $1+1".0.0"}')
 
   git merge develop || return 1
@@ -321,7 +347,7 @@ function releaseMajor {
 function pushAndRelease {
   yarn test || return 1
 
-  RELEASE_VERSION=$(sed -n 's/.*"version": *"\{0,1\}\([^",]*\)"\{0,1\}.*/\1/p' ./package.json)
+  RELEASE_VERSION=$(node -p "require('./package.json').version")
   echo "Release version: ${RELEASE_VERSION}"
 
   git add package.json || return 1
@@ -332,22 +358,19 @@ function pushAndRelease {
   TAG_CREATED="v${RELEASE_VERSION}"
   git tag "${TAG_CREATED}" || return 1
 
-  yarn build || return 1
-  echo
-  echo "BUILD DONE"
-  echo
-  echo
-  yarn bundle || return 1
-  echo
-  echo "BUNDLE DONE"
-  echo
-  echo
+  if [[ $BUILD_LOCAL_APK -eq 1 ]]; then
+    echo "Building local Android APK..."
+    yarn build || return 1
+    echo
+    echo "LOCAL APK BUILD DONE"
+    echo
+    xdg-open android/app/build/outputs/apk/release || open android/app/build/outputs/apk/release || echo ""
+  else
+    echo "Skipping local builds. GitHub Actions will build and release the APK & bundle."
+  fi
 
   retry git push -u origin master --tags || return 1
   MASTER_PUSHED=1
-
-  xdg-open android/app/build/outputs/apk/release || open android/app/build/outputs/apk/release || echo ""
-  xdg-open android/app/build/outputs/bundle/release || open android/app/build/outputs/bundle/release || echo ""
 
   ./upload_source_map.sh || {
     echo ""
@@ -362,7 +385,7 @@ function setNextDevelopmentVersion {
   git rebase master || return 1
 
   # Generate next (minor) development version
-  CURRENT_VERSION=$(sed -n 's/.*"version": *"\{0,1\}\([^",]*\)"\{0,1\}.*/\1/p' ./package.json)
+  CURRENT_VERSION=$(node -p "require('./package.json').version")
   DEV_VERSION=$(echo ${CURRENT_VERSION} | sed 's/v//g' | awk -F'.' '{print $1"."$2+1".0"}')-SNAPSHOT
 
   echo "Next development version: ${DEV_VERSION}"
@@ -384,6 +407,7 @@ function cleanTestDatabases {
 command="$1"
 case $command in
   patch)
+    promptLocalApkBuild
     checkEnvironment
     initRollbackTracking
     updateDependencies || exit 1
@@ -391,6 +415,7 @@ case $command in
     setNextDevelopmentVersion || exit 1
     ;;
   minor)
+    promptLocalApkBuild
     checkEnvironment
     initRollbackTracking
     updateDependencies || exit 1
@@ -398,6 +423,7 @@ case $command in
     setNextDevelopmentVersion || exit 1
     ;;
   major)
+    promptLocalApkBuild
     checkEnvironment
     initRollbackTracking
     updateDependencies || exit 1
