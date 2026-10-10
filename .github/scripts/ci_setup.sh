@@ -24,7 +24,18 @@ if [[ -z "${ROLLBAR_API_KEY}" ]]; then
   echo "Warning: ROLLBAR_API_KEY is not defined in GitHub environment/secrets!" >&2
 fi
 
-# 3. Decode Android upload keystore if provided in secrets
+# 3. Restore google-services.json if provided in secrets (raw JSON or base64)
+if [[ -n "${GOOGLE_SERVICES_JSON}" ]]; then
+  echo "Writing google-services.json from secret..."
+  GOOGLE_SERVICES_DEST="${REPO_ROOT}/android/app/google-services.json"
+  if echo "${GOOGLE_SERVICES_JSON}" | base64 --decode &>/dev/null && echo "${GOOGLE_SERVICES_JSON}" | base64 --decode | grep -q '"project_info"'; then
+    echo "${GOOGLE_SERVICES_JSON}" | base64 --decode > "${GOOGLE_SERVICES_DEST}"
+  else
+    echo "${GOOGLE_SERVICES_JSON}" > "${GOOGLE_SERVICES_DEST}"
+  fi
+fi
+
+# 4. Decode Android upload keystore if provided in secrets
 if [[ -n "${ANDROID_KEYSTORE_BASE64}" ]]; then
   echo "Decoding Android keystore from secret..."
   KEYSTORE_PATH="${REPO_ROOT}/android/app/release.keystore"
@@ -33,11 +44,11 @@ if [[ -n "${ANDROID_KEYSTORE_BASE64}" ]]; then
   echo "BLOOMABLE_UPLOAD_STORE_FILE=${KEYSTORE_PATH}" >> "${GITHUB_ENV:-/dev/null}"
 fi
 
-# 4. Check and validate version format in package.json
+# 5. Check and validate version format in package.json
 VERSION=$(node -p "require('./package.json').version" 2>/dev/null || true)
 echo "Detected package.json version: '${VERSION}'"
 
-# 5. Verify required tools
+# 6. Verify required tools
 for cmd in node yarn git; do
   if ! command -v "$cmd" &>/dev/null; then
     echo "Error: Required tool '$cmd' is not installed or not in PATH." >&2
