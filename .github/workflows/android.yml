@@ -65,6 +65,7 @@ jobs:
           ROLLBAR_API_KEY: ${{ secrets.ROLLBAR_API_KEY }}
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           OPEN_ROUTES_SERVICE_API_KEY: ${{ secrets.OPEN_ROUTES_SERVICE_API_KEY }}
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
 
       - name: Install JavaScript dependencies
