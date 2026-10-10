@@ -11,7 +11,6 @@ import { defaultFontFamilies, lightColors } from "../theme";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { orderActionInProgressState, ordersState, selectedDateState } from "../../logic/recoil";
 import { Server } from "../../logic/bloomable/server";
-import { getNextDay } from "../../logic/utils/utils";
 import NumberComponent from "./components/NumberComponent";
 import LoadingOverlay from "../utils/LoadingOverlay";
 
@@ -56,14 +55,6 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
                          setOrderActionInProgress(true);
                          setOrderActionInProgress(false);
                        }} />
-      <SwitchComponent settingsKey={"orderDaysAddNextDayOnSunday"}
-                       title={"Add Monday to Sunday"}
-                       description={"On Sundays, also show the upcoming orders of Monday (the next day) in the dashboard."}
-                       callback={() => {
-                         // Just quickly refresh the GUI so the new setting is applied to the buttons.
-                         setSelectedDate(getNextDay(selectedDate));
-                         setSelectedDate(selectedDate);
-                       }} />
 
       <Header title={"Notifications"} />
       <SwitchComponent settingsKey={"notificationsShowForNewOrders"}
@@ -99,7 +90,7 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
 
       <View style={styles.versionContainer}>
         <Text style={styles.versionText}>
-          version: {getVersion()} ({getBuildNumber()}) {process.env.NODE_ENV === "production" ? undefined : `(${process.env.NODE_ENV})`}\
+          version: {getVersion()} ({getBuildNumber()}) {process.env.NODE_ENV === "production" ? undefined : `(${process.env.NODE_ENV})`}
         </Text>
       </View>
     </ScrollView>
