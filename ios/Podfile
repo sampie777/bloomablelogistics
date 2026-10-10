@@ -1,3 +1,21 @@
+# Compatibility patch for Ruby >= 3.4 / 4.0 where ERB.new positional arguments were removed.
+# React Native 0.70.x invokes ERB.new(template, 0, '->') in script_phases.rb.
+require 'erb'
+if ERB.instance_method(:initialize).parameters.none? { |_type, name| name == :safe_level }
+  module ERBLegacyCompat
+    def initialize(str, *args, **kwargs)
+      if args.any? && kwargs.empty?
+        kwargs[:trim_mode] = args[1] if args[1]
+        kwargs[:eoutvar] = args[2] if args[2]
+        super(str, **kwargs)
+      else
+        super
+      end
+    end
+  end
+  ERB.prepend(ERBLegacyCompat)
+end
+
 require_relative '../node_modules/react-native/scripts/react_native_pods'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
