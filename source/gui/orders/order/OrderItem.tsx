@@ -22,7 +22,7 @@ const OrderItem: React.FC<Props> = ({ order }) => {
   ]}>
     <View style={styles.row}>
       <UrlLink url={`https://dashboard.bloomable.com/orders/${order.id}`}>
-        <Text style={styles.number} selectable={true}>{order.number}</Text>
+        <Text style={styles.number}>{order.number}</Text>
       </UrlLink>
 
       <View style={styles.deliverAtDate}>

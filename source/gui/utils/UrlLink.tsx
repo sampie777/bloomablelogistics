@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, TouchableOpacity, View } from "react-native";
+import { Alert, Pressable, View } from "react-native";
 import { openLink } from "../../logic/utils/utils";
 
 const UrlLink: React.FC<{
@@ -23,13 +23,12 @@ const UrlLink: React.FC<{
 
     return (
       <View style={style}>
-        <TouchableOpacity onPress={open} onLongPress={onLongPress}>
+        <Pressable onPress={open} onLongPress={onLongPress} style={({ pressed }) => pressed ? { opacity: 0.7 } : undefined}>
           <View>
             {children}
           </View>
-        </TouchableOpacity>
+        </Pressable>
       </View>);
   };
 
 export default UrlLink;
-

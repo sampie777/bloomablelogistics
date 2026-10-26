@@ -19,7 +19,6 @@ import DateHeader from "./DateHeader";
 import OrdersLoadingProgressBar from "../dashboard/OrdersLoadingProgressBar";
 import OrderDetailsLoader from "../orders/OrderDetailsLoader";
 import { Notifications } from "../../logic/notifications";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BloomableApi } from "../../logic/bloomable/api";
 
 const TabNav = createBottomTabNavigator();
@@ -140,8 +139,7 @@ const MainWrapper: React.FC<Props> = () => {
       });
   };
 
-  return <GestureHandlerRootView style={{ flex: 1 }}>
-    <View style={styles.container}>
+  return <View style={styles.container}>
       <LoadingOverlay isVisible={isProcessing || orderActionInProgress}
                       text={isProcessing ? "Getting orders..." :
                         (orderActionInProgress ? "Applying..." : undefined)} />
@@ -160,24 +158,22 @@ const MainWrapper: React.FC<Props> = () => {
 
       <TabNav.Navigator initialRouteName={Routes.Dashboard}
                         screenOptions={{
+                          headerShown: false,
                           tabBarStyle: styles.tabBar,
                           tabBarActiveTintColor: styles.tabBarActiveLabel.color as string,
                         }}>
         <TabNav.Screen name={Routes.Dashboard} component={Dashboard}
                        options={{
-                         headerShown: false,
                          tabBarIcon: ({ focused, color, size }) =>
                            <FontAwesome5Icon name="home" size={size} color={color} />,
                        }} />
         <TabNav.Screen name={Routes.Map} component={MapOverview}
                        options={{
-                         headerShown: false,
                          tabBarIcon: ({ focused, color, size }) =>
                            <FontAwesome5Icon name="map-marked-alt" size={size} color={color} />,
                        }} />
       </TabNav.Navigator>
-    </View>
-  </GestureHandlerRootView>;
+    </View>;
 };
 
 const styles = StyleSheet.create({

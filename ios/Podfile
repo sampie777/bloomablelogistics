@@ -1,26 +1,8 @@
-# Compatibility patch for Ruby >= 3.4 / 4.0 where ERB.new positional arguments were removed.
-# React Native 0.70.x invokes ERB.new(template, 0, '->') in script_phases.rb.
-require 'erb'
-if ERB.instance_method(:initialize).parameters.none? { |_type, name| name == :safe_level }
-  module ERBLegacyCompat
-    def initialize(str, *args, **kwargs)
-      if args.any? && kwargs.empty?
-        kwargs[:trim_mode] = args[1] if args[1]
-        kwargs[:eoutvar] = args[2] if args[2]
-        super(str, **kwargs)
-      else
-        super
-      end
-    end
-  end
-  ERB.prepend(ERBLegacyCompat)
-end
-
 require_relative '../node_modules/react-native/scripts/react_native_pods'
-require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
-platform :ios, '12.4'
-install! 'cocoapods', :deterministic_uuids => false
+platform :ios, min_ios_version_supported
+
+prepare_react_native_project!
 
 target 'bloomablelogistics' do
   pod 'GoogleUtilities', :modular_headers => true
@@ -28,35 +10,11 @@ target 'bloomablelogistics' do
 
   config = use_native_modules!
 
-  # Flags change depending on the env values.
-  flags = get_default_flags()
-
   use_react_native!(
     :path => config[:reactNativePath],
-
-    # Hermes is now enabled by default. Disable by setting this flag to false.
-    # Upcoming versions of React Native may rely on get_default_flags(), but
-    # we make it explicit here to aid in the React Native upgrade process.
-    :hermes_enabled => true,
-    :fabric_enabled => flags[:fabric_enabled],
-    # Enables Flipper.
-    #
-    # Note that if you have use_frameworks! enabled, Flipper will not work and
-    # you should disable the next line.
-    :flipper_configuration => FlipperConfiguration.enabled,
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
-
-  pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
-
-  pod 'RNDeviceInfo', :path => '../node_modules/react-native-device-info'
-
-  pod 'react-native-config', :path => '../node_modules/react-native-config'
-
-  pod 'RNReanimated', :path => '../node_modules/react-native-reanimated'
-
-  pod 'RNGestureHandler', :path => '../node_modules/react-native-gesture-handler'
 
   target 'bloomablelogisticsTests' do
     inherit! :complete
@@ -66,19 +24,22 @@ target 'bloomablelogistics' do
   post_install do |installer|
     react_native_post_install(
       installer,
-      # Set `mac_catalyst_enabled` to `true` in order to apply patches
-      # necessary for Mac Catalyst builds
+      config[:reactNativePath],
       :mac_catalyst_enabled => false
     )
-    __apply_Xcode_12_5_M1_post_install_workaround(installer)
 
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
         deployment_target = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f
-        if deployment_target < 12.4 && deployment_target != 0.0
-          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.4'
+        if deployment_target < 15.1 && deployment_target != 0.0
+          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.1'
         end
         config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = ''
+
+        # Workaround for fmt / RCT-Folly consteval compile errors on Xcode 16+
+        if target.name == 'fmt' || target.name == 'RCT-Folly'
+          config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+        end
       end
     end
 
@@ -88,28 +49,6 @@ target 'bloomablelogistics' do
       content = File.read(xcconfig)
       new_content = content.gsub(/EXCLUDED_ARCHS\[sdk=iphonesimulator\*\]\s*=\s*arm64/, '')
       File.write(xcconfig, new_content) if content != new_content
-    end
-
-    # Boost unary_function C++17 compatibility patch
-    boost_hash = "#{installer.sandbox.root}/boost/boost/container_hash/hash.hpp"
-    if File.exist?(boost_hash)
-      `chmod u+w "#{boost_hash}"`
-      content = File.read(boost_hash)
-      if content.include?('std::unary_function')
-        content = content.gsub(/template <class T>\s+struct hash_base\s+:\s+std::unary_function<T, std::size_t> \{\};/, "template <class T>\n        struct hash_base {\n            typedef T argument_type;\n            typedef std::size_t result_type;\n        };")
-        File.write(boost_hash, content)
-      end
-    end
-
-    # Flipper missing <functional> patch
-    flipper_transport = "#{installer.sandbox.root}/Flipper/xplat/Flipper/FlipperTransportTypes.h"
-    if File.exist?(flipper_transport)
-      `chmod u+w "#{flipper_transport}"`
-      content = File.read(flipper_transport)
-      if !content.include?('#include <functional>')
-        content = content.gsub('#include <string>', "#include <string>\n#include <functional>")
-        File.write(flipper_transport, content)
-      end
     end
 
     # Rollbar patches for modern Clang / SDK
@@ -145,16 +84,6 @@ target 'bloomablelogistics' do
       content = File.read(header)
       if content.include?('@import FirebaseCore;')
         File.write(header, content.gsub('@import FirebaseCore;', '#import <FirebaseCore/FirebaseCore.h>'))
-      end
-    end
-
-    # Yoga user-defined literal fix
-    ygvalue_h = "#{installer.sandbox.root}/../node_modules/react-native/ReactCommon/yoga/yoga/YGValue.h"
-    if File.exist?(ygvalue_h)
-      `chmod u+w "#{ygvalue_h}"`
-      content = File.read(ygvalue_h)
-      if content.include?('operator"" _pt')
-        File.write(ygvalue_h, content.gsub('operator"" _pt', 'operator""_pt'))
       end
     end
   end

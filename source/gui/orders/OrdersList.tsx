@@ -12,7 +12,7 @@ import {
   selectedDateState,
 } from "../../logic/recoil";
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
-import { Directions, Gesture, GestureDetector } from "react-native-gesture-handler";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { config } from "../../config";
 
 interface Props {
@@ -26,8 +26,6 @@ const OrdersList: React.FC<Props> = ({
                                        showHeader,
                                        onScrollViewScroll,
                                      }) => {
-  let startX = 0, startY = 0;
-
   const _newDateRef = useRef<Date | undefined>(undefined);
   const swipeDirection = useRef<number>(0);
   const [screenWidth, setScreenWidth] = useState(0);
@@ -63,10 +61,20 @@ const OrdersList: React.FC<Props> = ({
     _newDateRef.current = newDate;
     swipeDirection.current = direction;
 
-    animatedHorizontalOffset.value = withTiming(direction * screenWidth, {
-      duration: duration,
-      easing: direction === 0 ? Easing.out(Easing.ease) : Easing.in(Easing.ease),
-    }, () => runOnJS(updateSelectedDate)());
+    const width = screenWidth || Dimensions.get("window").width;
+    animatedHorizontalOffset.value = withTiming(
+      direction * width,
+      {
+        duration: duration,
+        easing: direction === 0 ? Easing.out(Easing.ease) : Easing.in(Easing.ease),
+      },
+      (finished) => {
+        "worklet";
+        if (finished) {
+          runOnJS(updateSelectedDate)();
+        }
+      }
+    );
   };
 
   const updateSelectedDate = () => {
@@ -76,33 +84,17 @@ const OrdersList: React.FC<Props> = ({
     _newDateRef.current = undefined;
   };
 
-  const swipeGesture = Gesture.Fling()
+  const swipeGesture = Gesture.Pan()
     .runOnJS(true)
-    .direction(Directions.RIGHT | Directions.LEFT)
-    .numberOfPointers(1)
-    .onBegin((e) => {
-      startX = e.absoluteX;
-      startY = e.absoluteY;
-    })
-    .onTouchesMove((e) => {
-      if (e.allTouches.length === 0) {
-        return;
-      }
-
-      const currentX = e.allTouches[0].absoluteX;
-      const dx = currentX - startX;
-
-      if (Math.abs(dx) < config.ordersListSwipeMinXOffset / 2) {
-        return;
-      }
-
+    .activeOffsetX([-config.ordersListSwipeMinXOffset, config.ordersListSwipeMinXOffset])
+    .failOffsetY([-config.ordersListSwipeMaxYOffset, config.ordersListSwipeMaxYOffset])
+    .onUpdate((e) => {
+      const dx = e.translationX;
       animatedHorizontalOffset.value = dx - (dx > 0 ? 1 : -1) * config.ordersListSwipeMinXOffset / 2;
     })
-    .onFinalize((e) => {
-      const currentX = e.absoluteX;
-      const currentY = e.absoluteY;
-      const dx = currentX - startX;
-      const dy = currentY - startY;
+    .onEnd((e) => {
+      const dx = e.translationX;
+      const dy = e.translationY;
 
       if (Math.abs(dx) < config.ordersListSwipeMinXOffset || Math.abs(dy) > config.ordersListSwipeMaxYOffset) {
         animateDayTransition(0, undefined, 400);
