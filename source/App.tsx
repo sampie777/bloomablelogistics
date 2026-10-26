@@ -1,7 +1,7 @@
 import React from "react";
-import { StatusBar, StyleSheet } from "react-native";
+import { StatusBar, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import ErrorBoundary from "./gui/utils/ErrorBoundary";
 import { lightColors } from "./gui/theme";
 import AppRoot from "./gui/AppRoot";
@@ -10,7 +10,7 @@ const App = () => {
   return (
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
           <ErrorBoundary>
             <AppRoot />
           </ErrorBoundary>
@@ -18,7 +18,7 @@ const App = () => {
           <StatusBar barStyle={"dark-content"}
                      backgroundColor={lightColors.surface2}
                      hidden={false} />
-        </SafeAreaView>
+        </View>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
