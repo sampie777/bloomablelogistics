@@ -1,5 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { PermissionsAndroid, Platform, StyleSheet, Text, View } from "react-native";
+import {
+  PermissionsAndroid,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { Permissions } from "../../logic/permissions";
 import MapView, { Callout, Marker } from "react-native-maps";
 import { Location, Locations } from "../../logic/location/Locations";
@@ -11,7 +17,7 @@ interface Props {
 }
 
 const Map: React.FC<Props> = ({ locations, onMarkerPress }) => {
-  const mapRef = useRef<MapView | null>();
+  const mapRef = useRef<MapView | null>(null);
   const [hasLocationPermission, setHasLocationPermission] = useState(false);
 
   useEffect(() => {
@@ -47,7 +53,7 @@ const Map: React.FC<Props> = ({ locations, onMarkerPress }) => {
 
   return <View style={styles.container}>
     <MapView style={{ flex: 1 }}
-             ref={ref => mapRef.current = ref}
+             ref={mapRef}
              showsUserLocation={hasLocationPermission}
              moveOnMarkerPress={false}
              maxZoomLevel={19}

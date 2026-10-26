@@ -10,7 +10,7 @@ interface Props {
 }
 
 const ShowWhenLoaded: React.FC<Props> = ({ product, component, children }) => {
-  if (product._detailsLoaded) return component ?? <>{children}</> ?? null;
+  if (product._detailsLoaded) return component ?? <>{children}</>;
 
   return <View style={styles.container}>
     <ActivityIndicator style={styles.loading} color={styles.loading.color} />

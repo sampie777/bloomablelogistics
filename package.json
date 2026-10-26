@@ -58,7 +58,6 @@
     "@react-native/typescript-config": "0.81.6",
     "@types/jest": "29.5.1",
     "@types/react": "^19.1.4",
-    "@types/react-native": "0.70.13",
     "@types/react-native-vector-icons": "6.4.13",
     "@types/react-test-renderer": "^19.1.0",
     "@typescript-eslint/eslint-plugin": "5.62.0",
@@ -72,7 +71,7 @@
     "typescript": "^5.8.3"
   },
   "resolutions": {
-    "@types/react": "^17",
+    "@types/react": "^19.1.4",
     "@babel/traverse": "^7.25.0"
   },
   "jest": {

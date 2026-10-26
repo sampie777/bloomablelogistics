@@ -2,30 +2,30 @@ import { ColorValue } from "react-native";
 import { isIOS } from "../logic/utils/utils";
 
 export interface ThemeColors {
-  primary: ColorValue,
-  primaryVariant: ColorValue,
-  primaryLight: ColorValue,
-  background: ColorValue,
-  surface1: ColorValue,
-  surface2: ColorValue,
-  surface3: ColorValue,
-  onPrimary: ColorValue,
-  text: ColorValue,
-  textLight: ColorValue,
-  textLighter: ColorValue,
-  textHeader: ColorValue,
-  textError: ColorValue,
-  verseTitle: ColorValue,
-  url: ColorValue,
-  button: ColorValue,
-  buttonVariant: ColorValue,
-  border: ColorValue,
-  borderLight: ColorValue,
-  borderVariant: ColorValue,
-  notesColor: ColorValue,
-  notesLines: ColorValue,
-  switchComponentThumb: ColorValue,
-  switchComponentBackground?: ColorValue,
+  primary: ColorValue;
+  primaryVariant: ColorValue;
+  primaryLight: ColorValue;
+  background: ColorValue;
+  surface1: ColorValue;
+  surface2: ColorValue;
+  surface3: ColorValue;
+  onPrimary: ColorValue;
+  text: ColorValue;
+  textLight: ColorValue;
+  textLighter: ColorValue;
+  textHeader: ColorValue;
+  textError: ColorValue;
+  verseTitle: ColorValue;
+  url: ColorValue;
+  button: ColorValue;
+  buttonVariant: ColorValue;
+  border: ColorValue;
+  borderLight: ColorValue;
+  borderVariant: ColorValue;
+  notesColor: ColorValue;
+  notesLines: ColorValue;
+  switchComponentThumb: ColorValue;
+  switchComponentBackground?: ColorValue;
 }
 
 export const lightColors: ThemeColors = {
@@ -56,13 +56,13 @@ export const lightColors: ThemeColors = {
 };
 
 export interface ThemeFontFamilies {
-  // sansSerif: string,
+  sansSerifMedium: string,
   sansSerifLight: string,
   sansSerifThin: string,
 }
 
 export const defaultFontFamilies: ThemeFontFamilies = {
-  // sansSerif: isIOS ? "HelveticaNeue" : "sans-serif",
+  sansSerifMedium: isIOS ? "HelveticaNeue-Medium" : "sans-serif-medium",
   sansSerifLight: isIOS ? "HelveticaNeue-Light" : "sans-serif-light",
   sansSerifThin: isIOS ? "HelveticaNeue-Thin" : "sans-serif-thin",
 };

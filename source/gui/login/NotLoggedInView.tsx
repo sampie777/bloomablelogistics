@@ -1,5 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import LoadingOverlay from "../utils/LoadingOverlay";
 import { defaultFontFamilies, lightColors } from "../theme";
@@ -14,12 +20,12 @@ interface Props {
 
 const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
   const isMounted = useRef(false);
+  const passwordInputRef = useRef<TextInput | null>(null);
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
-  let passwordInput: TextInput | null = null;
 
   useEffect(() => {
     isMounted.current = true;
@@ -90,12 +96,12 @@ const NotLoggedInView: React.FC<Props> = ({ onLoggedIn }) => {
                  autoCapitalize={"none"}
                  autoComplete={"username"}
                  returnKeyType={"next"}
-                 onSubmitEditing={() => passwordInput?.focus()}
+                 onSubmitEditing={() => passwordInputRef.current?.focus()}
                  blurOnSubmit={false} />
 
       <View style={styles.passwordContainer}>
         <TextInput placeholder={"Password"}
-                   ref={ref => passwordInput = ref}
+                   ref={passwordInputRef}
                    style={styles.passwordInput}
                    placeholderTextColor={styles.placeholder.color}
                    maxLength={255}

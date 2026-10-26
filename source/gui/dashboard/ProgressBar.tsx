@@ -1,20 +1,23 @@
 import React, { useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { DimensionValue, StyleSheet, Text, View } from "react-native";
 import { useRecoilValue } from "recoil";
 import { selectedDateOrdersState } from "../../logic/recoil";
 import { defaultFontFamilies, lightColors } from "../theme";
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
-interface Props {
-
-}
+interface Props {}
 
 const ProgressBar: React.FC<Props> = () => {
   const orders = useRecoilValue(selectedDateOrdersState)
     .filter(it => it.status === "accepted" || it.status === "fulfilled" || it.status === "delivered");
   const animatedValue = useSharedValue(0);
   const animatedStyle = useAnimatedStyle(() => ({
-    width: animatedValue.value + "%",
+    width: `${animatedValue.value}%` as DimensionValue,
   }));
 
   const delivered = orders.filter(it => it.status === "fulfilled" || it.status === "delivered").length;

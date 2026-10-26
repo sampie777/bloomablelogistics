@@ -37,6 +37,7 @@ const OrderDetailsLoader: React.FC<Props> = () => {
     const ordersNeedingDetails = selectedOrders.filter(order =>
       order.id &&
       !loadedOrderIdsRef.current.has(order.id) &&
+      order.deliverAtDate &&
       (isToday(now, order.deliverAtDate) || isTomorrow(now, order.deliverAtDate)) &&
       order.products.some(it => !it._detailsLoaded)
     );
