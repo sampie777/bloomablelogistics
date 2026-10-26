@@ -9,14 +9,26 @@ import { Notifications } from "../../logic/notifications";
 import { getBuildNumber, getVersion } from "react-native-device-info";
 import { defaultFontFamilies, lightColors } from "../theme";
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { orderActionInProgressState, ordersState, selectedDateState } from "../../logic/recoil";
+import {
+  orderActionInProgressState,
+  ordersState,
+  selectedDateState,
+} from "../../logic/recoil";
 import { Server } from "../../logic/bloomable/server";
 import NumberComponent from "./components/NumberComponent";
 import LoadingOverlay from "../utils/LoadingOverlay";
 
-const Header: React.FC<{ title: string, isVisible?: boolean }> = ({ title, isVisible = true }) => {
+const Header: React.FC<{
+  title: string;
+  isVisible?: boolean;
+  isFirst?: boolean;
+}> = ({ title, isVisible = true, isFirst = false }) => {
   return !isVisible ? null : (
-    <View style={styles.settingHeaderContainer}>
+    <View
+      style={[
+        styles.settingHeaderContainer,
+        isFirst ? styles.firstSettingHeaderContainer : undefined,
+      ]}>
       <Text style={styles.settingHeader}>{title}</Text>
     </View>
   );
@@ -33,7 +45,7 @@ const SettingsScreen: React.FC<NativeStackScreenProps<ParamList>> = ({ navigatio
     <ScrollView
       contentContainerStyle={styles.scrollContainer}>
 
-      <Header title={"Orders"} />
+      <Header title={"Orders"} isFirst={true} />
       <NumberComponent settingsKey={"maxPastOrderPagesToFetch"}
                        title={"Past orders to load"}
                        description={"Specify the amount of delivered orders to load. Increase this number if you want to see more past orders."}
@@ -110,6 +122,10 @@ const styles = StyleSheet.create({
     marginTop: 15,
     paddingHorizontal: 20,
     paddingVertical: 15,
+  },
+  firstSettingHeaderContainer: {
+    marginTop: 0,
+    paddingTop: 10,
   },
   settingHeader: {
     fontWeight: "bold",

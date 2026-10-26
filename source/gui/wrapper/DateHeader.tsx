@@ -2,15 +2,19 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { selectedDateState, upcomingOrdersState } from "../../logic/recoil";
-import { formatDateToWords, getNextDay, getPreviousDay } from "../../logic/utils/utils";
+import {
+  formatDateToWords,
+  getNextDay,
+  getPreviousDay,
+} from "../../logic/utils/utils";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../theme";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-interface Props {
-
-}
+interface Props {}
 
 const DateHeader: React.FC<Props> = () => {
+  const insets = useSafeAreaInsets();
   const [selectedDate, setSelectedDate] = useRecoilState(selectedDateState);
   const upcomingOrders = useRecoilValue(upcomingOrdersState);
 
@@ -28,7 +32,7 @@ const DateHeader: React.FC<Props> = () => {
     setSelectedDate(new Date());
   };
 
-  return <View style={styles.container}>
+  return <View style={[styles.container, { paddingTop: insets.top }]}>
     <TouchableOpacity style={styles.side} onPress={previousDay}>
       <FontAwesome5Icon name={"chevron-left"} style={styles.arrow} />
       {!upcomingOrders || upcomingOrders.length === 0 ? undefined :
