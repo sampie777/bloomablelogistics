@@ -11,9 +11,7 @@ import { lightColors } from "../theme";
 import SmartAddressButton from "./SmartAddressButton";
 import { settings } from "../../logic/settings/settings";
 
-interface Props {
-
-}
+interface Props {}
 
 const MapOverview: React.FC<Props> = () => {
   const isMounted = useRef(false);
@@ -45,8 +43,8 @@ const MapOverview: React.FC<Props> = () => {
 
   useFocusEffect(
     React.useCallback(() => {
-      BackHandler.addEventListener("hardwareBackPress", onBackPress);
-      return () => BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+      const subscription = BackHandler.addEventListener("hardwareBackPress", onBackPress);
+      return () => subscription.remove();
     }, [selectedLocation]),
   );
 
@@ -61,17 +59,31 @@ const MapOverview: React.FC<Props> = () => {
 
   const loadLocations = () => {
     isDirty.current = false;
-    setSelectedLocation(undefined);
 
     if (orders.length === 0) {
       setLocations([]);
+      setSelectedLocation(undefined);
       setIsProcessing(false);
       return;
     }
 
-    setIsProcessing(true);
+    if (locations.length === 0) {
+      setIsProcessing(true);
+    }
+
     Locations.locationsForOrders(orders, useSmartAddress)
-      .then((result) => setLocations(result))
+      .then((result) => {
+        setLocations(result);
+        setSelectedLocation((current) => {
+          if (!current) return undefined;
+          const match = result.find(loc =>
+            loc.orders.some(o =>
+              current.orders.some(co => co.id != null && co.id === o.id)
+            )
+          );
+          return match;
+        });
+      })
       .finally(() => setIsProcessing(false));
   };
 

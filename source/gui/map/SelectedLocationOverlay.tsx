@@ -6,7 +6,7 @@ import { lightColors } from "../theme";
 
 interface Props {
   location: Location;
-  unselectLocation?: () => void
+  unselectLocation?: () => void;
 }
 
 const SelectedLocationOverlay: React.FC<Props> = ({ location, unselectLocation }) => {
@@ -35,7 +35,14 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     backgroundColor: lightColors.surface2,
     borderRadius: 30,
-    elevation: 3,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
     paddingVertical: 13,
     paddingHorizontal: 60,
   },
