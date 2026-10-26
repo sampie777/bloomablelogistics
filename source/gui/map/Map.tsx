@@ -7,9 +7,8 @@ import {
   View,
 } from "react-native";
 import { Permissions } from "../../logic/permissions";
-import MapView, { Callout, Marker } from "react-native-maps";
+import MapView, { Marker } from "react-native-maps";
 import { Location, Locations } from "../../logic/location/Locations";
-import { lightColors } from "../theme";
 
 interface Props {
   locations: Location[];
@@ -57,7 +56,6 @@ const Map: React.FC<Props> = ({ locations, onMarkerPress }) => {
              showsUserLocation={hasLocationPermission}
              moveOnMarkerPress={false}
              maxZoomLevel={19}
-             onPress={() => onMarkerPress?.(undefined)}
              initialRegion={{
                latitude: -25.763144,
                longitude: 28.1,
@@ -65,21 +63,38 @@ const Map: React.FC<Props> = ({ locations, onMarkerPress }) => {
                longitudeDelta: 0.3,
              }}
              userLocationPriority={"balanced"}>
-      {[...locations].reverse().map(it =>
-        <Marker key={it.key}
-                coordinate={{ ...it }}
-                identifier={it.key}
-                title={it.orders.length === 1 ? `${it.orders.length} order` : `${it.orders.length} orders`}
-                onCalloutPress={() => onMarkerPress?.(it)}
-                pinColor={Locations.allOrdersDelivered(it) ? "#00c900" : "red"}>
-          <Callout tooltip={true}>
-            <View style={styles.calloutContainer}>
-              <Text style={styles.calloutText}>
-                {it.orders.length === 1 ? `${it.orders.length} order` : `${it.orders.length} orders`}
-              </Text>
+      {[...locations].reverse().map(it => {
+        const isDelivered = Locations.allOrdersDelivered(it);
+        const orderCount = it.orders.length;
+
+        return (
+          <Marker
+            key={it.key}
+            coordinate={{ ...it }}
+            identifier={it.key}
+            anchor={{ x: 0.5, y: 1.0 }}
+            stopPropagation={true}
+            onPress={() => onMarkerPress?.(it)}>
+            <View style={styles.markerContainer}>
+              <View
+                style={[
+                  styles.markerPill,
+                  isDelivered ? styles.markerDelivered : styles.markerPending,
+                ]}>
+                <Text style={styles.markerText}>{orderCount}</Text>
+              </View>
+              <View
+                style={[
+                  styles.markerArrow,
+                  isDelivered
+                    ? styles.markerArrowDelivered
+                    : styles.markerArrowPending,
+                ]}
+              />
             </View>
-          </Callout>
-        </Marker>)}
+          </Marker>
+        );
+      })}
     </MapView>
   </View>;
 };
@@ -88,20 +103,49 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  calloutContainer: {
-    backgroundColor: "white",
-    paddingVertical: 10,
-    marginBottom: 5,
-    borderRadius: 30,
-    width: 100,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: lightColors.border,
+  markerContainer: {
+    alignItems: "center",
   },
-  calloutText: {
-    color: "black",
-    textAlign: "center",
+  markerPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.25,
+    shadowRadius: 2,
+  },
+  markerDelivered: {
+    backgroundColor: "#00c900",
+  },
+  markerPending: {
+    backgroundColor: "#e53935",
+  },
+  markerText: {
+    color: "white",
+    fontSize: 12,
     fontWeight: "bold",
+  },
+  markerArrow: {
+    width: 0,
+    height: 0,
+    backgroundColor: "transparent",
+    borderStyle: "solid",
+    borderLeftWidth: 5,
+    borderRightWidth: 5,
+    borderTopWidth: 5,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    alignSelf: "center",
+  },
+  markerArrowDelivered: {
+    borderTopColor: "#00c900",
+  },
+  markerArrowPending: {
+    borderTopColor: "#e53935",
   },
 });
 

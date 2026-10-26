@@ -1836,8 +1836,65 @@ PODS:
     - React-Core
   - react-native-encrypted-storage (4.0.3):
     - React-Core
-  - react-native-maps (1.3.2):
+  - react-native-maps (1.29.11):
+    - react-native-maps/Maps (= 1.29.11)
+  - react-native-maps/Generated (1.29.11):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
     - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
+  - react-native-maps/Maps (1.29.11):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - react-native-maps/Generated
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
   - react-native-safe-area-context (5.10.1):
     - boost
     - DoubleConversion
@@ -2468,12 +2525,12 @@ PODS:
   - RNFBApp (18.0.0):
     - Firebase/CoreOnly (= 10.10.0)
     - React-Core
-  - RNFBMessaging (18.0.0):
+  - RNFBMessaging (18.9.0):
     - Firebase/Messaging (= 10.10.0)
     - FirebaseCoreExtension (= 10.10.0)
     - React-Core
     - RNFBApp
-  - RNGestureHandler (2.33.0):
+  - RNGestureHandler (2.33.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -3055,7 +3112,7 @@ SPEC CHECKSUMS:
   React-microtasksnativemodule: 1e4d3178ba5d5000b351b902c603fb0c9d60649e
   react-native-config: 1baea138c9641f8460d7730568daf2ff3738c4db
   react-native-encrypted-storage: 569d114e329b1c2c2d9f8c84bcdbe4478dda2258
-  react-native-maps: c392dfa80c6d661ca17acc4c09dd2a97b0727aa4
+  react-native-maps: a83f314867ef761439385f3280a433c2c9b258de
   react-native-safe-area-context: 735c8ebacdececeb034ce0524f80ef1a484f67fe
   React-NativeModulesApple: 183f9bd5b20a51a8b016e90be78ed6c1538da4a7
   React-oscompat: d5e3366fbd6c7150e17c1bda85eab583a6fa9fce
@@ -3092,8 +3149,8 @@ SPEC CHECKSUMS:
   RNCClipboard: efe1b27ad1ea378c60c8c8aabfd130961bbeb474
   RNDeviceInfo: e38f15f203e786b0a11bd7232d4b79ebcbb94a7c
   RNFBApp: 6519289b48015f6790e59e588181c298a6c2fe2b
-  RNFBMessaging: a9dc21073d242013296cf88b4a3d91b754058d80
-  RNGestureHandler: 4259cc6916ac7a017d8100524fac339ff723e932
+  RNFBMessaging: 2a76cd8e00488d3d4146c51359e0b92759860a5b
+  RNGestureHandler: 0a1dfbaf0e80e9741b051a238ed39677cb2f6b58
   RNReanimated: 9af1b9f7d221d1cc2f99d935bab08419cae7c1ce
   RNScreens: d821082c6dd1cb397cc0c98b026eeafaa68be479
   RNVectorIcons: 5784330be9dddb5474e8b378d5f6947996c84e55
