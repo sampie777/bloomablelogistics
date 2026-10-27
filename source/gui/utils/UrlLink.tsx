@@ -1,35 +1,36 @@
-import React from "react";
-import { Alert, TouchableOpacity, View } from "react-native";
+import React, { PropsWithChildren } from "react";
+import { Alert, Pressable, StyleProp, View, ViewStyle } from "react-native";
 import { openLink } from "../../logic/utils/utils";
 
-const UrlLink: React.FC<{
-  url: string,
-  style?: Array<Object> | Object,
-  onOpened?: () => void,
-  onLongPress?: () => void,
-}> =
-  ({
-     children,
-     url,
-     style = [],
-     onOpened,
-     onLongPress,
-   }) => {
-    const open = () => {
-      openLink(url)
-        .then(onOpened)
-        .catch(error => Alert.alert("Error opening link", error.message));
-    };
+interface Props {
+  url: string;
+  style?: StyleProp<ViewStyle>;
+  onOpened?: () => void;
+  onLongPress?: () => void;
+}
 
-    return (
-      <View style={style}>
-        <TouchableOpacity onPress={open} onLongPress={onLongPress}>
-          <View>
-            {children}
-          </View>
-        </TouchableOpacity>
-      </View>);
+const UrlLink: React.FC<PropsWithChildren<Props>> = ({
+  children,
+  url,
+  style,
+  onOpened,
+  onLongPress,
+}) => {
+  const open = () => {
+    openLink(url)
+      .then(onOpened)
+      .catch((error: any) => Alert.alert("Error opening link", error?.message || String(error)));
   };
 
-export default UrlLink;
+  return (
+    <View style={style}>
+      <Pressable onPress={open} onLongPress={onLongPress} style={({ pressed }) => pressed ? { opacity: 0.7 } : undefined}>
+        <View>
+          {children}
+        </View>
+      </Pressable>
+    </View>
+  );
+};
 
+export default UrlLink;

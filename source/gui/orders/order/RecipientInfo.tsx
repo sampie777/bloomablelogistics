@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Platform, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, ToastAndroid, View } from "react-native";
 import FontAwesome5Icon from "react-native-vector-icons/FontAwesome5";
 import { lightColors } from "../../theme";
 import UrlLink from "../../utils/UrlLink";
@@ -49,17 +49,17 @@ const RecipientInfo: React.FC<Props> = ({ order }) => {
   };
 
   return <View style={styles.container}>
-    <TouchableOpacity onPress={toggleCollapsed}>
+    <Pressable onPress={toggleCollapsed} style={({ pressed }) => pressed ? { opacity: 0.7 } : undefined}>
       <View style={styles.row}>
         <FontAwesome5Icon name={"user"} solid style={styles.icon} />
-        <Text style={styles.name} selectable={true}>{Orders.recipientName(order)}</Text>
+        <Text style={styles.name}>{Orders.recipientName(order)}</Text>
 
         {!order.recipient.specialInstructions ? undefined :
           <FontAwesome5Icon name={"exclamation-triangle"} solid style={[styles.icon, { color: "#f38300" }]} />}
 
         <FontAwesome5Icon name={collapsed ? "chevron-down" : "chevron-up"} style={styles.iconCollapse} />
       </View>
-    </TouchableOpacity>
+    </Pressable>
 
     {collapsed ? undefined : <View style={styles.collapsedContainer}>
       {order.recipient.phones
@@ -67,7 +67,7 @@ const RecipientInfo: React.FC<Props> = ({ order }) => {
           <View key={i} style={styles.row}>
             <FontAwesome5Icon name={"phone-alt"} style={styles.icon} />
             <UrlLink url={"tel:" + it.replace(/\s+/g, "")}>
-              <Text style={styles.phone} selectable={true}>{it}</Text>
+              <Text style={styles.phone}>{it}</Text>
             </UrlLink>
           </View>)
       }
@@ -79,13 +79,13 @@ const RecipientInfo: React.FC<Props> = ({ order }) => {
             {!order.recipient.company ? undefined :
               <View style={styles.row}>
                 <Text style={styles.addressLabel}>Company:</Text>
-                <Text style={styles.addressValue} selectable={true}>{order.recipient.company}</Text>
+                <Text style={styles.addressValue}>{order.recipient.company}</Text>
               </View>
             }
             {!order.recipient.unit ? undefined :
               <View style={styles.row}>
                 <Text style={styles.addressLabel}>Unit:</Text>
-                <Text style={styles.addressValue} selectable={true}>{order.recipient.unit}</Text>
+                <Text style={styles.addressValue}>{order.recipient.unit}</Text>
               </View>
             }
             {!order.recipient.address ? undefined :
@@ -96,8 +96,7 @@ const RecipientInfo: React.FC<Props> = ({ order }) => {
                 <UrlLink url={Platform.select({ ios: "maps:0,0?q=", android: "geo:0,0?q=" }) + encodeURIComponent(order.recipient.address)}
                          style={{ flex: 1 }}
                          onLongPress={copyAddress}>
-                  <Text style={[styles.addressValue, styles.url]}
-                        selectable={true}>
+                  <Text style={[styles.addressValue, styles.url]}>
                     {order.recipient.address}
                   </Text>
                 </UrlLink>
@@ -109,18 +108,18 @@ const RecipientInfo: React.FC<Props> = ({ order }) => {
 
       {!order.recipient.specialInstructions ? undefined :
         <View style={styles.row}>
-          <FontAwesome5Icon name={"exclamation-triangle"} solid style={styles.icon} />
-          <View style={styles.specialInstructionsContainer}>
-            <Text style={styles.specialInstructionsText} selectable={true}>{order.recipient.specialInstructions}</Text>
+          <FontAwesome5Icon name={"exclamation-triangle"} solid style={[styles.icon, { color: "#f38300" }]} />
+          <View style={styles.specialInstructions}>
+            <Text style={styles.specialInstructionsText}>{order.recipient.specialInstructions}</Text>
           </View>
         </View>
       }
 
       {!order.recipient.message ? undefined :
         <View style={styles.row}>
-          <FontAwesome5Icon name={"comment"} solid style={styles.icon} />
-          <View style={styles.messageContainer}>
-            <Text style={styles.messageText} selectable={true}>{order.recipient.message}</Text>
+          <FontAwesome5Icon name={"comment-dots"} solid style={styles.icon} />
+          <View style={styles.message}>
+            <Text style={styles.messageText}>{order.recipient.message}</Text>
           </View>
         </View>
       }
@@ -131,19 +130,20 @@ const RecipientInfo: React.FC<Props> = ({ order }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {},
-  error: {
-    color: "#800",
+  container: {
+    marginVertical: 10,
   },
-
-  collapsedContainer: {
-    paddingBottom: 15,
-  },
-
   row: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 3,
+  },
+  name: {
+    flex: 1,
+    fontWeight: "bold",
+    color: lightColors.text,
+  },
+  phone: {
+    color: lightColors.primary,
   },
   icon: {
     marginRight: 10,
@@ -151,26 +151,21 @@ const styles = StyleSheet.create({
     color: lightColors.text,
   },
   iconCollapse: {
-    marginLeft: 10,
+    paddingHorizontal: 10,
     color: lightColors.text,
   },
 
-  name: {
-    fontWeight: "bold",
-    flex: 1,
-    color: lightColors.text,
+  collapsedContainer: {
+    paddingLeft: 10,
+    paddingTop: 5,
   },
-
-  phone: {
-    color: lightColors.primary,
-  },
-
   address: {
     flex: 1,
+    flexDirection: "column",
   },
   addressLabel: {
     color: lightColors.textLighter,
-    paddingRight: 5,
+    marginRight: 5,
   },
   addressValue: {
     color: lightColors.text,
@@ -179,26 +174,19 @@ const styles = StyleSheet.create({
     color: lightColors.primary,
   },
 
-  specialInstructionsContainer: {
+  specialInstructions: {
     flex: 1,
-    backgroundColor: "#fff0da",
-    borderRadius: 5,
-    padding: 10,
-    marginVertical: 5,
   },
   specialInstructionsText: {
-    color: "#834400",
+    color: "#ca6a00",
   },
 
-  messageContainer: {
+  message: {
     flex: 1,
-    backgroundColor: "#ecf4fa",
-    borderRadius: 5,
-    padding: 10,
-    marginVertical: 5,
   },
   messageText: {
-    color: "#083355",
+    fontStyle: "italic",
+    color: lightColors.text,
   },
 });
 

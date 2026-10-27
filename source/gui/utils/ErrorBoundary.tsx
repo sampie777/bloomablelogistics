@@ -92,7 +92,7 @@ export default class ErrorBoundary extends Component<ComponentProps, ComponentSt
           <Text style={styles.errorName}>{this.state.error && this.state.error.toString()}</Text>
 
           <FlatList
-            data={this.state.errorInfo.componentStack
+            data={(this.state.errorInfo?.componentStack || "")
               .trim()
               .split("\n")}
             renderItem={this.renderCodeLine}

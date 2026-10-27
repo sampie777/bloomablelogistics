@@ -23,11 +23,11 @@ const AppRoot: React.FC<Props> = () => {
   return <RecoilRoot>
     <NavigationContainer>
       <RootNav.Navigator initialRouteName={Routes.Login}
-                         screenOptions={{}}>
-        <RootNav.Screen name={Routes.Main} component={MainWrapper}
-                        options={{ headerShown: false }} />
-        <RootNav.Screen name={Routes.Login} component={LoginScreen}
-                        options={{ headerShown: false }} />
+                         screenOptions={{
+                           headerShown: false,
+                         }}>
+        <RootNav.Screen name={Routes.Main} component={MainWrapper} />
+        <RootNav.Screen name={Routes.Login} component={LoginScreen} />
         <RootNav.Screen name={Routes.Settings} component={SettingsScreen}
                         options={{ headerShown: true }} />
         <RootNav.Screen name={Routes.RejectOrder} component={RejectOrderScreen as any}

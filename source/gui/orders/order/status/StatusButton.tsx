@@ -1,6 +1,6 @@
 import React from "react";
 import { lightColors } from "../../../theme";
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { OrderStatus } from "../../../../logic/orders/models";
 import { Status } from "../../../../logic/orders/status";
 
@@ -28,13 +28,22 @@ const getStyleForStatus = (status: OrderStatus) => {
 
 
 export const StatusButton: React.FC<StatusProps> = ({ status, onPress }) => {
-  return <TouchableOpacity onPress={onPress}
-                           disabled={onPress === undefined}
-                           style={[styles.boolean, (onPress === undefined ? {} : styles.button), getStyleForStatus(status)]}>
-    <Text style={[styles.booleanText]}>
-      {Status.toReadableActionText(status)}
-    </Text>
-  </TouchableOpacity>;
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={onPress === undefined}
+      style={({ pressed }) => [
+        styles.boolean,
+        onPress === undefined ? {} : styles.button,
+        getStyleForStatus(status),
+        pressed && styles.pressed,
+      ]}
+    >
+      <Text style={[styles.booleanText]}>
+        {Status.toReadableActionText(status)}
+      </Text>
+    </Pressable>
+  );
 };
 
 export const StatusLoading: React.FC<{ text: string }> = ({ text }) => {
@@ -68,6 +77,9 @@ export const styles = StyleSheet.create({
     shadowRadius: 1.41,
     elevation: 2,
   },
+  pressed: {
+    opacity: 0.7,
+  },
   statusOpen: {
     backgroundColor: "#ec8700",
     color: "#fff",
@@ -98,8 +110,7 @@ export const styles = StyleSheet.create({
 
   icon: {
     fontSize: 16,
-    color: "#fff",
-    marginLeft: 0,
-    marginRight: 7,
+    color: lightColors.text,
+    marginRight: 10,
   },
 });

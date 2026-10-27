@@ -1,25 +1,29 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { Orders } from "../../logic/orders/orders";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { ordersState, selectedDateOrdersState, selectedDateState } from "../../logic/recoil";
+import {
+  ordersState,
+  selectedDateOrdersState,
+  selectedDateState,
+} from "../../logic/recoil";
 import { Server } from "../../logic/bloomable/server";
 import { isToday, isTomorrow } from "../../logic/utils/utils";
 
-interface Props {
-
-}
+interface Props {}
 
 const OrderDetailsLoader: React.FC<Props> = () => {
   const [allOrders, setAllOrders] = useRecoilState(ordersState);
   const selectedDate = useRecoilValue(selectedDateState);
   const selectedOrders = useRecoilValue(selectedDateOrdersState);
+  const isLoadingRef = useRef(false);
+  const loadedOrderIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     loadDetails();
   }, [selectedOrders, selectedDate]);
 
   const loadDetails = () => {
-    if (!Server.isLoggedIn()) {
+    if (!Server.isLoggedIn() || isLoadingRef.current) {
       return;
     }
 
@@ -31,6 +35,9 @@ const OrderDetailsLoader: React.FC<Props> = () => {
     }
 
     const ordersNeedingDetails = selectedOrders.filter(order =>
+      order.id &&
+      !loadedOrderIdsRef.current.has(order.id) &&
+      order.deliverAtDate &&
       (isToday(now, order.deliverAtDate) || isTomorrow(now, order.deliverAtDate)) &&
       order.products.some(it => !it._detailsLoaded)
     );
@@ -39,6 +46,11 @@ const OrderDetailsLoader: React.FC<Props> = () => {
       return;
     }
 
+    ordersNeedingDetails.forEach(o => {
+      if (o.id) loadedOrderIdsRef.current.add(o.id);
+    });
+
+    isLoadingRef.current = true;
     Orders.fetchDetailsForOrders(ordersNeedingDetails)
       .then((updatedOrders) => {
         if (!Server.isLoggedIn()) {
@@ -54,6 +66,9 @@ const OrderDetailsLoader: React.FC<Props> = () => {
       })
       .catch(() => {
         // Prevent unhandled promise rejection
+      })
+      .finally(() => {
+        isLoadingRef.current = false;
       });
   };
 
