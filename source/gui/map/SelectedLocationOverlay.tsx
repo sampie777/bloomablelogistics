@@ -11,14 +11,16 @@ interface Props {
 
 const SelectedLocationOverlay: React.FC<Props> = ({ location, unselectLocation }) => {
   return <View style={styles.container}>
-    <OrdersList orders={location.orders}
-                showHeader={false} />
+      <OrdersList
+        orders={location.orders}
+        showHeader={false}
+        onBackgroundPress={unselectLocation}
+      />
 
-    <TouchableOpacity onPress={unselectLocation}
-                      style={styles.overlayButton}>
-      <Text style={styles.buttonText}>Back</Text>
-    </TouchableOpacity>
-  </View>;
+      <TouchableOpacity onPress={unselectLocation} style={styles.overlayButton}>
+        <Text style={styles.buttonText}>Close</Text>
+      </TouchableOpacity>
+    </View>;
 };
 
 const styles = StyleSheet.create({

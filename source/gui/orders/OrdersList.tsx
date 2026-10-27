@@ -1,5 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Dimensions, ListRenderItemInfo, NativeScrollEvent, NativeSyntheticEvent, StyleSheet } from "react-native";
+import {
+  Dimensions,
+  ListRenderItemInfo,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  StyleSheet,
+  View,
+} from "react-native";
 import OrderItem from "./order/OrderItem";
 import ListEmptyComponent from "./ListEmptyComponent";
 import { Order } from "../../logic/orders/models";
@@ -11,7 +18,13 @@ import {
   ordersOutdatedState,
   selectedDateState,
 } from "../../logic/recoil";
-import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import Animated, {
+  Easing,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { config } from "../../config";
 
@@ -19,31 +32,35 @@ interface Props {
   orders: Order[];
   showHeader: boolean;
   onScrollViewScroll?: (e: NativeSyntheticEvent<NativeScrollEvent>) => void;
+  onBackgroundPress?: () => void;
 }
 
 const OrdersList: React.FC<Props> = ({
-                                       orders,
-                                       showHeader,
-                                       onScrollViewScroll,
-                                     }) => {
+  orders,
+  showHeader,
+  onScrollViewScroll,
+  onBackgroundPress,
+}) => {
   const _newDateRef = useRef<Date | undefined>(undefined);
   const swipeDirection = useRef<number>(0);
   const [screenWidth, setScreenWidth] = useState(0);
   const [selectedDate, setSelectedDate] = useRecoilState(selectedDateState);
-  const [ordersOutdated, setOrdersOutdated] = useRecoilState(ordersOutdatedState);
-  const [orderActionInProgress, setOrderActionInProgress] = useRecoilState(orderActionInProgressState);
+  const [ordersOutdated, setOrdersOutdated] =
+    useRecoilState(ordersOutdatedState);
+  const [orderActionInProgress, setOrderActionInProgress] = useRecoilState(
+    orderActionInProgressState,
+  );
 
   const animatedHorizontalOffset = useSharedValue(0);
   const animatedContainerStyle = useAnimatedStyle(() => {
     return {
-      transform: [
-        { translateX: animatedHorizontalOffset.value },
-      ],
+      transform: [{ translateX: animatedHorizontalOffset.value }],
     };
   });
 
   useEffect(() => {
-    animatedHorizontalOffset.value = swipeDirection.current * -1 * Dimensions.get("window").width;
+    animatedHorizontalOffset.value =
+      swipeDirection.current * -1 * Dimensions.get("window").width;
     animateDayTransition(0);
   }, [orders]);
 
@@ -57,7 +74,11 @@ const OrdersList: React.FC<Props> = ({
     animateDayTransition(-1, newDate);
   };
 
-  const animateDayTransition = (direction: number, newDate?: Date, duration = 200) => {
+  const animateDayTransition = (
+    direction: number,
+    newDate?: Date,
+    duration = 200,
+  ) => {
     _newDateRef.current = newDate;
     swipeDirection.current = direction;
 
@@ -66,14 +87,15 @@ const OrdersList: React.FC<Props> = ({
       direction * width,
       {
         duration: duration,
-        easing: direction === 0 ? Easing.out(Easing.ease) : Easing.in(Easing.ease),
+        easing:
+          direction === 0 ? Easing.out(Easing.ease) : Easing.in(Easing.ease),
       },
-      (finished) => {
+      finished => {
         "worklet";
         if (finished) {
           runOnJS(updateSelectedDate)();
         }
-      }
+      },
     );
   };
 
@@ -86,17 +108,27 @@ const OrdersList: React.FC<Props> = ({
 
   const swipeGesture = Gesture.Pan()
     .runOnJS(true)
-    .activeOffsetX([-config.ordersListSwipeMinXOffset, config.ordersListSwipeMinXOffset])
-    .failOffsetY([-config.ordersListSwipeMaxYOffset, config.ordersListSwipeMaxYOffset])
-    .onUpdate((e) => {
+    .activeOffsetX([
+      -config.ordersListSwipeMinXOffset,
+      config.ordersListSwipeMinXOffset,
+    ])
+    .failOffsetY([
+      -config.ordersListSwipeMaxYOffset,
+      config.ordersListSwipeMaxYOffset,
+    ])
+    .onUpdate(e => {
       const dx = e.translationX;
-      animatedHorizontalOffset.value = dx - (dx > 0 ? 1 : -1) * config.ordersListSwipeMinXOffset / 2;
+      animatedHorizontalOffset.value =
+        dx - ((dx > 0 ? 1 : -1) * config.ordersListSwipeMinXOffset) / 2;
     })
-    .onEnd((e) => {
+    .onEnd(e => {
       const dx = e.translationX;
       const dy = e.translationY;
 
-      if (Math.abs(dx) < config.ordersListSwipeMinXOffset || Math.abs(dy) > config.ordersListSwipeMaxYOffset) {
+      if (
+        Math.abs(dx) < config.ordersListSwipeMinXOffset ||
+        Math.abs(dy) > config.ordersListSwipeMaxYOffset
+      ) {
         animateDayTransition(0, undefined, 400);
         return;
       }
@@ -116,23 +148,37 @@ const OrdersList: React.FC<Props> = ({
     setOrdersOutdated(true);
   };
 
-  return <GestureDetector gesture={swipeGesture}>
-    <Animated.View style={[styles.container, animatedContainerStyle]}
-                   onLayout={(e) => setScreenWidth(e.nativeEvent.layout.width)}>
-      <Animated.FlatList data={orders}
-                         contentContainerStyle={styles.list}
-                         renderItem={renderOrderItem}
-                         keyExtractor={order => order.id + ""}
-                         onEndReachedThreshold={2}
-                         onRefresh={refreshOrders}
-                         refreshing={ordersOutdated && orderActionInProgress}
-                         ListEmptyComponent={ListEmptyComponent}
-                         ListHeaderComponent={showHeader ? ProgressView : undefined}
-                         onScroll={onScrollViewScroll}
-                         scrollEventThrottle={1}
-      />
-    </Animated.View>
-  </GestureDetector>;
+  const handlePress = (e: any) => {
+    if (e.target === e.currentTarget) {
+      onBackgroundPress?.();
+    }
+  };
+
+  return (
+    <GestureDetector gesture={swipeGesture}>
+      <Animated.View
+        style={[styles.container, animatedContainerStyle]}
+        onLayout={e => setScreenWidth(e.nativeEvent.layout.width)}>
+        <Animated.FlatList
+          data={orders}
+          contentContainerStyle={styles.list}
+          renderItem={renderOrderItem}
+          keyExtractor={order => order.id + ""}
+          onEndReachedThreshold={2}
+          onRefresh={refreshOrders}
+          refreshing={ordersOutdated && orderActionInProgress}
+          ListEmptyComponent={ListEmptyComponent}
+          ListHeaderComponent={showHeader ? ProgressView : undefined}
+          ListFooterComponent={
+            <View style={styles.footer} onTouchEnd={handlePress} />
+          }
+          onScroll={onScrollViewScroll}
+          scrollEventThrottle={1}
+          onTouchEnd={handlePress}
+        />
+      </Animated.View>
+    </GestureDetector>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -141,7 +187,9 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingTop: 30,
-    paddingBottom: 80,
+  },
+  footer: {
+    height: 80,
   },
 });
 
