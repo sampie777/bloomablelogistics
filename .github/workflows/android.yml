@@ -57,7 +57,16 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
-          cache: 'gradle'
+
+      - name: Cache Gradle Wrapper
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/wrapper/dists
+            ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
       - name: Run CI Setup (Environment, .env & Secrets)
         run: .github/scripts/ci_setup.sh
@@ -105,8 +114,8 @@ jobs:
             android/app/build/outputs/apk/release/*.apk
           if-no-files-found: warn
 
-      # When a release tag is pushed (e.g. v1.34.0 via release.sh), create/update the GitHub Release as pre-release and attach the APK & AAB
-      - name: Create GitHub Pre-Release with APK & Bundle
+      # When a release tag is pushed (e.g. v1.34.0 via release.sh), create/update the GitHub Release as pre-release and attach ONLY the APK
+      - name: Create GitHub Pre-Release with APK
         if: ${{ startsWith(github.ref, 'refs/tags/v') }}
         uses: softprops/action-gh-release@v3
         with:
@@ -116,7 +125,6 @@ jobs:
           generate_release_notes: true
           files: |
             android/app/build/outputs/apk/release/*.apk
-            android/app/build/outputs/bundle/release/*.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
