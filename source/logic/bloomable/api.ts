@@ -1,5 +1,11 @@
 import { Order, Product } from "../orders/models";
-import { MeResponse, OrderResponse, OrdersResponse, OrderStatus, ProductResponse } from "./serverModels";
+import {
+  MeResponse,
+  OrderResponse,
+  OrdersResponse,
+  OrderStatus,
+  ProductResponse,
+} from "./serverModels";
 import { convertToLocalOrder, convertToLocalProduct } from "./converter";
 import { BloomableAuth } from "./auth";
 import { rollbar, sanitizeErrorForRollbar } from "../rollbar";
@@ -8,36 +14,63 @@ import { ProductCache } from "./productCache";
 
 export namespace BloomableApi {
   const jsonHeaders = {
-    "Accept": "application/json",
-    "Referer": "https://dashboard.bloomable.com/dashboard",
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    "X-Bloomable-Client": "Web",
+    Referer: "https://dashboard.bloomable.com/dashboard",
   };
 
-  export const getRejectReasons = (credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<string[]> =>
-    BloomableAuth.authenticatedFetch(credentials,
+  export const getRejectReasons = (
+    credentials: BloomableAuth.Credentials = Server.getCredentials(),
+  ): Promise<string[]> =>
+    BloomableAuth.authenticatedFetch(
+      credentials,
       "https://dashboard.bloomable.com/api/order-line-reject-reasons",
-      { headers: jsonHeaders })
+      { headers: jsonHeaders },
+    )
       .then(response => response.json() as Promise<string[]>)
       .then(data => {
         if (data === undefined || !Array.isArray(data)) {
-          throw new Error(`Response for getRejectReasons is not the expected array but '${JSON.stringify(data)}'`);
+          throw new Error(
+            `Response for getRejectReasons is not the expected array but '${JSON.stringify(
+              data,
+            )}'`,
+          );
         }
         return data;
       })
       .catch(error => {
-        rollbar.error("Could not get reject reasons", sanitizeErrorForRollbar(error));
+        rollbar.error(
+          "Could not get reject reasons",
+          sanitizeErrorForRollbar(error),
+        );
         throw error;
       });
 
-  export const getOrders = (page = 1,
-                            withStatus: OrderStatus | "all" = "all",
-                            credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<OrdersResponse> =>
-    BloomableAuth.authenticatedFetch(credentials,
-      `https://dashboard.bloomable.com/api/orders?page=${page}&s=created_at&d=desc${withStatus === "all" ? "" : `&filter=${withStatus}`}`,
-      { headers: jsonHeaders })
+  export const getOrders = (
+    page = 1,
+    withStatus: OrderStatus | "all" = "all",
+    credentials: BloomableAuth.Credentials = Server.getCredentials(),
+  ): Promise<OrdersResponse> =>
+    BloomableAuth.authenticatedFetch(
+      credentials,
+      `https://dashboard.bloomable.com/api/orders?page=${page}&s=created_at&d=desc${
+        withStatus === "all" ? "" : `&filter=${withStatus}`
+      }`,
+      { headers: jsonHeaders },
+    )
       .then(response => response.json() as Promise<OrdersResponse | undefined>)
       .then(json => {
-        if (json === undefined || json.data === undefined || !Array.isArray(json.data)) {
-          throw new Error(`Response for getOrders is not the expected array but '${JSON.stringify(json)}'`);
+        if (
+          json === undefined ||
+          json.data === undefined ||
+          !Array.isArray(json.data)
+        ) {
+          throw new Error(
+            `Response for getOrders is not the expected array but '${JSON.stringify(
+              json,
+            )}'`,
+          );
         }
         return json;
       })
@@ -50,10 +83,15 @@ export namespace BloomableApi {
         throw error;
       });
 
-  export const getOrder = (order: { id: string },
-                           credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<Order> =>
-    BloomableAuth.authenticatedFetch(credentials,
-      `https://dashboard.bloomable.com/api/orders/${order.id}`, { headers: jsonHeaders })
+  export const getOrder = (
+    order: { id: string },
+    credentials: BloomableAuth.Credentials = Server.getCredentials(),
+  ): Promise<Order> =>
+    BloomableAuth.authenticatedFetch(
+      credentials,
+      `https://dashboard.bloomable.com/api/orders/${order.id}`,
+      { headers: jsonHeaders },
+    )
       .then(response => response.json() as Promise<OrderResponse>)
       .then(json => convertToLocalOrder(json.data))
       .catch(error => {
@@ -64,23 +102,33 @@ export namespace BloomableApi {
         throw error;
       });
 
-  export const doesOrderExists = (order: { id: string },
-                                  credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<boolean> =>
-    BloomableAuth.authenticatedFetch(credentials,
-      `https://dashboard.bloomable.com/api/orders/${order.id}`, { headers: jsonHeaders })
+  export const doesOrderExists = (
+    order: { id: string },
+    credentials: BloomableAuth.Credentials = Server.getCredentials(),
+  ): Promise<boolean> =>
+    BloomableAuth.authenticatedFetch(
+      credentials,
+      `https://dashboard.bloomable.com/api/orders/${order.id}`,
+      { headers: jsonHeaders },
+    )
       .then(response => response.json() as Promise<OrderResponse>)
       .then(() => true)
       .catch(() => false);
 
-  export const getProduct = (product: { id: number },
-                             credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<Product> => {
+  export const getProduct = (
+    product: { id: number },
+    credentials: BloomableAuth.Credentials = Server.getCredentials(),
+  ): Promise<Product> => {
     const cached = ProductCache.get(product.id);
     if (cached) {
       return Promise.resolve(cached);
     }
 
-    return BloomableAuth.authenticatedFetch(credentials,
-      `https://dashboard.bloomable.com/api/product-variants/${product.id}`, { headers: jsonHeaders })
+    return BloomableAuth.authenticatedFetch(
+      credentials,
+      `https://dashboard.bloomable.com/api/product-variants/${product.id}`,
+      { headers: jsonHeaders },
+    )
       .then(response => response.json() as Promise<ProductResponse>)
       .then(json => {
         const localProduct = convertToLocalProduct(json.data);
@@ -96,18 +144,24 @@ export namespace BloomableApi {
       });
   };
 
-  const callApiWithAction = (credentials: BloomableAuth.Credentials,
-                             order: { id: string },
-                             action: "accept" | "reject" | "fulfill" | "deliver") =>
-    BloomableAuth.authenticatedFetch(credentials,
+  const callApiWithAction = (
+    credentials: BloomableAuth.Credentials,
+    order: { id: string },
+    action: "accept" | "reject" | "fulfill" | "deliver",
+  ) =>
+    BloomableAuth.authenticatedFetch(
+      credentials,
       `https://dashboard.bloomable.com/api/orders/${order.id}/${action}`,
       {
         headers: jsonHeaders,
         method: "POST",
-      })
+      },
+    )
       .then(response => {
         if (response.status !== 200) {
-          throw new Error(`Failed to ${action} order (status=${response.status})`);
+          throw new Error(
+            `Failed to ${action} order (status=${response.status})`,
+          );
         }
       })
       .catch(error => {
@@ -118,24 +172,26 @@ export namespace BloomableApi {
         throw error;
       });
 
-  export const acceptOrder = (order: { id: string },
-                              credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<any> =>
-    callApiWithAction(credentials, order, "accept");
+  export const acceptOrder = (
+    order: { id: string },
+    credentials: BloomableAuth.Credentials = Server.getCredentials(),
+  ): Promise<any> => callApiWithAction(credentials, order, "accept");
 
   // Not tested
-  export const rejectOrder = (order: { id: string },
-                              reason: string,
-                              credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<any> =>
-    BloomableAuth.authenticatedFetch(credentials,
+  export const rejectOrder = (
+    order: { id: string },
+    reason: string,
+    credentials: BloomableAuth.Credentials = Server.getCredentials(),
+  ): Promise<any> =>
+    BloomableAuth.authenticatedFetch(
+      credentials,
       `https://dashboard.bloomable.com/api/orders/${order.id}/reject`,
       {
-        headers: {
-          ...jsonHeaders,
-          "Content-Type": "application/json",
-        },
+        headers: jsonHeaders,
         method: "POST",
         body: JSON.stringify({ reason: reason }),
-      })
+      },
+    )
       .then(response => {
         if (response.status !== 200) {
           throw new Error(`Failed to reject order (status=${response.status})`);
@@ -150,43 +206,54 @@ export namespace BloomableApi {
         throw error;
       });
 
-  export const fulfillOrder = (order: { id: string },
-                               credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<any> =>
-    callApiWithAction(credentials, order, "fulfill");
+  export const fulfillOrder = (
+    order: { id: string },
+    credentials: BloomableAuth.Credentials = Server.getCredentials(),
+  ): Promise<any> => callApiWithAction(credentials, order, "fulfill");
 
-  export const deliverOrder = (order: { id: string },
-                               credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<any> =>
-    callApiWithAction(credentials, order, "deliver");
+  export const deliverOrder = (
+    order: { id: string },
+    credentials: BloomableAuth.Credentials = Server.getCredentials(),
+  ): Promise<any> => callApiWithAction(credentials, order, "deliver");
 
-  export const getProfile = (credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<MeResponse> =>
-    BloomableAuth.authenticatedFetch(credentials,
-      "https://dashboard.bloomable.com/api/me", { headers: jsonHeaders })
+  export const getProfile = (
+    credentials: BloomableAuth.Credentials = Server.getCredentials(),
+  ): Promise<MeResponse> =>
+    BloomableAuth.authenticatedFetch(
+      credentials,
+      "https://dashboard.bloomable.com/api/me",
+      { headers: jsonHeaders },
+    )
       .then(response => response.json())
       .catch(error => {
         rollbar.error("Could not load profile", sanitizeErrorForRollbar(error));
         throw error;
       });
 
-  export const loadOrderProducts = (order: Order,
-                                    credentials: BloomableAuth.Credentials = Server.getCredentials()): Promise<unknown> =>
-    Promise.all(order.products.map(product => {
-      if (!product.id) {
-        product._detailsLoaded = true;
-        return Promise.resolve();
-      }
-      return getProduct(product, credentials)
-        .then(it => {
-          product.name = it.name;
-          product.size = it.size;
-          product.description = it.description;
-          product.guidelines = it.guidelines;
-          product.image = it.image;
-          product.extras = it.extras;
+  export const loadOrderProducts = (
+    order: Order,
+    credentials: BloomableAuth.Credentials = Server.getCredentials(),
+  ): Promise<unknown> =>
+    Promise.all(
+      order.products.map(product => {
+        if (!product.id) {
           product._detailsLoaded = true;
-        })
-        .catch(() => {
-          // Mark as loaded so failing/missing products don't cause infinite reload loops
-          product._detailsLoaded = true;
-        });
-    }));
+          return Promise.resolve();
+        }
+        return getProduct(product, credentials)
+          .then(it => {
+            product.name = it.name;
+            product.size = it.size;
+            product.description = it.description;
+            product.guidelines = it.guidelines;
+            product.image = it.image;
+            product.extras = it.extras;
+            product._detailsLoaded = true;
+          })
+          .catch(() => {
+            // Mark as loaded so failing/missing products don't cause infinite reload loops
+            product._detailsLoaded = true;
+          });
+      }),
+    );
 }

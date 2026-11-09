@@ -78,3 +78,4 @@ GoogleService-Info.plist
 .agents
 .gemini
 skills
+*output.json

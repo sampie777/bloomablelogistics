@@ -3,11 +3,11 @@ import EncryptedStorage from "react-native-encrypted-storage";
 import { getUniqueId } from "react-native-device-info";
 import { Notifications } from "../notifications";
 import { BloomableAuth } from "./auth";
-import LoginError = BloomableAuth.LoginError;
 import { Validation } from "../utils/validation";
 import { Mocks } from "../demoData/mocks";
 import { clearSession } from "./session";
 import { ProductCache } from "./productCache";
+import LoginError = BloomableAuth.LoginError;
 
 export namespace Server {
   const emptyCredentials = { username: "", password: "" };
@@ -21,32 +21,36 @@ export namespace Server {
   export const getCredentials = () => _credentials;
   export const isDemoUser = () => _credentials?.username === "demo";
 
-  export const login = (credentials: BloomableAuth.Credentials, maxRetries: number = 1): Promise<any> => {
-    return logout()
-      .then(() => {
-        verifyUsername(credentials.username);
-        verifyPassword(credentials.password);
+  export const login = (
+    credentials: BloomableAuth.Credentials,
+    maxRetries: number = 1,
+  ): Promise<any> => {
+    return logout().then(() => {
+      verifyUsername(credentials.username);
+      verifyPassword(credentials.password);
 
-        if (credentials.username === "demo") {
-          Mocks.setupDemoData();
-          rollbar.setPerson("demo", "demo", "demo@bloomable.com");
-        } else {
-          Mocks.tearDownDemoData();
-          getUniqueId().then(deviceId => rollbar.setPerson(deviceId, credentials.username)).catch(() => {});
-        }
+      if (credentials.username === "demo") {
+        Mocks.setupDemoData();
+        rollbar.setPerson("demo", "demo", "demo@bloomable.com");
+      } else {
+        Mocks.tearDownDemoData();
+        getUniqueId()
+          .then(deviceId => rollbar.setPerson(deviceId, credentials.username))
+          .catch(() => {});
+      }
 
-        return BloomableAuth.login(credentials)
-          .then(() => storeCredentials(credentials))
-          .catch(error => {
-            if (!(error instanceof LoginError)) {
-              rollbar.error("Error logging in on server", {
-                ...sanitizeErrorForRollbar(error),
-                maxRetries: maxRetries,
-              });
-            }
-            throw error;
-          });
-      });
+      return BloomableAuth.login(credentials)
+        .then(() => storeCredentials(credentials))
+        .catch(error => {
+          if (!(error instanceof LoginError)) {
+            rollbar.error("Error logging in on server", {
+              ...sanitizeErrorForRollbar(error),
+              maxRetries: maxRetries,
+            });
+          }
+          throw error;
+        });
+    });
   };
 
   const verifyUsername = (value: string) => {
@@ -65,22 +69,21 @@ export namespace Server {
 
     setCredentials(emptyCredentials);
     ProductCache.clear();
-    getUniqueId().then(deviceId => rollbar.setPerson(deviceId)).catch(() => {});
+    getUniqueId()
+      .then(deviceId => rollbar.setPerson(deviceId))
+      .catch(() => {});
 
-    const promises: Promise<any>[] = [
-      clearCredentials(),
-    ];
+    const promises: Promise<any>[] = [clearCredentials()];
 
     if (isDemo || !currentUser) {
       clearSession();
       Mocks.tearDownDemoData();
     } else {
       promises.push(
-        BloomableAuth.logout()
-          .finally(() => {
-            clearSession();
-            Mocks.tearDownDemoData();
-          })
+        BloomableAuth.logout().finally(() => {
+          clearSession();
+          Mocks.tearDownDemoData();
+        }),
       );
     }
 
@@ -147,51 +150,102 @@ export namespace Server {
   };
 
   const removeStorageItemSafely = (key: string): Promise<void> => {
-    return EncryptedStorage.removeItem(key)
-      .catch((error: any) => {
-        // -25300 is errSecItemNotFound on iOS keychain: the item did not exist in storage to remove
-        const errorCode = error?.code || error?.userInfo?.code;
-        if (errorCode === "-25300" || errorCode === -25300) {
-          return;
-        }
-        rollbar.critical("Error removing EncryptedStorage item", {
-          ...sanitizeErrorForRollbar(error),
-          key: key,
-        });
+    return EncryptedStorage.removeItem(key).catch((error: any) => {
+      // -25300 is errSecItemNotFound on iOS keychain: the item did not exist in storage to remove
+      const errorCode = error?.code || error?.userInfo?.code;
+      if (errorCode === "-25300" || errorCode === -25300) {
+        return;
+      }
+      rollbar.critical("Error removing EncryptedStorage item", {
+        ...sanitizeErrorForRollbar(error),
+        key: key,
       });
+    });
   };
 
   export const clearCredentials = () => {
     setCredentials(emptyCredentials);
-    return removeStorageItemSafely("username")
-      .then(() => removeStorageItemSafely("password"));
+    return removeStorageItemSafely("username").then(() =>
+      removeStorageItemSafely("password"),
+    );
+  };
+
+  const orderActionHeaders = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    "X-Bloomable-Client": "Web",
+    Referer: "https://dashboard.bloomable.com/dashboard",
+  };
+
+  const callOrderAction = (
+    id: string,
+    action: "accept" | "fulfill" | "deliver",
+    body?: any,
+  ): Promise<Response> => {
+    return BloomableAuth.authenticatedFetch(
+      _credentials,
+      `https://dashboard.bloomable.com/api/orders/${id}/${action}`,
+      {
+        method: "POST",
+        headers: orderActionHeaders,
+        body: body ? JSON.stringify(body) : undefined,
+      },
+    )
+      .then(response => {
+        if (response.status !== 200) {
+          throw new Error(
+            `Failed to ${action} order (status=${response.status})`,
+          );
+        }
+        return response;
+      })
+      .catch(error => {
+        rollbar.error(`Error ${action}ing order`, {
+          ...sanitizeErrorForRollbar(error),
+          id: id,
+        });
+        throw error;
+      });
   };
 
   export const acceptOrder = (id: string) => {
-    return BloomableAuth.authenticatedFetch(_credentials, `https://dashboard.bloomable.com/api/orders/${id}/accept`, {
-      method: "POST",
-    });
+    return callOrderAction(id, "accept");
   };
 
   export const fulfillOrder = (id: string) => {
-    return BloomableAuth.authenticatedFetch(_credentials, `https://dashboard.bloomable.com/api/orders/${id}/fulfill`, {
-      method: "POST",
-    });
+    return callOrderAction(id, "fulfill");
   };
 
   export const deliverOrder = (id: string) => {
-    return BloomableAuth.authenticatedFetch(_credentials, `https://dashboard.bloomable.com/api/orders/${id}/deliver`, {
-      method: "POST",
-    });
+    return callOrderAction(id, "deliver");
   };
 
   export const rejectOrder = (id: string, reason: string) => {
-    return BloomableAuth.authenticatedFetch(_credentials, `https://dashboard.bloomable.com/api/orders/${id}/reject`, {
-      method: "POST",
-      body: JSON.stringify({
-        reason: reason,
-      }),
-    });
+    return BloomableAuth.authenticatedFetch(
+      _credentials,
+      `https://dashboard.bloomable.com/api/orders/${id}/reject`,
+      {
+        method: "POST",
+        headers: orderActionHeaders,
+        body: JSON.stringify({
+          reason: reason,
+        }),
+      },
+    )
+      .then(response => {
+        if (response.status !== 200) {
+          throw new Error(`Failed to reject order (status=${response.status})`);
+        }
+        return response;
+      })
+      .catch(error => {
+        rollbar.error("Error rejecting order", {
+          ...sanitizeErrorForRollbar(error),
+          id: id,
+          reason: reason,
+        });
+        throw error;
+      });
   };
 }
 
